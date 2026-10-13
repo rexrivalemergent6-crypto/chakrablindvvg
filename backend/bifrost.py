@@ -11,6 +11,7 @@ back at this proxy, so every button / fetch / RPC call of the original site is
 routed through our backend -> Veil's real backends.
 """
 import asyncio
+import json
 import logging
 import re
 import time
@@ -115,6 +116,39 @@ def _cache_put(key, status, headers, body):
         _cache_del(k)
 
 
+IMG_HOSTS = ("api.houdiniswap.com", "cdn.jsdelivr.net", "raw.githubusercontent.com",
+             "assets.coingecko.com", "coin-images.coingecko.com", "static.jup.ag", "arweave.net")
+
+
+async def _image_proxy(u: str):
+    """Same-origin image relay for swap token icons (upstream CDNs are blocked cross-origin by ORB)."""
+    try:
+        from urllib.parse import urlparse
+        pu = urlparse(u)
+    except Exception:
+        return JSONResponse({"error": "bad url"}, status_code=400)
+    host = (pu.hostname or "").lower()
+    if pu.scheme != "https" or not any(host == h or host.endswith("." + h) for h in IMG_HOSTS):
+        return JSONResponse({"error": "host not allowed"}, status_code=400)
+    ckey = ("_img", u)
+    hit = _cache_get(ckey)
+    if hit:
+        return Response(hit[3], media_type=hit[2].get("content-type", "image/png"),
+                        headers={"cache-control": "public, max-age=86400"})
+    try:
+        r = await get_client().get(u, headers={"user-agent": UA, "accept": "image/avif,image/webp,image/png,image/*,*/*;q=0.8"})
+    except Exception as e:
+        return JSONResponse({"error": str(e)[:200]}, status_code=502)
+    ctype = r.headers.get("content-type", "")
+    if r.status_code != 200 or not (ctype.startswith("image/") or ctype == "application/octet-stream"):
+        return Response(status_code=404)
+    body = r.content
+    if ctype == "application/octet-stream":
+        ctype = "image/png"
+    _cache_put(ckey, 200, {"content-type": ctype}, body)
+    return Response(body, media_type=ctype, headers={"cache-control": "public, max-age=86400"})
+
+
 def get_client() -> httpx.AsyncClient:
     global _client
     if _client is None or _client.is_closed:
@@ -151,8 +185,45 @@ def _inject_script(target: str) -> str:
     return head_inject(target, PREFIX)
 
 
+# Project token of the upstream (removed from the mirror; only swap tokens remain)
+PROJECT_TOKEN_MINT = "HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump"
+# valid base58 pubkey that is not a mint -> upstream code treats the project token as absent
+PROJECT_TOKEN_STUB = "11111111111111111111111111111111"
+
+
+def _strip_project_token(obj):
+    """Recursively drop list entries that reference the project token mint."""
+    def refs(o):
+        if isinstance(o, str):
+            return o == PROJECT_TOKEN_MINT
+        if isinstance(o, dict):
+            return any(refs(v) for v in o.values())
+        if isinstance(o, list):
+            return any(refs(v) for v in o)
+        return False
+
+    if isinstance(obj, list):
+        return [_strip_project_token(v) for v in obj if not refs(v)]
+    if isinstance(obj, dict):
+        return {k: _strip_project_token(v) for k, v in obj.items() if k != PROJECT_TOKEN_MINT}
+    return obj
+
+
+def strip_project_token_json(text: str) -> str:
+    if PROJECT_TOKEN_MINT not in text:
+        return text
+    try:
+        return json.dumps(_strip_project_token(json.loads(text)), separators=(",", ":"))
+    except Exception:
+        return text
+
+
 def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
     base = f"{origin}{PREFIX}"
+    if target in ("indexer", "relayer") and "json" in ctype:
+        text = strip_project_token_json(text)
+    if target == "app" and "javascript" in ctype:
+        text = text.replace(f'"{PROJECT_TOKEN_MINT}"', f'"{PROJECT_TOKEN_STUB}"')
     for t in HOST_ORDER:
         up = TARGETS[t]
         host = up.split("://", 1)[1]
@@ -268,11 +339,14 @@ async def proxy_root(target: str, request: Request):
 @router.api_route("/{target}/{path:path}",
                   methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"])
 async def proxy(target: str, path: str, request: Request):
+    if target == "_img":
+        return await _image_proxy(request.query_params.get("u", ""))
     if target == "_brand":
         asset = brand_asset(path)
         if not asset:
             return JSONResponse({"error": "not found"}, status_code=404)
-        return Response(asset[0], media_type=asset[1], headers={"cache-control": "public, max-age=3600"})
+        return Response(asset[0], media_type=asset[1],
+                        headers={"cache-control": "no-cache" if path.endswith(".js") else "public, max-age=3600"})
     upstream = TARGETS.get(target)
     if not upstream:
         return JSONResponse({"error": "unknown bifrost target", "targets": list(TARGETS)},

@@ -5,12 +5,20 @@ import Logo from '../components/Logo';
 const BACKEND = process.env.REACT_APP_BACKEND_URL || '';
 const BIFROST = `${BACKEND}/api/bifrost/v1`;
 
-// Map a pretty /shield URL to the Bifrost v1 upstream mirror.
-//   /shield            -> app  /
-//   /shield/docs       -> app  /docs
-//   /shield/about[...] -> site /...
+// Map any pretty site URL to the Bifrost v1 upstream mirror (one single site):
+//   /                -> app  /            (Darkinator app: wallet, shield, trade, swaps...)
+//   /docs, /security -> app  /docs ...
+//   /about[...]      -> site /...         (landing)
+//   /swap            -> app  /#private-route   (legacy)
+//   /track?id=X      -> app  /#track/X         (legacy)
+//   /shield[...]     -> same as above without the /shield prefix (legacy)
 export function shieldUpstream(pathname, search = '', hash = '') {
-  let rest = pathname.replace(/^\/shield/, '') || '/';
+  let rest = pathname.replace(/^\/shield(?=\/|$)/, '') || '/';
+  if (rest === '/swap' || rest.startsWith('/swap/')) return `${BIFROST}/app/${hash || '#private-route'}`;
+  if (rest === '/track' || rest.startsWith('/track/')) {
+    const id = new URLSearchParams(search).get('id') || rest.slice(7);
+    return `${BIFROST}/app/#track${id ? `/${encodeURIComponent(id)}` : ''}`;
+  }
   let target = 'app';
   if (rest === '/about' || rest.startsWith('/about/')) {
     target = 'site';
@@ -36,7 +44,7 @@ export default function ShieldPage() {
       <div className="animate-pulse">
         <Logo size={44} />
       </div>
-      <p className="text-sm text-white/50 tracking-wide">Opening ZK Shield…</p>
+      <p className="text-sm text-white/50 tracking-wide">Loading Darkinator…</p>
     </div>
   );
 }

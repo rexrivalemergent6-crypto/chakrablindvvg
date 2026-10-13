@@ -38,6 +38,14 @@ def lockup_svg(light: bool = False) -> str:
 
 
 BRAND_CSS = """
+/* project token removed: only swap tokens remain */
+/* third-party / upstream brand surfaces removed (extension promo, audit badges, upstream socials) */
+a.xc,.xc,a[href*="chromewebstore.google.com"],a[href*="x.com/veil"],a[href*="twitter.com/veil"],
+a[href*="t.me/veil"],a[href*="github.com/veil"],a[href*="@veilit.xyz"],.foot-audit,.batch-tag[href*="contractwolf.io"],
+img[src*="audit-contractwolf"],li:has(> a[href*="contractwolf.io"]),#extension,.ext-soon,.ext-get,
+section#developers,a[href="#developers"],a[href$="docs#developers"],a[href="#extension"]{display:none!important}
+a[href*="contractwolf.io"]{pointer-events:none!important;color:inherit!important;text-decoration:none!important}
+.omark,.tk,.foot-ca,[data-copy="HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump"]{display:none!important}
 html:root{
  --veil:#a78bfa;--veil-hi:#ddd6fe;--veil-deep:#7c3aed;--veil-wash:rgba(167,139,250,.1);
  --veil-rgb:167,139,250;--veil-hi-rgb:221,214,254;--veil-deep-rgb:124,58,237;
@@ -56,11 +64,15 @@ _SHIM = r"""
 var P='__P__',R='__R__',T='__T__',PRETTY=T==='site'?'/shield/about':'/shield',BRAND='__BRAND__';
 var ORIGIN=location.origin,BU=R+'_brand/';
 try{if(!localStorage.getItem('veil-theme'))localStorage.setItem('veil-theme','dark');}catch(e){}
-function LK(){return BU+(document.documentElement.getAttribute('data-theme')==='light'?'lockup-light.svg':'lockup.svg');}
+function isLight(){var th=document.documentElement.getAttribute('data-theme');if(th==='light')return true;if(th==='dark')return false;
+ try{var els=[document.body,document.documentElement];for(var i=0;i<els.length;i++){if(!els[i])continue;var c=getComputedStyle(els[i]).backgroundColor;var m=c&&c.match(/rgba?\(([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:[, /]+([\d.]+))?/);
+ if(m&&(m[4]===undefined||parseFloat(m[4])>0.05)){return (0.2126*m[1]+0.7152*m[2]+0.0722*m[3])/255>0.55;}}}catch(e){}return false;}
+function LK(){return BU+(isLight()?'lockup-light.svg':'lockup.svg');}
 function up(p){
   if(p.indexOf(R)===0)return p;
   if(p==='/shield/about'||p.indexOf('/shield/about/')===0)return R+'site'+(p.slice(13)||'/');
   if(p==='/shield'||p.indexOf('/shield/')===0)return R+'app'+(p.slice(7)||'/');
+  if(p==='/about'||p.indexOf('/about/')===0)return R+'site'+(p.slice(6)||'/');
   return P+p;
 }
 function vbaseFrom(pathname){return ORIGIN+(pathname.indexOf(R)===0?pathname:up(pathname));}
@@ -77,10 +89,12 @@ function pretty(u){
   var x;try{x=new URL(String(u),location.href);}catch(e){return u;}
   if(x.origin!==ORIGIN)return u;
   var p=x.pathname,q;
-  if(p.indexOf(R+'app')===0)q='/shield'+p.slice((R+'app').length);
-  else if(p.indexOf(R+'site')===0)q='/shield/about'+p.slice((R+'site').length);
-  else if(p.indexOf('/shield')===0)q=p;
-  else q=PRETTY+p;
+  if(p.indexOf(R+'app')===0)q=p.slice((R+'app').length);
+  else if(p.indexOf(R+'site')===0)q='/about'+p.slice((R+'site').length);
+  else if(p.indexOf('/shield/about')===0)q='/about'+p.slice(13);
+  else if(p.indexOf('/shield')===0)q=p.slice(7);
+  else if(T==='site'&&!(p==='/about'||p.indexOf('/about/')===0))q='/about'+p;
+  else q=p;
   q=q.replace(/\/+$/,'')||'/';
   return q+x.search+x.hash;
 }
@@ -89,7 +103,7 @@ var hr=history.replaceState,hp=history.pushState;
 if(!DBG.nopretty)try{hr.call(history,history.state,'',pretty(location.href));}catch(e){}
 function hpatch(f){return function(s,t,u){if(u!=null){var pu=pretty(String(u));try{VBASE=vbaseFrom(new URL(pu,location.href).pathname);}catch(e){}u=pu;}return f.call(this,s,t,u);};}
 if(!DBG.nopretty){history.pushState=hpatch(hp);history.replaceState=hpatch(hr);}
-var of=window.fetch;if(of){window.fetch=function(i,o){try{
+var of=window.fetch;window.__bfFetch=of&&of.bind(window);if(of){window.fetch=function(i,o){try{
  if(typeof i==='string')i=fx(i);
  else if(i instanceof URL)i=fx(i.href);
  else if(i&&i.url){var n=fx(i.url);if(n!==i.url)i=new Request(n,i);}
@@ -126,11 +140,18 @@ document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&
  if(!a)return;var h=a.getAttribute('href');if(!h||SKIP.test(h))return;var n=fx(h);if(n!==h)a.setAttribute('href',n);},true);
 
 /* ---------- Darkinator branding ---------- */
-var TXT=/veilit\.xyz|Veil/;
+var TXT=/veilit\.xyz|Veil|ContractWolf|veil-core|(^|[^$A-Za-z0-9_\/.:@-])veil(?![A-Za-z0-9_-])/;
 function rt(s){
  return s.replace(/app\.veilit\.xyz/g,location.host+'/shield')
   .replace(/(?:www\.)?veilit\.xyz/g,location.host)
-  .replace(/(^|[^$A-Za-z])Veil/g,'$1'+BRAND);
+  .replace(/Audited by ContractWolf/g,'Independently audited')
+  .replace(/External audit · ContractWolf/g,'External audit')
+  .replace(/its audit by ContractWolf/g,'its independent audit')
+  .replace(/ContractWolf · /g,'Independent audit · ')
+  .replace(/ContractWolf/g,'an independent auditor')
+  .replace(/veil-core/g,BRAND.toLowerCase()+'-core')
+  .replace(/(^|[^$A-Za-z])Veil/g,'$1'+BRAND)
+  .replace(/(^|[^$A-Za-z0-9_\/.:@-])veil(?![A-Za-z0-9_-])/g,'$1'+BRAND.toLowerCase());
 }
 var SKIPTAG={SCRIPT:1,STYLE:1,NOSCRIPT:1,TEXTAREA:1,INPUT:1,TEMPLATE:1};
 var BATTR=['title','aria-label','placeholder','alt','data-tip','data-title'];
@@ -193,6 +214,7 @@ def head_inject(target: str, prefix: str) -> str:
         '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&display=swap">'
         f"<style id=\"bifrost-brand\">{BRAND_CSS}</style>"
+        + (f'<script src="{prefix}/_brand/dk-swap.js" defer></script>' if target == "app" else "")
     )
 
 
@@ -202,6 +224,11 @@ def brand_asset(name: str):
         return lockup_svg().encode(), "image/svg+xml"
     if name == "lockup-light.svg":
         return lockup_svg(True).encode(), "image/svg+xml"
+    if name == "dk-swap.js":
+        try:
+            return (BRAND_DIR / "dk-swap.js").read_bytes(), "application/javascript; charset=utf-8"
+        except Exception:
+            return None
     if name == "mark.png":
         p = BRAND_DIR / "mark-256.png"
     elif name == "favicon.png":

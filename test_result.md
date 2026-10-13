@@ -47,7 +47,19 @@
 ##   test_sequence: 0
 ##   run_ui: false
 ##
-## test_plan:
+##   - task: "Single site: Darkinator app (Veil mirror) at / with Private route + Privacy swap + Track injected in sidebar (Mayan-style UI)"
+    implemented: true
+    working: "NA"
+    file: "backend/brand/dk-swap.js, backend/bifrost_brand.py, backend/bifrost.py (_img relay, project-token stripping), frontend/src/App.js, frontend/src/pages/ShieldPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "ITERATION 3: whole site is now the mirror. / = app, /about = landing, /docs etc. Old React pages replaced by redirect boot (/swap -> /#private-route, /track?id=X -> /#track/X, /shield* legacy). Sidebar gets Private route, Privacy swap, Track order (mobile tabbar: Swaps). Views #private-route, #privacy-swap, #track/<id> render Mayan-style swap UI (square cards, Space Grotesk/Mono, gradient CTA, token modal Sell/Buy with chain grid). Live data via /api/ds. Token icons via same-origin relay /api/bifrost/v1/_img?u=. Project token VEIL (mint HgTG...pump) removed from indexer/relayer JSON and app JS; extension promo, audit badges, upstream socials hidden; text Veil/veil -> Darkinator."
+
+test_plan:
 ##   current_focus:
 ##     - "Task name 1"
 ##     - "Task name 2"

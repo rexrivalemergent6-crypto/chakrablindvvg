@@ -1,22 +1,15 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import HomePage from "./pages/HomePage";
-import SwapPage from "./pages/SwapPage";
-import DocsPage from "./pages/DocsPage";
-import TrackOrderPage from "./pages/TrackOrderPage";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ShieldPage from "./pages/ShieldPage";
 
+// One single Darkinator site: every URL is served by the Bifrost v1 mirror
+// (wallet, shield, trade, send, private route, privacy swap, track, docs, about).
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/swap" element={<SwapPage />} />
-          <Route path="/docs" element={<DocsPage />} />
-          <Route path="/track" element={<TrackOrderPage />} />
-          <Route path="/shield/*" element={<ShieldPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<ShieldPage />} />
         </Routes>
       </BrowserRouter>
     </div>
