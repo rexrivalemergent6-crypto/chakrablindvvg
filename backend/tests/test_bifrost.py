@@ -42,6 +42,33 @@ def test_meta(session):
     assert "targets" in j and "app" in j["targets"]
 
 
+# ---------- brand assets (Darkinator rebrand) ----------
+def test_brand_lockup_svg(session):
+    r = session.get(f"{BIFROST}/_brand/lockup.svg", timeout=30)
+    assert r.status_code == 200
+    assert "image/svg+xml" in r.headers.get("content-type", "")
+    assert len(r.content) > 100
+
+
+def test_brand_lockup_light_svg(session):
+    r = session.get(f"{BIFROST}/_brand/lockup-light.svg", timeout=30)
+    assert r.status_code == 200
+    assert "image/svg+xml" in r.headers.get("content-type", "")
+
+
+def test_brand_mark_png(session):
+    r = session.get(f"{BIFROST}/_brand/mark.png", timeout=30)
+    assert r.status_code == 200
+    assert "image/png" in r.headers.get("content-type", "")
+
+
+def test_brand_favicon_png(session):
+    r = session.get(f"{BIFROST}/_brand/favicon.png", timeout=30)
+    assert r.status_code == 200
+    assert "image/png" in r.headers.get("content-type", "")
+
+
+
 # ---------- HTML passthrough + rewrite ----------
 def test_app_html(session):
     r = session.get(f"{BIFROST}/app/", timeout=60)
