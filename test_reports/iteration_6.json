@@ -1,0 +1,27 @@
+{
+  "summary": "Frontend-only testing of the new Darkinator landing page at '/' and the Launch-app flow into '/app'. All landing-page acceptance criteria pass on desktop: layout renders, nav scroll-links present and scroll to anchor, hero image loads, no forbidden brand strings (Veil / ContractWolf / $VEIL / DarkSwap) are present, live stats resolve to real numbers (Notes 508, Nullifiers 153, Shieldable 61, Chains 126), Merkle root hex chip + 'Relayer online' chip both render, all four tech tabs (zk/houdini/near/api) switch panels, all six FAQ items open, pillar CTAs have correct deep-link hrefs (/app#shield, /app#private-route, /app#privacy-swap), and all three Launch buttons navigate to /app which successfully loads the Darkinator app (dk-nav-private, dk-nav-privacy, dk-nav-track visible). Legacy /swap correctly redirects to /app#private-route. One minor UI issue on mobile 390px: horizontal page overflow (scrollWidth=514) caused by code <pre> blocks inside the Technology section expanding their flex/grid parent cards.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "LandingPage · Tech section cards", "issue": "Mobile (390px) horizontal page overflow (document.scrollWidth=514 vs window=390). Offending nodes are the Tech panel block cards whose <pre> code snippets have overflow-x-auto, but the parent card div lacks min-w-0, so wide code lines push the grid column past the viewport. Fix: add min-w-0 to the block card (e.g., in tech-panel-<key> children className) and/or wrap the grid cells with min-w-0.", "selector": "[data-testid^=\"tech-panel-\"] .rounded-2xl.border.border-white\\/10.bg-white\\/\\[.02\\].p-6", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix mobile horizontal overflow in Technology section cards (add min-w-0 to the code-block card wrapper or grid cells)."
+  ],
+  "critical_code_review_comments": [
+    "LandingPage.jsx useLiveStats fetches four endpoints without any abort controller — only a dead flag guards state updates. Fine for a landing page but AbortController would be cleaner.",
+    "Footer link to /app/docs and /app/security render fine via SPA catch-all, but these produce the known benign React #418 hydration warning (documented by main agent)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a", "frontend": "95%"},
+  "test_credentials": "none required",
+  "seed_data_creation": "none",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Landing at '/' is fully functional with live Bifrost stats. The only outstanding issue is a mobile-viewport horizontal overflow in the Technology section caused by code <pre> blocks pushing their parent card wider than the viewport (parent lacks min-w-0). Legacy routes /swap and /shield are correctly caught by the catch-all SPA route and resolve under /app. The Darkinator app loads under /app with sidebar nav items dk-nav-private, dk-nav-privacy, dk-nav-track and takes ~10s to fully initialise.",
+  "rca of the issue": "Mobile overflow RCA: in LandingPage.jsx `Tech()` section, each block renders a `<pre class=\"overflow-x-auto …\">`. Although the <pre> itself scrolls, its ancestor `<div class=\"rounded-2xl border … p-6\">` sits inside a CSS grid cell (`grid gap-6 lg:grid-cols-2`). CSS grid cells default to `min-width: auto`, so the long non-wrapping code lines force the cell to grow, which in turn makes the page wider than the viewport on 390px. Mitigation: add `min-w-0` to the inner card div (and/or the grid container's children) so the <pre>'s own overflow-x-auto can take effect."
+}

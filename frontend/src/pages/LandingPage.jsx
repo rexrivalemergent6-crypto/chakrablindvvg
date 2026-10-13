@@ -294,11 +294,11 @@ function Tech() {
             </button>
           ))}
         </div>
-        <div className="mt-8 rounded-3xl border border-white/10 bg-[#0a0910] p-6 sm:p-10" data-testid={`tech-panel-${d.key}`}>
+        <div className="mt-8 min-w-0 overflow-hidden rounded-3xl border border-white/10 bg-[#0a0910] p-5 sm:p-10" data-testid={`tech-panel-${d.key}`}>
           <p className="max-w-4xl text-[17px] leading-relaxed text-white/75">{d.intro}</p>
           <div className="mt-8 grid gap-6 lg:grid-cols-2">
             {d.blocks.map((b) => (
-              <div key={b.h} className="rounded-2xl border border-white/10 bg-white/[.02] p-6">
+              <div key={b.h} className="min-w-0 rounded-2xl border border-white/10 bg-white/[.02] p-6">
                 <h3 className="flex items-center gap-2 font-display text-lg font-bold"><Layers className="h-4 w-4 text-violet-300" />{b.h}</h3>
                 <div className="mt-3 space-y-3">{b.p.map((x) => <p key={x.slice(0, 24)} className="text-sm leading-relaxed text-white/60">{x}</p>)}</div>
                 {b.code && <pre className="mt-4 overflow-x-auto rounded-xl border border-white/10 bg-black/50 p-4 font-mono text-[12px] leading-relaxed text-cyan-100/90">{b.code}</pre>}
