@@ -11,7 +11,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid
-from bifrost import router as bifrost_router, close_client as bifrost_close
+from bifrost import router as bifrost_router, close_client as bifrost_close, opaque_image_urls
 from datetime import datetime, timezone
 
 
@@ -178,10 +178,22 @@ async def ds_proxy_get(path: str, request: Request):
             return Response(content=body, status_code=status, media_type="application/json")
         return Response(content='{"error":"upstream unreachable"}', status_code=502,
                         media_type="application/json")
+    body = _scrub(r.content)
     if ttl and r.status_code == 200:
-        _ds_cache[key] = (now, r.status_code, r.content)
-    return Response(content=r.content, status_code=r.status_code,
+        _ds_cache[key] = (now, r.status_code, body)
+    return Response(content=body, status_code=r.status_code,
                     media_type="application/json")
+
+
+def _scrub(body: bytes) -> bytes:
+    """Hide upstream identity in JSON sent to the browser (image hosts -> opaque relay, display names)."""
+    try:
+        t = body.decode("utf-8")
+    except Exception:
+        return body
+    t = opaque_image_urls(t)
+    t = t.replace("DarkSwap", "Cadabra").replace("darkswap.app", "cadabra")
+    return t.encode("utf-8")
 
 
 @api_router.post("/ds/{path:path}")
@@ -193,7 +205,7 @@ async def ds_proxy_post(path: str, request: Request):
     body = await request.body()
     try:
         r = await _ds_request("POST", url, content=body)
-        return Response(content=r.content, status_code=r.status_code,
+        return Response(content=_scrub(r.content), status_code=r.status_code,
                         media_type="application/json")
     except httpx.HTTPError as e:
         logger.error(f"ds proxy POST {path} failed: {e}")

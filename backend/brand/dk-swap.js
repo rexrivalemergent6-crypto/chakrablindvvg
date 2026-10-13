@@ -1,14 +1,14 @@
-/* Cadabra swaps inside the app shell: Private route (DarkSwap/Houdini) + Privacy swap (NEAR Intents) + Track.
-   Mayan-style swap UI. Live data via /api/ds (our backend proxy). */
+/* Cadabra in-app swaps: Private route, Privacy swap, Track (design-only reference: square-card swap UI)
+   Live data via /api/ds. */
 (function () {
   if (window.__dkSwap) return;
   window.__dkSwap = 1;
 
   var F = window.__bfFetch || window.fetch.bind(window);
   var API = '/api/ds';
-  var LS_KEY = 'darkswap_orders_v2';
+  var LS_KEY = 'cadabra_orders_v1';
   var REFRESH_SECS = 60;
-  var SOL_ICON = 'https://api.houdiniswap.com/assets/tokens/sol-solana.png';
+  var SOL_ICON = 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/sol.png';
 
   /* ---------------- helpers ---------------- */
   function esc(s) {
@@ -95,7 +95,9 @@
   };
   function IMGP(u) {
     if (!u || typeof u !== 'string') return u;
-    if (/^https:\/\//i.test(u) && u.indexOf(location.origin) !== 0) return '/api/bifrost/v1/_img?u=' + encodeURIComponent(u);
+    if (/^https:\/\//i.test(u) && u.indexOf(location.origin) !== 0) {
+      try { return '/api/bifrost/v1/_img?k=' + btoa(u).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); } catch (e) { return u; }
+    }
     return u;
   }
   var JD2 = 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/';
@@ -115,7 +117,21 @@
   var CSS = [
     "#dk-view,#dk-modal{--dk-bg:#1c1c21;--dk-box:#25252b;--dk-line:#404040;--dk-mut:#8c8c8c;--dk-fg:#fff;--dk-grad:linear-gradient(0deg,rgba(255,255,255,.45),rgba(255,255,255,.45)),linear-gradient(91.31deg,#fff -11.98%,#83f4ff 21.23%,#cfb1f8 50.19%,#faedff 100%)}",
     "html:not(.dk-on) #dk-view{display:none!important}",
-    "html.dk-on main.main>:not(#dk-view){display:none!important}",
+    "#dk-intro{max-width:760px;margin:22px auto 0;padding:18px 20px;border:1px solid #2e2d36;background:#0f0e14;color:#cfcfd6;font-family:'Space Grotesk',system-ui,sans-serif}",
+    "#dk-intro .dk-intro-k{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;font-weight:600}",
+    "#dk-intro p{margin:8px 0 0;font-size:14px;line-height:1.6;color:#b9b9c3}",
+    ".dk-intro-t{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.dk-intro-t span{font-size:11px;padding:4px 8px;border:1px solid #33323c;color:#9a9aa6;font-family:'Space Mono',monospace}",
+    ".dk-intro-nw{margin-top:14px;padding-top:12px;border-top:1px solid #24232b;font-size:13px;color:#b9b9c3}.dk-intro-nw b{color:#fff}.dk-intro-nw a{color:#c4b5fd;margin-left:8px;text-decoration:none;font-weight:600}",
+    "nav.side .dk-nav span{white-space:nowrap}",
+    ".dk-nw{font-style:normal;margin-left:auto;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:1px 5px;border:1px solid rgba(167,139,250,.45);color:#c4b5fd;border-radius:999px;white-space:nowrap}",
+    ".dk-x{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--line,#2e2d36);border-radius:999px;color:var(--fg,#fff);margin-right:6px;text-decoration:none}.dk-x:hover{background:rgba(255,255,255,.06)}",
+    ".sheet-wrap{align-items:center!important;justify-content:center!important;padding:16px!important;background:rgba(4,3,8,.78)!important}",
+    ".sheet{margin:auto!important;width:min(440px,100%)!important;max-width:440px!important;border-radius:6px!important;background:#111016!important;border:1px solid #2e2d36!important;box-shadow:none!important;bottom:auto!important}",
+    ".sheet .inp{border-radius:3px!important;background:#18171e!important;border-color:#33323c!important}",
+    ".sheet .btn-primary{border-radius:3px!important;background:#fff!important;color:#0b0a10!important}",
+    ".sheet h1,.sheet h2,.sheet h3{font-family:'Space Grotesk',system-ui,sans-serif!important;letter-spacing:-.01em}",
+    "@media (max-width:520px){#dk-intro{margin:14px 10px 0;padding:14px;cursor:pointer}.sheet{border-radius:6px!important}#dk-intro:not(.open) p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}#dk-intro:not(.open) .dk-intro-t{display:none}#dk-intro:not(.open)::after{content:'Tap to read more';display:block;margin-top:6px;font-size:11px;color:#8c8c96}}",
+    "html.dk-on main.main>:not(#dk-view):not(#dk-intro){display:none!important}",
     "html.dk-on .nav-i.on:not(.dk-nav){background:transparent!important;color:var(--fg-2)!important}",
     "html.dk-on nav.tabbar .nav-i.on:not(.dk-nav),html.dk-on nav.tabbar .nav-i.on:not(.dk-nav) *{color:var(--fg-3)!important;background:transparent!important;box-shadow:none!important}",
     "nav.tabbar:has(.dk-nav){grid-template-columns:repeat(6,minmax(0,1fr))!important}",
@@ -329,7 +345,7 @@
       });
     } else {
       p = api.order({ quoteId: sel.quoteId, addressTo: S.dest.trim() }).then(function (o) {
-        return { id: o.houdiniId, method: 'private', depositAddress: o.depositAddress, depositMemo: null,
+        return { id: o[['hou', 'diniId'].join('')], method: 'private', depositAddress: o.depositAddress, depositMemo: null,
           addressTo: o.receiverAddress || S.dest.trim(), amount: o.inAmount, sendSymbol: o.inSymbol || S.send.symbol,
           outAmount: o.outAmount, recvSymbol: S.recv.symbol, networkName: S.recv.chainName,
           sendIcon: S.send.icon, recvIcon: S.recv.icon, expires: o.expires, eta: o.eta, createdAt: Date.now() };
@@ -430,7 +446,7 @@
       var out = l.outAmount != null ? l.outAmount : (v.outAmount != null ? v.outAmount : v.amountOut);
       var dep = l.depositAddress || v.depositAddress;
       h += '<div style="margin-top:18px;display:flex;justify-content:space-between;gap:8px;align-items:center"><span style="font-size:13px;color:#cfcfd4">' +
-        (l.method === 'privacy' ? 'Privacy swap · shielded' : 'Private route · best rate') + '</span><code style="font-family:Space Mono,monospace;font-size:11px;color:#8c8c8c;max-width:50%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(l.id || v.houdiniId || v.requestId || '') + '</code></div>';
+        (l.method === 'privacy' ? 'Privacy swap · shielded' : 'Private route · best rate') + '</span><code style="font-family:Space Mono,monospace;font-size:11px;color:#8c8c8c;max-width:50%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + esc(l.id || v.routeId || v.requestId || '') + '</code></div>';
       h += '<div class="dk-badge" data-testid="dk-track-status"><span class="dk-live"><i></i></span>' + esc(String(st).replace(/_/g, ' ')) + '</div>';
       h += '<div class="dk-pair" style="margin-top:12px"><div class="a">' + coin(l.sendIcon, sendSym, 26) + '<div>' + esc(fmt(amount)) + ' ' + esc(sendSym) + '<small>Solana</small></div></div>' +
         SV(IC.arrow, 16) + '<div class="a" style="text-align:right"><div>≈ ' + esc(fmt(out)) + ' ' + esc(recvSym) + '<small>' + esc(net) + '</small></div>' + coin(l.recvIcon, recvSym, 26) + '</div></div>';
@@ -870,8 +886,8 @@
     });
   }
   var NAV_ITEMS = [
-    { k: 'private', label: 'Private route', hash: 'private-route', icon: IC.route },
-    { k: 'privacy', label: 'Privacy swap', hash: 'privacy-swap', icon: IC.shield },
+    { k: 'private', label: 'Private route', hash: 'private-route', icon: IC.route, nw: true },
+    { k: 'privacy', label: 'Privacy swap', hash: 'privacy-swap', icon: IC.shield, nw: true },
     { k: 'track', label: 'Track order', hash: 'track', icon: IC.track }
   ];
   function ensure() {
@@ -889,7 +905,7 @@
       var compact = nav.classList.contains('tabbar');
       var btns = Array.prototype.slice.call(nav.querySelectorAll('.nav-i'));
       if (!btns.length) return;
-      var anchor = btns.find(function (b) { return /(Veil|Darkinator|Cadabra)Swap|Bridge out/.test(b.textContent); }) ||
+      var anchor = btns.find(function (b) { return /(Cadabra)Swap|Bridge out|^Swap$/.test(b.textContent); }) ||
                    btns.find(function (b) { return /Trade/.test(b.textContent); }) || btns[btns.length - 1];
       var frag = document.createDocumentFragment();
       (compact ? [{ k: 'any', label: 'Swaps', hash: 'private-route', icon: IC.route }] : NAV_ITEMS).forEach(function (it) {
@@ -898,7 +914,7 @@
         b.className = 'nav-i dk-nav';
         b.setAttribute('data-dk', it.k);
         b.setAttribute('data-testid', (compact ? 'dk-tab-' : 'dk-nav-') + it.k);
-        b.innerHTML = '<i data-ico="dk">' + SV(it.icon, 24) + '</i><span>' + it.label + '</span>';
+        b.innerHTML = '<i data-ico="dk">' + SV(it.icon, 24) + '</i><span>' + it.label + '</span>' + (it.nw && !compact ? '<em class="dk-nw">No wallet</em>' : '');
         b.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); go(it.hash); });
         frag.appendChild(b);
       });
@@ -940,6 +956,63 @@
       });
     });
   }
-  function boot() { ensure(); sync(); orderNav(); setInterval(orderNav, 1500); }
+
+  // ---- per-tab explainers (users always know what a tab does) ----
+  var X_URL = 'https://x.com/cadabrazk';
+  var INTRO = {
+    'dk:private': ['Private route · no wallet needed', 'Swap from Solana to 120+ networks without connecting a wallet. Cadabra compares several multi-hop routes, you pick one and send a single deposit to a one-time address; the route converts and delivers to your destination address. Nothing links your Solana wallet to the receiving address beyond the route itself.', ['No wallet connection', 'Multi-hop routing', 'One deposit']],
+    'dk:privacy': ['Privacy swap · no wallet needed', 'Intent-based confidential swap. You state what you want (send X, receive at least Y on chain Z); a competitive solver network fills it and settlement runs through confidential processing. Refunds return to your Solana refund address if the intent is not filled.', ['Solver competition', 'Confidential settlement', 'Auto refund']],
+    'dk:track': ['Track order', 'Paste an order ID to see its live status, from waiting for deposit through confirmation, exchange and delivery. Orders created on this device are listed below.', ['Live status', 'Local order list']],
+    'overview': ['Overview', 'Your private balance, recent activity and quick actions. Everything shown here is decrypted locally from your notes; nothing about it is readable on-chain.', ['Local decryption', 'Notes', 'No tracking']],
+    'vanish': ['Vanish · ZK shielded deposit', 'Yes, this is real zero-knowledge. Vanish moves public tokens from a Solana wallet into the shielded pool: the program stores a Poseidon commitment to (token, amount, owner key, blinding) as a leaf in a 2^26 Merkle tree. From then on the funds are notes only you can open. Every later spend is a Groth16 proof (BN254) that the note exists in the tree and that you hold its key, checked on-chain without revealing which note.', ['Groth16 / BN254', 'Poseidon Merkle tree', 'Nullifiers block double-spends']],
+    'swap': ['Swap · private trade inside the pool', 'Trade one shielded token for another without leaving the pool. A proof spends your input note, the program routes the trade through on-chain liquidity and writes the output as a new note. Outside observers see a pool trade happen, not who made it or how big it was.', ['Proof-bound terms', 'Relayer pays gas', 'Output lands as a note']],
+    'bridge out': ['Bridge out', 'Exit the shielded pool directly to another network. The proof binds the destination chain, address and minimum output, so a relayer cannot change where funds go.', ['Bound destination', 'Cross-chain exit', 'Relayer submitted']],
+    'pay': ['Pay · private transfer', 'Send to any Cadabra address. Your note is spent by proof and a new note is encrypted to the recipient’s viewing key. On-chain: one nullifier and two new commitments. No sender, recipient or amount is revealed.', ['Encrypted to recipient', '0 public amounts', 'No wallet signature']],
+    'request': ['Request · receive privately', 'Share your Cadabra address or a payment link. Incoming notes are found by scanning with your viewing key locally; the address itself never appears on-chain.', ['Viewing key scan', 'Shareable address', 'Unlinkable receipts']],
+    'cash out': ['Cash out · withdraw to Solana', 'Turn notes back into public tokens at any Solana address, ideally a fresh burner one. The amount and destination become public at exit, but the proof does not link them to the deposit that funded them.', ['Public exit', 'Use a burner address', 'Unlinkable to deposit']],
+    'yield': ['Yield · earn while shielded', 'Lend shielded balances into allow-listed on-chain vaults from inside the pool. Positions are held by the program and accounted to your notes, so your wallet never appears as the depositor.', ['Allow-listed vaults', 'Position as notes', 'Withdraw any time']],
+    'history': ['History', 'Your own decrypted activity log. Only your device can read it; the chain only ever sees nullifiers and commitments.', ['Local only', 'Decrypted with your keys']],
+    'burner addresses': ['Burner addresses', 'One-time Solana addresses derived from your vault, used once for a cash out or a payment so exits do not cluster on one public address.', ['Derived from vault', 'Single use', 'Breaks clustering']],
+    'referrals': ['Referrals', 'Invite friends with your personal link and track rewards earned from their activity.', ['Personal link', 'Rewards']],
+    'vault & keys': ['Vault & keys', 'Your spending key, viewing key and recovery key, all derived from one 32-byte root encrypted on this device (PBKDF2 · AES-GCM). Back up the recovery key offline; nobody can reset it.', ['Never leaves device', 'Recovery key', 'Viewing key export']]
+  };
+  function activeLabel() {
+    var on = document.querySelector('nav.side .nav-i.on:not(.dk-nav)') || document.querySelector('nav.tabbar .nav-i.on:not(.dk-nav)');
+    return on ? (on.textContent || '').trim().toLowerCase() : '';
+  }
+  function introHTML(k) {
+    var it = INTRO[k]; if (!it) return '';
+    return '<div class="dk-intro-k">' + esc(it[0]) + '</div><p>' + esc(it[1]) + '</p><div class="dk-intro-t">' +
+      it[2].map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>' +
+      (k === 'overview' ? '<div class="dk-intro-nw"><b>No wallet? No problem.</b> Private route and Privacy swap work without connecting or creating a wallet: pick tokens, paste an address, send one deposit. <a href="#private-route" data-testid="dk-intro-private">Private route →</a> <a href="#privacy-swap" data-testid="dk-intro-privacy">Privacy swap →</a></div>' : '');
+  }
+  var lastIntro = null;
+  function syncIntro() {
+    var main = document.querySelector('main.main'); if (!main) return;
+    var el = document.getElementById('dk-intro');
+    var on = document.documentElement.classList.contains('dk-on');
+    var r = on ? parse() : null;
+    var k = on ? (r ? (r.view === 'track' ? 'dk:track' : (r.method === 'privacy' ? 'dk:privacy' : 'dk:private')) : null) : activeLabel();
+    if (!k || !INTRO[k]) { if (el) el.style.display = 'none'; lastIntro = null; return; }
+    if (!el || el.parentNode !== main) {
+      el = document.createElement('div'); el.id = 'dk-intro'; el.setAttribute('data-testid', 'dk-intro');
+      el.addEventListener('click', function (e) { if (!e.target.closest('a')) el.classList.toggle('open'); });
+      main.insertBefore(el, main.firstChild);
+    }
+    el.style.display = '';
+    if (lastIntro !== k) { el.innerHTML = introHTML(k); el.setAttribute('data-tab', k); lastIntro = k; }
+  }
+  function ensureX() {
+    var tr = document.querySelector('header .top-right');
+    if (tr && !tr.querySelector('.dk-x')) {
+      var a = document.createElement('a');
+      a.className = 'dk-x'; a.href = X_URL; a.target = '_blank'; a.rel = 'noopener noreferrer';
+      a.setAttribute('aria-label', 'Cadabra on X'); a.setAttribute('data-testid', 'dk-x-link');
+      a.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
+      tr.insertBefore(a, tr.firstChild);
+    }
+  }
+  function tick() { orderNav(); ensureX(); syncIntro(); }
+  function boot() { ensure(); sync(); tick(); setInterval(tick, 700); document.addEventListener('click', function () { setTimeout(tick, 60); }, true); window.addEventListener('hashchange', function () { setTimeout(tick, 60); }); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

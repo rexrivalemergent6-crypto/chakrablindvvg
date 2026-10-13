@@ -235,13 +235,15 @@ def _inject_script(target: str) -> str:
 PROJECT_TOKEN_MINT = "HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump"
 # valid base58 pubkey that is not a mint -> upstream code treats the project token as absent
 PROJECT_TOKEN_STUB = "11111111111111111111111111111111"
+# every upstream project token is hidden (only neutral swap tokens remain)
+HIDDEN_MINTS = {PROJECT_TOKEN_MINT, "7KEPApdbBMByrmqihz3bht2uMhFQcatjfSFQCKq66kH3"}
 
 
 def _strip_project_token(obj):
     """Recursively drop list entries that reference the project token mint."""
     def refs(o):
         if isinstance(o, str):
-            return o == PROJECT_TOKEN_MINT
+            return o in HIDDEN_MINTS
         if isinstance(o, dict):
             return any(refs(v) for v in o.values())
         if isinstance(o, list):
@@ -251,12 +253,12 @@ def _strip_project_token(obj):
     if isinstance(obj, list):
         return [_strip_project_token(v) for v in obj if not refs(v)]
     if isinstance(obj, dict):
-        return {k: _strip_project_token(v) for k, v in obj.items() if k != PROJECT_TOKEN_MINT}
+        return {k: _strip_project_token(v) for k, v in obj.items() if k not in HIDDEN_MINTS}
     return obj
 
 
 def strip_project_token_json(text: str) -> str:
-    if PROJECT_TOKEN_MINT not in text:
+    if not any(m in text for m in HIDDEN_MINTS):
         return text
     try:
         return json.dumps(_strip_project_token(json.loads(text)), separators=(",", ":"))
@@ -286,7 +288,11 @@ def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
             text = re.sub(r'(srcset=["\'])/(?!/|api/bifrost/)', rf"\1{p}/", text)
             text = re.sub(r'(,\s*)/(?=_next/)', rf"\1{p}/", text)
             text = re.sub(r'url\((["\']?)/(?!/|api/bifrost/)', rf"url(\1{p}/", text)
+            text = text.replace("'veil-theme'", "'cb-theme'").replace('"veil-theme"', '"cb-theme"')
             if "text/html" in ctype:
+                text = text.replace(f"{p}/veil-mark.webp", f"{PREFIX}/_brand/mark.png")
+                text = text.replace("Pulling the veil over", "Pulling the cadabra over")
+                text = re.sub(r"(?<![A-Za-z$])Veil(?![A-Za-z])", "Cadabra", text)
                 # document-relative urls (page URL is shown as /shield/... so resolve them here)
                 text = re.sub(r'((?:\s)(?:src|poster|srcset)=["\'])(?![/#?"\']|[a-zA-Z][a-zA-Z0-9+.-]*:)',
                               rf"\1{p}/", text)
@@ -386,7 +392,15 @@ async def proxy_root(target: str, request: Request):
                   methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"])
 async def proxy(target: str, path: str, request: Request):
     if target == "_img":
-        return await _image_proxy(request.query_params.get("u", ""))
+        u = request.query_params.get("u", "")
+        k = request.query_params.get("k", "")
+        if k:
+            try:
+                import base64 as _b
+                u = _b.urlsafe_b64decode(k + "=" * (-len(k) % 4)).decode()
+            except Exception:
+                u = ""
+        return await _image_proxy(u)
     if target == "indexer" and path.startswith("v1/logo/") and request.method == "GET":
         return await _logo_small(path, request)
     if target == "_brand":
@@ -631,3 +645,16 @@ async def ws_proxy(ws: WebSocket, target: str, path: str):
             await ws.close()
         except Exception:
             pass
+
+
+_IMG_URL_RE = re.compile(r'https://(?:api\.houdiniswap\.com|cdn\.jsdelivr\.net|raw\.githubusercontent\.com|assets\.coingecko\.com|coin-images\.coingecko\.com)/[^"\\\s]+')
+
+
+def opaque_image_urls(text: str) -> str:
+    """Replace third-party image URLs with opaque same-origin relay keys (no upstream host visible)."""
+    import base64 as _b
+
+    def _sub(m):
+        k = _b.urlsafe_b64encode(m.group(0).encode()).decode().rstrip("=")
+        return f"{PREFIX}/_img?k={k}"
+    return _IMG_URL_RE.sub(_sub, text)

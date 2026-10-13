@@ -1,0 +1,39 @@
+{
+  "summary": "Iteration 9 — Launch App perf fixes verified end-to-end. On throttled 4G (1.6Mbps / 150ms RTT) the Cadabra app reveals (html.bf-ready) in 1.09s desktop and 1.32s mobile after clicking the landing hero launch; full nav (dk-nav-private / mobile tabbar) visible in 5.94s desktop / 5.14s mobile. The landing CTAs go DIRECTLY to the backend shim (`${REACT_APP_BACKEND_URL}/api/bifrost/v1/app/`, no React bundle hop) and the address bar is rewritten to <host>/app after the shim runs — verified for landing-launch-hero. Inline fast-path in public/index.html correctly redirects /swap → /app#private-route, /track?id=abc → /app#track/abc, /about → /, /app → /api/bifrost/v1/app/, /app#privacy-swap preserved. Backend logo endpoint /api/bifrost/v1/indexer/v1/logo/<mint> returns 200 image/webp 1106 bytes, 96x96 (previously ~863KB) — repeat fetch returns same size (cached). No 'Veil' branding flash: body.innerText contains no 'Veil' at bf-ready nor 500ms later. All backend acceptance tests pass (4/4 pytest).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iter9_perf.py",
+    "/app/test_reports/pytest/iter9_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "frontend/public/index.html inline fast-path: regex /^\\/(app|shield)(\\/.*)?$/ handles /app and /shield, then explicit branches for /swap, /track, /about. The /about branch inside the /(app|shield) regex redirects to '/' when path is '/app/about' — which is the documented behaviour but could surprise users deep-linking from docs; worth a code comment.",
+    "backend/bifrost.py logo downscale from ~860KB to ~1.1KB (780x compression) is excellent; the 96x96 WebP target hits the sweet spot for both desktop and mobile asset lists. Consider adding a Cache-Control: public, max-age=86400 on logo responses (ingress currently forces no-store so client-side it's irrelevant, but when ingress is relaxed this would help)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter9_perf.py (new)"
+  ],
+  "success_rate": {
+    "backend": "100% (4/4 pytest: logo WebP downscale + cache stability + fast-path HTML + /app shim)",
+    "frontend": "100% on the targeted perf acceptance criteria (bf-ready + dk-nav-private + tabbar + URL rewrite + redirects + no-Veil-flash)"
+  },
+  "test_credentials": "Local wallet password TestPass!2345 (not re-exercised this iteration — wallet creation + Private route end-to-end regressions already passed in iterations 7 and 8).",
+  "seed_data_creation": "None in this iteration (perf-focused).",
+  "perf_measurements": {
+    "throttle": "CDP Network.emulateNetworkConditions downloadThroughput ~1.6Mbps, latency 150ms",
+    "desktop_1920x800": {"bf_ready_s": 1.09, "dk_nav_private_s": 5.94, "url_after_launch": "<host>/app"},
+    "mobile_390x844": {"bf_ready_s": 1.32, "tabbar_s": 5.14, "url_after_launch": "<host>/app"},
+    "logo_bytes": 1106,
+    "logo_dimensions_px": "96x96",
+    "logo_content_type": "image/webp"
+  },
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Perf fixes shipped and verified. Landing launch buttons href = ${REACT_APP_BACKEND_URL}/api/bifrost/v1/app/ (direct backend shim). Inline fast-path in public/index.html runs BEFORE React boot and handles /app, /shield, /swap, /track?id=, /about. Backend logo downscale to <=96px WebP + cache delivers ~1KB payloads. If retesting, note that logo <img> tags only mount AFTER wallet creation (asset list / Vanish right panel) — iteration 8 already verified they render with naturalWidth>0; this iteration verified the endpoint directly. React #418 hydration warning may appear (per request note) — did not break the page in any run.",
+  "rca of the issue": "Original user complaint 'clicking launch app takes so long to load' root-caused in prior iterations to (a) content being hidden until window 'load' event (every image/font must finish — ~7s fallback), (b) landing-launch CTAs rendering React landing before the backend-shim redirect, and (c) upstream token logos ~860KB each saturating slow networks. Iter-9 fixes verified: (1) landing CTAs now href straight to /api/bifrost/v1/app/, saving the React bundle round-trip, (2) reveal moved from window 'load' to DOMContentLoaded (fallback cut to 2.5s), (3) logos re-encoded to 96x96 WebP (~1.1KB, 780x smaller) and micro-cached. Result: app reveal under 1.5s on throttled 4G in both desktop and mobile viewports."
+}

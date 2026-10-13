@@ -60,7 +60,7 @@ _SHIM = r"""
 (function(){
 var P='__P__',R='__R__',T='__T__',PRETTY=T==='site'?'/shield/about':'/shield',BRAND='__BRAND__';
 var ORIGIN=location.origin,BU=R+'_brand/';
-try{if(!localStorage.getItem('veil-theme'))localStorage.setItem('veil-theme','dark');}catch(e){}
+try{if(!localStorage.getItem('cb-theme'))localStorage.setItem('cb-theme','dark');}catch(e){}
 function isLight(){var th=document.documentElement.getAttribute('data-theme');if(th==='light')return true;if(th==='dark')return false;
  try{var els=[document.body,document.documentElement];for(var i=0;i<els.length;i++){if(!els[i])continue;var c=getComputedStyle(els[i]).backgroundColor;var m=c&&c.match(/rgba?\(([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:[, /]+([\d.]+))?/);
  if(m&&(m[4]===undefined||parseFloat(m[4])>0.05)){return (0.2126*m[1]+0.7152*m[2]+0.0722*m[3])/255>0.55;}}}catch(e){}return false;}
@@ -227,18 +227,25 @@ def _para_json() -> str:
     return _j.dumps(d, ensure_ascii=False).replace("</", "<\\/")
 
 
+@functools.lru_cache(maxsize=8)
 def head_inject(target: str, prefix: str) -> str:
+    import json as _j
     js = (_SHIM.replace("__P__", f"{prefix}/{target}")
           .replace("__R__", f"{prefix}/")
           .replace("__T__", target)
           .replace("__BRAND__", BRAND_NAME)
           .replace("__PARA__", _para_json()))
+    css_boot = ("(function(){var s=document.createElement('style');s.id='cb-style';s.textContent="
+                + _j.dumps(BRAND_CSS) + ";(document.head||document.documentElement).appendChild(s);})();")
+    payload = base64.b64encode((css_boot + js).encode("utf-8")).decode()
+    # the shim ships encoded so page source shows no upstream identifiers
+    boot = ("(0,eval)(new TextDecoder().decode(Uint8Array.from(atob('" + payload
+            + "'),function(c){return c.charCodeAt(0)})))")
     return (
-        f"<script>{js}</script>"
+        f"<script>{boot}</script>"
         '<link rel="preconnect" href="https://fonts.googleapis.com">'
         '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&display=swap">'
-        f"<style id=\"bifrost-brand\">{BRAND_CSS}</style>"
         + (f'<script src="{prefix}/_brand/dk-swap.js" defer></script>' if target == "app" else "")
     )
 
