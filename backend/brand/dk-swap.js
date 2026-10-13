@@ -466,7 +466,7 @@
     var once = function () {
       var lo = T.local;
       var p = lo && lo.method === 'privacy' ? api.nGetOrder(id) : api.getOrder(id).catch(function () { return api.nGetOrder(id); });
-      return p.then(function (d) { T.live = d; T.err = ''; }).catch(function (e) { T.err = e.message; })
+      return p.then(function (d) { T.live = d; T.err = ''; }).catch(function (e) { T.err = (e && e.message) || 'Order not found'; })
         .then(function () { T.loading = false; if (S.view === 'track') render(); });
     };
     once();
@@ -544,6 +544,11 @@
       if (!term) {
         var seen = {}, cs = [];
         M.tokens.forEach(function (t) { var c = t.chainName || 'Other'; if (!seen[c]) { seen[c] = 1; cs.push(c); } });
+        var PRI = ['Ethereum Mainnet', 'Ethereum', 'Base', 'Arbitrum', 'Solana', 'Binance Smart Chain', 'BNB Chain', 'Polygon', 'Optimism', 'Avalanche C-Chain', 'NEAR', 'Zcash'];
+        cs.sort(function (a, b) {
+          var ia = PRI.indexOf(a), ib = PRI.indexOf(b);
+          return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+        });
         M.allChains = cs;
       }
     }).catch(function () { if (M && id === M.req) M.tokens = []; })
