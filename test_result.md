@@ -195,6 +195,9 @@ frontend:
         -working: "NA"
         -agent: "main"
         -comment: "New /shield page embeds the proxied Veil app in an iframe with view tabs (Wallet, Overview, Docs, Security, Launch post, Compliance), service health pills, reload + open full screen. Swap card has a 3rd 'ZK Shield' tab that navigates to /shield."
+        -working: "NA"
+        -agent: "main"
+        -comment: "ITERATION 2: iframe REMOVED per user. /shield/* React route now hands the browser to the Bifrost mirror full-page; the shim rewrites the address bar back to pretty URLs (/shield = app, /shield/about = landing, /shield/docs etc). Darkinator re-branding layer (backend/bifrost_brand.py): text 'Veil'->'Darkinator', veilit.xyz->our host, logos -> /api/bifrost/v1/_brand/lockup.svg|mark.png|favicon.png, Darkinator purple palette + Sora headings, dark theme default. Token ticker $VEIL/VEIL intentionally kept (real on-chain token)."
 
 test_plan:
   current_focus: []

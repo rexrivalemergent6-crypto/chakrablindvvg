@@ -15,7 +15,7 @@ function App() {
           <Route path="/swap" element={<SwapPage />} />
           <Route path="/docs" element={<DocsPage />} />
           <Route path="/track" element={<TrackOrderPage />} />
-          <Route path="/shield" element={<ShieldPage />} />
+          <Route path="/shield/*" element={<ShieldPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

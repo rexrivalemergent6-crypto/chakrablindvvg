@@ -18,6 +18,7 @@ from collections import OrderedDict
 from typing import Optional
 
 import httpx
+from bifrost_brand import head_inject, brand_asset
 import websockets
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, Response, StreamingResponse
@@ -147,46 +148,7 @@ def public_origin(request) -> str:
 
 
 def _inject_script(target: str) -> str:
-    base = f"{PREFIX}/{target}"
-    return (
-        "<script>(function(){"
-        f"var P='{base}',R='{PREFIX}/';"
-        "self.TURBOPACK_CHUNK_BASE_PATH=P+'/_next/';"
-        "function fx(u){if(typeof u!=='string')return u;"
-        "if(u.charAt(0)==='/'&&u.charAt(1)!=='/'&&u.indexOf(R)!==0)return P+u;"
-        "try{var x=new URL(u,location.href);if(x.origin===location.origin&&x.pathname.indexOf(R)!==0)return P+x.pathname+x.search+x.hash;}catch(e){}"
-        "return u;}"
-        "var of=window.fetch;if(of){window.fetch=function(i,o){try{"
-        "if(typeof i==='string')i=fx(i);"
-        "else if(i instanceof URL)i=fx(i.href);"
-        "else if(i&&i.url){var n=fx(i.url);if(n!==i.url)i=new Request(n,i);}"
-        "}catch(e){}return of.call(this,i,o);};}"
-        "var xo=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){"
-        "arguments[1]=fx(typeof u==='string'?u:String(u));return xo.apply(this,arguments);};"
-        "['pushState','replaceState'].forEach(function(k){var f=history[k];history[k]=function(s,t,u){"
-        "if(u!=null){u=fx(String(u));}return f.call(this,s,t,u);};});"
-        "var AT={src:1,href:1,srcset:1,action:1,poster:1,'xlink:href':1};"
-        "function fs(v){return String(v).split(',').map(function(p){var t=p.trim();var i=t.indexOf(' ');var u=i<0?t:t.slice(0,i);return (p.match(/^\\s*/)[0])+fx(u)+(i<0?'':t.slice(i));}).join(',');}"
-        "var sa=Element.prototype.setAttribute;Element.prototype.setAttribute=function(n,v){try{var k=String(n).toLowerCase();"
-        "if(AT[k]&&typeof v==='string'){v=k==='srcset'?fs(v):fx(v);}}catch(e){}return sa.call(this,n,v);};"
-        "[[window.HTMLImageElement,'src'],[window.HTMLImageElement,'srcset'],[window.HTMLScriptElement,'src'],[window.HTMLLinkElement,'href'],"
-        "[window.HTMLSourceElement,'src'],[window.HTMLSourceElement,'srcset'],[window.HTMLIFrameElement,'src'],[window.HTMLMediaElement,'src'],"
-        "[window.HTMLFormElement,'action'],[window.HTMLAnchorElement,'href']].forEach(function(c){try{var pr=c[0].prototype;"
-        "var d=Object.getOwnPropertyDescriptor(pr,c[1]);if(!d||!d.set)return;Object.defineProperty(pr,c[1],{configurable:true,enumerable:d.enumerable,"
-        "get:d.get,set:function(v){d.set.call(this,c[1]==='srcset'?fs(v):fx(String(v)));}});}catch(e){}});"
-        "try{var W=window.Worker;window.Worker=function(u,o){return new W(fx(typeof u==='string'?u:String(u)),o);};window.Worker.prototype=W.prototype;}catch(e){}"
-        "try{var SW=window.SharedWorker;if(SW){window.SharedWorker=function(u,o){return new SW(fx(typeof u==='string'?u:String(u)),o);};window.SharedWorker.prototype=SW.prototype;}}catch(e){}"
-        "try{if(navigator.serviceWorker){navigator.serviceWorker.register=function(){return new Promise(function(){});};"
-        "navigator.serviceWorker.getRegistrations&&navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){var s=r.scope||'';if(s.indexOf(location.origin+R)!==0)return;r.unregister();});});}}catch(e){}"
-        "var es=window.EventSource;if(es){window.EventSource=function(u,o){return new es(fx(String(u)),o);};window.EventSource.prototype=es.prototype;}"
-        "var WS=window.WebSocket;window.WebSocket=function(u,p){try{var x=new URL(String(u),location.href);"
-        "if(x.host===location.host&&x.pathname.indexOf(R)!==0){x.pathname=P+x.pathname;}u=x.href;}catch(e){}return p===undefined?new WS(u):new WS(u,p);};"
-        "window.WebSocket.prototype=WS.prototype;['CONNECTING','OPEN','CLOSING','CLOSED'].forEach(function(k){window.WebSocket[k]=WS[k];});"
-        "var wo=window.open;window.open=function(u){if(typeof u==='string')arguments[0]=fx(u);return wo.apply(this,arguments);};"
-        "document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');"
-        "if(!a)return;var h=a.getAttribute('href');if(h&&h.charAt(0)==='/'&&h.charAt(1)!=='/'&&h.indexOf(R)!==0){a.setAttribute('href',P+h);}},true);"
-        "})();</script>"
-    )
+    return head_inject(target, PREFIX)
 
 
 def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
@@ -207,6 +169,12 @@ def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
             text = re.sub(r'(srcset=["\'])/(?!/|api/bifrost/)', rf"\1{p}/", text)
             text = re.sub(r'(,\s*)/(?=_next/)', rf"\1{p}/", text)
             text = re.sub(r'url\((["\']?)/(?!/|api/bifrost/)', rf"url(\1{p}/", text)
+            if "text/html" in ctype:
+                # document-relative urls (page URL is shown as /shield/... so resolve them here)
+                text = re.sub(r'((?:\s)(?:src|poster|srcset)=["\'])(?![/#?"\']|[a-zA-Z][a-zA-Z0-9+.-]*:)',
+                              rf"\1{p}/", text)
+                text = re.sub(r'(<link\b[^>]*?\shref=["\'])(?![/#?"\']|[a-zA-Z][a-zA-Z0-9+.-]*:)',
+                              rf"\1{p}/", text)
             # next flight / json payload references
             text = re.sub(r'(?<![A-Za-z0-9_/.])/_next/', f"{p}/_next/", text)
             if "text/html" in ctype:
@@ -300,6 +268,11 @@ async def proxy_root(target: str, request: Request):
 @router.api_route("/{target}/{path:path}",
                   methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"])
 async def proxy(target: str, path: str, request: Request):
+    if target == "_brand":
+        asset = brand_asset(path)
+        if not asset:
+            return JSONResponse({"error": "not found"}, status_code=404)
+        return Response(asset[0], media_type=asset[1], headers={"cache-control": "public, max-age=3600"})
     upstream = TARGETS.get(target)
     if not upstream:
         return JSONResponse({"error": "unknown bifrost target", "targets": list(TARGETS)},
