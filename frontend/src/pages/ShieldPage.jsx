@@ -118,7 +118,7 @@ export default function ShieldPage() {
           src={src}
           onLoad={() => setLoading(false)}
           className="absolute inset-0 h-full w-full border-0 bg-[#07060c]"
-          allow="clipboard-read; clipboard-write; camera; web-share; publickey-credentials-get *; publickey-credentials-create *"
+          allow="clipboard-read; clipboard-write; camera; publickey-credentials-get *; publickey-credentials-create *"
         />
       </div>
     </div>
