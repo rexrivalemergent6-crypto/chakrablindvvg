@@ -32,18 +32,55 @@
     return Object.keys(o).filter(function (k) { return o[k] !== undefined && o[k] !== null && o[k] !== ''; })
       .map(function (k) { return k + '=' + encodeURIComponent(o[k]); }).join('&');
   }
-  function req(path, opts) {
-    return F(API + path, opts).then(function (r) {
+  function req(path, opts, attempt) {
+    attempt = attempt || 0;
+    return F(API + path, Object.assign({ credentials: 'same-origin', headers: { accept: 'application/json' } }, opts || {}, {
+      headers: Object.assign({ accept: 'application/json' }, (opts && opts.headers) || {})
+    })).then(function (r) {
       return r.text().then(function (t) {
+        var html = /^\s*</.test(t || '');
+        if (html) {
+          // an edge/bot check answered instead of our API: retry quietly, never show raw HTML
+          var isPost = opts && opts.method === 'POST';
+          if (attempt < (isPost ? 1 : 3)) return new Promise(function (res) { setTimeout(res, 900 * (attempt + 1)); }).then(function () { return req(path, opts, attempt + 1); });
+          var ce = new Error('Connection check in progress. Please try again in a few seconds.'); ce.challenge = true; throw ce;
+        }
         var d = {};
-        try { d = t ? JSON.parse(t) : {}; } catch (e) { d = { error: t || 'Unexpected response' }; }
-        if (!r.ok) throw new Error((d && (d.error || d.message)) || ('Request failed (' + r.status + ')'));
+        try { d = t ? JSON.parse(t) : {}; } catch (e) { d = { error: 'Unexpected response' }; }
+        if (!r.ok) {
+          if ((r.status === 502 || r.status === 503 || r.status === 429) && attempt < 2 && (!opts || opts.method !== 'POST')) {
+            return new Promise(function (res) { setTimeout(res, 800 * (attempt + 1)); }).then(function () { return req(path, opts, attempt + 1); });
+          }
+          throw new Error((d && (d.error || d.message)) || ('Request failed (' + r.status + ')'));
+        }
         return d;
       });
+    }, function (e) {
+      if (attempt < 2) return new Promise(function (res) { setTimeout(res, 800); }).then(function () { return req(path, opts, attempt + 1); });
+      throw new Error('Network error. Please check your connection and retry.');
     });
   }
+  function b64u(str) {
+    var bytes = new TextEncoder().encode(str), bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  var MEMO = {};
+  function memo(k, fn) {
+    var m = MEMO[k], now = Date.now();
+    if (m && now - m.t < 300000) return m.p;
+    var p = fn().catch(function (e) { delete MEMO[k]; throw e; });
+    MEMO[k] = { t: now, p: p };
+    return p;
+  }
   function post(path, body) {
-    return req(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    var json = JSON.stringify(body);
+    return req(path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: json }).catch(function (e) {
+      if (!e || !e.challenge) throw e;
+      // edge bot-check swallowed the POST (it never reached us): resend through the GET tunnel
+      var p = path.split('?')[0];
+      return req('/_post' + p + '?b=' + b64u(json));
+    });
   }
   function nearIcon(t) {
     if (t.icon) return t.icon;
@@ -55,13 +92,15 @@
     return s ? 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@master/128/color/' + s + '.png' : '';
   }
   var api = {
-    tokens: function (side, term, chain) { return req('/tokens?' + qp({ side: side, term: term, chain: chain })).then(function (d) { return d.tokens || []; }); },
+    tokens: function (side, term, chain) { return memo('t|' + side + '|' + (term || '') + '|' + (chain || ''), function () { return req('/tokens?' + qp({ side: side, term: term, chain: chain })).then(function (d) { return d.tokens || []; }); }); },
     quotes: function (o) { return req('/quotes?' + qp(o)).then(function (d) { return d.quotes || []; }); },
     order: function (b) { return post('/orders', b); },
     getOrder: function (id) { return req('/orders/' + encodeURIComponent(id)); },
     nTokens: function (side, term) {
-      return req('/near/tokens?' + qp({ side: side, term: term })).then(function (d) {
-        return (d.tokens || []).map(function (t) { var o = Object.assign({}, t); o.name = t.name || t.symbol; o.icon = nearIcon(t); return o; });
+      return memo('n|' + side + '|' + (term || ''), function () {
+        return req('/near/tokens?' + qp({ side: side, term: term })).then(function (d) {
+          return (d.tokens || []).map(function (t) { var o = Object.assign({}, t); o.name = t.name || t.symbol; o.icon = nearIcon(t); return o; });
+        });
       });
     },
     nQuote: function (b) { return post('/near/quote', b); },
@@ -125,7 +164,9 @@
     "nav.side .dk-nav span{white-space:nowrap}",
     ".dk-nw{font-style:normal;margin-left:auto;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:1px 5px;border:1px solid rgba(167,139,250,.45);color:#c4b5fd;border-radius:999px;white-space:nowrap}",
     ".dk-x{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--line,#2e2d36);border-radius:999px;color:var(--fg,#fff);margin-right:6px;text-decoration:none}.dk-x:hover{background:rgba(255,255,255,.06)}",
-    ".sheet-wrap{align-items:center!important;justify-content:center!important;padding:16px!important;background:rgba(4,3,8,.78)!important}",
+    ".sheet-wrap{position:fixed!important;inset:0!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:16px!important;background:rgba(4,3,8,.62)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important;z-index:1000!important}",
+    ".sheet-scrim{position:absolute!important;inset:0!important;background:transparent!important;cursor:pointer}",
+    ".sheet{position:relative!important;animation:dkPop .18s ease-out}@keyframes dkPop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}",
     ".sheet{margin:auto!important;width:min(440px,100%)!important;max-width:440px!important;border-radius:6px!important;background:#111016!important;border:1px solid #2e2d36!important;box-shadow:none!important;bottom:auto!important}",
     ".sheet .inp{border-radius:3px!important;background:#18171e!important;border-color:#33323c!important}",
     ".sheet .btn-primary{border-radius:3px!important;background:#fff!important;color:#0b0a10!important}",
@@ -273,6 +314,26 @@
 
   function isNear() { return S.method === 'privacy'; }
   function selected() { return S.routes[S.ri] || null; }
+  var B58 = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/, EVM = /^0x[a-fA-F0-9]{40}$/;
+  var ADDR = {
+    solana: B58, sol: B58,
+    bitcoin: /^(bc1[a-z0-9]{25,62}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/,
+    tron: /^T[1-9A-HJ-NP-Za-km-z]{33}$/,
+    litecoin: /^(ltc1[a-z0-9]{25,62}|[LM3][a-km-zA-HJ-NP-Z1-9]{26,33})$/,
+    near: /^(([a-z0-9]+[-_])*[a-z0-9]+\.)*([a-z0-9]+[-_])*[a-z0-9]+\.(near|tg)$|^[a-f0-9]{64}$/,
+    zec: /^(t1|t3)[a-km-zA-HJ-NP-Z1-9]{33}$|^(zs1|u1)[a-z0-9]{40,}$/, Zcash: /^(t1|t3)[a-km-zA-HJ-NP-Z1-9]{33}$|^(zs1|u1)[a-z0-9]{40,}$/,
+    xlm: /^G[A-Z2-7]{55}$/, ripple: /^r[1-9A-HJ-NP-Za-km-z]{24,34}$/, monero: /^[48][1-9A-HJ-NP-Za-km-z]{94,105}$/
+  };
+  var EVM_CHAINS = /^(ethereum|eth|bsc|arbitrum|arb|base|op|optimism|pol|polygon|avalanche|cronos|gnosis|gravity|hyperevm|manta-pacific|pulsechain|rootstock|sei|ARC|Robinhood)$/;
+  function addrOk(chain, a) {
+    a = (a || '').trim();
+    if (!a) return false;
+    if (EVM_CHAINS.test(chain || '')) return EVM.test(a);
+    var re = ADDR[chain];
+    return re ? re.test(a) : a.length >= 20;
+  }
+  function destOk() { return !!S.recv && addrOk(S.recv.chain, S.dest); }
+  function refundOk() { return B58.test(S.refund.trim()); }
 
   function resetPair() {
     S.send = null; S.recv = null; S.routes = []; S.ri = 0; S.qerr = ''; S.serr = ''; S.validUntil = 0;
@@ -286,8 +347,8 @@
   function fetchQuote() {
     var amt = parseFloat(S.amount);
     var near = isNear();
-    var ready = S.send && S.recv && amt > 0 && (!near || (S.dest.trim().length >= 20 && S.refund.trim().length >= 20));
-    if (!ready) { S.routes = []; S.quoting = false; S.qerr = ''; render(); return; }
+    var ready = S.send && S.recv && amt > 0 && (!near || (destOk() && refundOk()));
+    if (!ready) { S.routes = []; S.quoting = false; S.qerr = ''; render(); return Promise.resolve(); }
     var id = ++S.reqId;
     S.quoting = true; S.qerr = ''; render();
     var p = near
@@ -307,21 +368,23 @@
           S.ri = 0;
           S.validUntil = Date.now() + REFRESH_SECS * 1000;
         });
-    p.catch(function (e) { if (id === S.reqId) { S.routes = []; S.qerr = e.message; } })
-      .then(function () { if (id === S.reqId) { S.quoting = false; render(); } });
+    return p.catch(function (e) { if (id === S.reqId) { S.routes = []; S.qerr = e.message; } })
+      .then(function () { if (id === S.reqId) { S.quoting = false; if (!S.submitting) render(); } });
   }
 
   function cta() {
     var amt = parseFloat(S.amount), near = isNear();
-    var validDest = S.dest.trim().length >= 20, validRefund = S.refund.trim().length >= 20;
+    var validDest = destOk(), validRefund = refundOk();
     var sel = selected();
     var ok = S.send && S.recv && sel && validDest && (!near || validRefund) && !S.quoting && !S.submitting;
     var t = 'Review swap';
     if (!S.send) t = 'Choose the asset you send';
     else if (!amt || amt <= 0) t = 'Enter an amount';
     else if (!S.recv) t = 'Pick an asset to receive';
-    else if (near && !validRefund) t = 'Enter your Solana refund address';
-    else if (!validDest) t = 'Enter a destination address';
+    else if (!S.dest.trim()) t = 'Enter a destination address';
+    else if (!validDest) t = 'Invalid ' + (S.recv.chainName || '') + ' address';
+    else if (near && !S.refund.trim()) t = 'Enter your Solana refund address';
+    else if (near && !validRefund) t = 'Invalid Solana refund address';
     else if (S.qerr) t = 'No quote · adjust and retry';
     else if (S.quoting || !sel) t = 'Fetching quote…';
     if (S.submitting) t = 'Creating order…';
@@ -333,6 +396,26 @@
     if (!c.ok) return;
     var sel = selected(), near = isNear();
     S.submitting = true; S.serr = ''; render();
+    var ri = S.ri;
+    create(sel, near).catch(function (e) {
+      if (!/fresh quote|claimed|expired|quote/i.test(e.message || '')) throw e;
+      return fetchQuote().then(function () {
+        S.ri = Math.min(ri, Math.max(0, S.routes.length - 1));
+        var s2 = selected();
+        if (!s2) throw new Error(S.qerr || 'Quote expired. Please try again.');
+        return create(s2, near);
+      });
+    }).then(function (rec) { saveOrder(rec); openOrder(rec); })
+      .catch(function (e) { S.serr = friendlyErr(e.message); })
+      .then(function () { S.submitting = false; render(); });
+  }
+
+  function friendlyErr(m) {
+    if (/recipient|address/i.test(m || '')) return 'The destination address is not valid for ' + ((S.recv && S.recv.chainName) || 'this network') + '. Double-check it and retry.';
+    return m || 'Could not create the order. Please retry.';
+  }
+
+  function create(sel, near) {
     var p;
     if (near) {
       var rid = (window.crypto && crypto.randomUUID && crypto.randomUUID()) || ('req-' + Math.random().toString(16).slice(2));
@@ -351,9 +434,7 @@
           sendIcon: S.send.icon, recvIcon: S.recv.icon, expires: o.expires, eta: o.eta, createdAt: Date.now() };
       });
     }
-    p.then(function (rec) { saveOrder(rec); openOrder(rec); })
-      .catch(function (e) { S.serr = e.message; })
-      .then(function () { S.submitting = false; render(); });
+    return p;
   }
 
   /* ---------------- render: swap ---------------- */
@@ -766,6 +847,7 @@
 
   /* ---------------- events ---------------- */
   document.addEventListener('click', function (e) {
+    if (e.target.classList && e.target.classList.contains('sheet-scrim')) { var sx = document.querySelector('.sheet-wrap .sheet-h .x'); if (sx) sx.click(); return; }
     var a = e.target.closest && e.target.closest('[data-act]');
     if (!a || !(a.closest('#dk-view') || a.closest('#dk-modal'))) return;
     var act = a.getAttribute('data-act');
@@ -810,12 +892,13 @@
       if (v !== t.value) t.value = v;
       S.amount = v; S.routes = S.routes.length ? S.routes : []; scheduleQuote();
       partial();
-    } else if (t.id === 'dk-dest') { S.dest = t.value; scheduleQuote(); partial(); }
-    else if (t.id === 'dk-refund') { S.refund = t.value; scheduleQuote(); partial(); }
+    } else if (t.id === 'dk-dest') { S.dest = t.value; S.serr = ''; scheduleQuote(); partial(); }
+    else if (t.id === 'dk-refund') { S.refund = t.value; S.serr = ''; scheduleQuote(); partial(); }
     else if (t.id === 'dk-track-q') { S.track.q = t.value; }
   }, true);
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && document.getElementById('dk-modal')) closeModal();
+    else if (e.key === 'Escape') { var sx = document.querySelector('.sheet-wrap .sheet-h .x'); if (sx) sx.click(); }
     if (e.key === 'Enter' && e.target && e.target.id === 'dk-track-q') doTrack(e.target.value);
   }, true);
 

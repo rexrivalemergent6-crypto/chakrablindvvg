@@ -154,6 +154,26 @@ async def _ds_request(method: str, url: str, params=None, content=None, retries:
     raise last_exc
 
 
+@api_router.get("/ds/_post/{path:path}")
+async def ds_proxy_post_tunnel(path: str, request: Request):
+    """GET tunnel for POSTs, used by the client only when an edge bot-check intercepts a POST."""
+    import base64 as _b
+    if not _ds_allowed(path):
+        return Response(content='{"error":"path not allowed"}', status_code=403, media_type="application/json")
+    b = request.query_params.get("b", "")
+    try:
+        body = _b.urlsafe_b64decode(b + "=" * (-len(b) % 4))
+    except Exception:
+        return Response(content='{"error":"bad body"}', status_code=400, media_type="application/json")
+    try:
+        r = await _ds_request("POST", f"{DS_BASE}/{path}", content=body)
+        return Response(content=_scrub(r.content), status_code=r.status_code, media_type="application/json",
+                        headers={"cache-control": "no-store"})
+    except httpx.HTTPError as e:
+        logger.error(f"ds tunnel POST {path} failed: {e}")
+        return Response(content='{"error":"upstream unreachable"}', status_code=502, media_type="application/json")
+
+
 @api_router.get("/ds/{path:path}")
 async def ds_proxy_get(path: str, request: Request):
     if not _ds_allowed(path):

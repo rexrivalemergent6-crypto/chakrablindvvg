@@ -1,0 +1,52 @@
+{
+  "summary": "Iteration 10 full E2E on Cadabra app. Backend leak-audit pytest suite 6/6 PASS: /api/bifrost/v1/app/ HTML has no 'Veil'/veilit/darkswap/houdini/contractwolf; title='Cadabra App'; /api/bifrost/v1/_brand/dk-swap.js clean of forbidden terms; /api/ds/tokens?side=source and ?side=destination&term=usdc contain no 'houdini'/'darkswap'; token icons go through /api/bifrost/v1/_img?k=... which returns 200 image/*; /api/bifrost/v1/indexer/v1/assets hides both upstream mints (HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump, 7KEPApdbBMByrmqihz3bht2uMhFQcatjfSFQCKq66kH3). Frontend: dk-intro present on every tested view with correct data-tab for Overview, Vanish, Swap, Bridge out, Pay, Request, Cash out, Yield, History, Burner addresses, Referrals, Vault & keys, dk:private, dk:privacy, dk:track (14/14). Vanish intro contains Groth16, Poseidon, Merkle, nullifier (4/4). Sidebar 'Private route' and 'Privacy swap' show .dk-nw 'NO WALLET' badges without label wrap. Overview has 'No wallet? No problem.' strip. Wallet creation .sheet is centred on desktop 1920x800 (box 740,218 440x362 → centered-x and centered-y both True) and mobile 390x844 (16,230 358x383 → top=230>80, bottom=613<764). X link data-testid=dk-x-link visible on /app with href=https://x.com/cadabrazk target=_blank on overview and after each tab switch; landing-x-link also present on /. No telegram/discord/github or other twitter/x handles anywhere on landing or app. localStorage theme storage key renamed to 'cb-theme' (confirmed = 'dark'). Landing document visible text has 0 Veil/DarkSwap/Houdini/Jupiter occurrences.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iter10_leak_audit.py",
+    "/app/test_reports/pytest/iter10_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "data-testid coverage asymmetry: only three sidebar items currently expose dk-nav-* testids (dk-nav-private, dk-nav-privacy, dk-nav-track). The remaining sidebar items (Overview, Vanish, Swap, Bridge out, Pay, Request, Cash out, Yield, History, Burner addresses, Referrals, Vault & keys) are reachable only by visible text, which is brittle for localized or renamed labels. Suggest adding dk-nav-overview, dk-nav-vanish, dk-nav-swap, dk-nav-bridge-out, dk-nav-pay, dk-nav-request, dk-nav-cash-out, dk-nav-yield, dk-nav-history, dk-nav-burner-addresses, dk-nav-referrals, dk-nav-vault-keys testids on the matching anchor/button elements for stable automated testing (the review request explicitly listed these).",
+    "Recovery-key payload begins with a lowercase 'veilsk' prefix (e.g. 'veilsk2qvxFNqTXkSVVzRE3BP672A6XWsHrTjvnNiXvbD...'). This is a functional identifier in the key encoding, not visible branding — the task note explicitly allows this, and capitalized 'Veil' is 0 in both HTML and body text. However, user-facing eyes may still associate 'veil' with the upstream brand. Consider renaming the key prefix (e.g. 'cadsk1') on the next schema bump if backwards-compatibility window permits.",
+    "A benign 404 appears in the console on every /api/bifrost/v1/app/ load (unspecified resource). Not failing the page, but worth tracing (likely a legacy asset reference) and removing to keep DevTools console clean."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter10_leak_audit.py (new)"
+  ],
+  "success_rate": {
+    "backend": "100% (6/6 pytest leak-audit)",
+    "frontend": "100% on all iteration-10 acceptance checks (intros x15, X-link x5+, centred sheet desktop+mobile, no-wallet badges+strip, landing-x-link, theme storage key)"
+  },
+  "test_credentials": "Local wallet password TestPass!2345 (exercised successfully: wallet creation → recovery key modal → recovery-tick checkbox → Open Cadabra → dashboard with 'Cadabra Wallet - 7Toh...q96P' in header).",
+  "seed_data_creation": "A fresh in-browser wallet was created during the UI run but no funds were sent; this leaves only a local-storage/session entry (no on-chain state).",
+  "intro_tab_matrix": {
+    "Overview": "overview",
+    "Vanish": "vanish (keywords: Groth16+Poseidon+Merkle+nullifier)",
+    "Swap": "swap",
+    "Bridge out": "bridge out",
+    "Pay": "pay",
+    "Request": "request",
+    "Cash out": "cash out",
+    "Yield": "yield",
+    "History": "history",
+    "Burner addresses": "burner addresses",
+    "Referrals": "referrals",
+    "Vault & keys": "vault & keys",
+    "Private route": "dk:private",
+    "Privacy swap": "dk:privacy",
+    "Track order": "dk:track"
+  },
+  "wallet_sheet_geometry": {
+    "desktop_1920x800": {"x": 740, "y": 218.6, "w": 440, "h": 362.8, "centered_x": true, "centered_y": true},
+    "mobile_390x844": {"x": 16, "y": 230.3, "w": 358, "h": 383.4, "centered_x": true, "top_gt_80": true, "bottom_lt_764": true}
+  },
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iteration-10 acceptance criteria for intros, X-link, centred sheet, no-wallet badges, theme-key rename and leak hiding all pass. Private route and Privacy swap full order-creation flows (SOL 2 → Ethereum USDC, and SOL 5 → Ethereum USDC + refund) were NOT re-exercised in this run (prior iterations 7–8 already verified them end-to-end with 45s upstream wait). Live Swap quote (SOL→USDC 0.1) was not fully exercised either because an amount input selector couldn't be deterministically located inside the Swap pane — reusing prior-iteration coverage. If retesting, close the recovery-key modal (click 'Open Cadabra' button, which has role=button name='Open Cadabra') before interacting with the sidebar; the modal otherwise blocks pointer events. Backend leak-audit tests live at /app/backend/tests/test_iter10_leak_audit.py and can be re-run with pytest for regression."
+}
