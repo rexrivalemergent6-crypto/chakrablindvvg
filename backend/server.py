@@ -11,6 +11,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid
+from bifrost import router as bifrost_router, close_client as bifrost_close
 from datetime import datetime, timezone
 
 
@@ -202,6 +203,7 @@ async def ds_proxy_post(path: str, request: Request):
 
 # Include the router in the main app
 app.include_router(api_router)
+app.include_router(bifrost_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -221,6 +223,7 @@ logger = logging.getLogger(__name__)
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+    await bifrost_close()
     global _ds_client
     if _ds_client is not None and not _ds_client.is_closed:
         await _ds_client.aclose()

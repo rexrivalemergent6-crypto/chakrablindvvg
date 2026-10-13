@@ -8,6 +8,7 @@ const X_URL = 'https://x.com/darkinatorswaps';
 const links = [
   { label: 'Home', to: '/' },
   { label: 'Swap', to: '/swap' },
+  { label: 'ZK Shield', to: '/shield' },
   { label: 'How it works', to: '/docs' },
 ];
 
@@ -34,6 +35,7 @@ export default function Navbar() {
             <Link
               key={l.label}
               to={l.to}
+              data-testid={`nav-${l.to.replace('/', '') || 'home'}`}
               className={`transition-colors ${isActive(l.to) ? 'text-white' : 'text-white/60 hover:text-white'}`}
             >
               {l.label}

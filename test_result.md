@@ -126,6 +126,18 @@ backend:
         -agent: "testing"
         -comment: "REGRESSION TEST COMPLETE - ALL 12 TESTS PASSED (100% success rate). HARDENED proxy verified with NO regressions. PRIVATE ROUTE (HoudiniSwap): ✅ Step 1: GET /api/ds/tokens?side=source returned 100 tokens including SOL. ✅ Step 2: GET /api/ds/tokens?side=destination&term=WBTC returned 11 tokens including WBTC. ✅ Step 3: GET /api/ds/quotes returned valid quote with quoteId, amountIn=6.899944, amountOut=0.0093528 WBTC, amountOutUsd=806.53. ✅ Step 4: POST /api/ds/orders created order with houdiniId=diB676i5qA4wrLbG5bNJKJ, depositAddress=AE2rJPjSYf2734ohieUkGAPS9J8zzphuCDm2NdYDwW9S, displayStatus=WAITING_FOR_DEPOSIT. ✅ Step 5: GET /api/ds/orders/{houdiniId} returned LIVE status displayStatus=WAITING_FOR_DEPOSIT (Track page endpoint working). PRIVACY SWAP (NEAR Intents): ✅ Step 6a: GET /api/ds/near/tokens?side=source returned 18 tokens including SOL (Solana) with id=nep141:sol.omft.near. ✅ Step 6b: GET /api/ds/near/tokens?side=destination returned 100 tokens including ETH (Ethereum) with id=nep141:eth.omft.near. ✅ Step 7: POST /api/ds/near/quote created quote with quoteId, amountOut=0.2983 ETH, estimatedSeconds=29. ✅ Step 8: POST /api/ds/near/orders created order with depositAddress=7eZHcBEa8XVmo8RcBbzXAKBXxpFV8U42KuKyBrbVR4xv, requestId=new-dark-build. ✅ Step 9: GET /api/ds/near/orders/{requestId} returned LIVE status=PENDING_DEPOSIT (Track page endpoint for Privacy swaps working). STABILITY CHECKS: ✅ Step 10: Cache behavior verified - called GET /api/ds/tokens?side=source twice, both returned 200 with consistent data (100 tokens), first call 0.152s, second call 0.161s (served from 60s TTL cache). ✅ Step 11: Allowlist guard working - GET /api/ds/rewards/config correctly blocked with 403 and error message 'path not allowed'. Backend logs show healthy operation with all HTTP requests returning expected status codes. Connection pooling, retry logic, and TTL caching all functioning as designed. NO REGRESSIONS DETECTED."
 
+  - task: "Bifrost v1 Veil mirror proxy /api/bifrost/v1/{site|app|indexer|relayer|rpc}/{path} (+ websocket)"
+    implemented: true
+    working: "NA"
+    file: "backend/bifrost.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "Full passthrough mirror of veilit.xyz + app.veilit.xyz + indexer/relayer/rpc. Rewrites upstream hosts in HTML/JS/CSS/JSON to our proxy, injects a shim (fetch/XHR/WebSocket/Worker/setAttribute/history patch) so Veil's own client code runs in the browser while every call goes through our backend. Static assets cached in memory. /_health and /_meta endpoints."
+
 frontend:
   - task: "Routing + navigation (fix 'route not found')"
     implemented: true
@@ -171,6 +183,18 @@ frontend:
         -working: false
         -agent: "testing"
         -comment: "PARTIAL SUCCESS - Private route works, Privacy swap has issues. PRIVATE ROUTE TAB (HoudiniSwap): ✅ Token selector loads real tokens (100+ tokens) ✅ Selected SOL as source token ✅ Entered amount: 5 SOL ✅ Selected USDC as destination token ✅ Entered destination address: 0x68b3a9f8940f418e8051ebb659e8ed278fea41f6 ✅ LIVE QUOTE RECEIVED: 587.9983 USDC ✅ Rate displayed: 1 SOL ≈ 117.5997 USDC · ~14s ✅ Order creation initiated successfully ✅ 'Order created' modal appeared ✅. PRIVACY SWAP TAB (NEAR Intents): ✅ Token selector loads tokens ✅ Selected SOL as source ✅ Entered amount: 5 SOL ✅ Selected ETH as destination ✅ Entered destination address ✅ Entered refund address: 5tzFkiKscXHK5ZXCGbXZxdw7gTjjD1mBwuoFbhUvuAi9 ✅ BUT ❌ NO LIVE QUOTE RECEIVED (shows 0.00) ❌ Error message displayed: 'Select supported assets and valid addresses for both networks.' ❌ Button shows 'No quote — adjust and retry'. Issue: Privacy swap (NEAR Intents) is not generating quotes. Possible causes: (1) Selected tokens (SOL/ETH) may not be supported in NEAR token universe, (2) NEAR quote API may be failing, (3) Token IDs from NEAR tokens endpoint may not match what the quote API expects. Recommend checking NEAR token selection logic and quote API integration."
+
+  - task: "ZK Shield tab (/shield page + swap card tab + navbar link)"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/ShieldPage.jsx, frontend/src/components/SwapCard.jsx, frontend/src/components/Navbar.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+        -working: "NA"
+        -agent: "main"
+        -comment: "New /shield page embeds the proxied Veil app in an iframe with view tabs (Wallet, Overview, Docs, Security, Launch post, Compliance), service health pills, reload + open full screen. Swap card has a 3rd 'ZK Shield' tab that navigates to /shield."
 
 test_plan:
   current_focus: []

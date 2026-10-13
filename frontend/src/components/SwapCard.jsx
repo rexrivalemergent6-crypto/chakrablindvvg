@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDown, ArrowDown, ClipboardPaste, Loader2, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import CoinIcon from './CoinIcon';
 import TokenSelector from './TokenSelector';
 import OrderModal from './OrderModal';
@@ -11,6 +12,7 @@ import {
 const METHODS = [
   { id: 'private', label: 'Private route', sub: 'Best live rate' },
   { id: 'privacy', label: 'Privacy swap', sub: 'Shielded settlement' },
+  { id: 'zk', label: 'ZK Shield', sub: 'Powered by Veil', to: '/shield' },
 ];
 
 const REFRESH_SECS = 60;
@@ -30,14 +32,16 @@ const usd = (n) => {
 };
 
 function MethodTabs({ method, setMethod }) {
+  const navigate = useNavigate();
   return (
-    <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-black/30 border border-white/5">
+    <div className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-black/30 border border-white/5">
       {METHODS.map((m) => {
         const active = method === m.id;
         return (
           <button
             key={m.id}
-            onClick={() => setMethod(m.id)}
+            data-testid={`method-tab-${m.id}`}
+            onClick={() => (m.to ? navigate(m.to) : setMethod(m.id))}
             className={`rounded-xl py-2.5 text-center transition-all ${
               active
                 ? 'aurora-btn shadow-lg'
