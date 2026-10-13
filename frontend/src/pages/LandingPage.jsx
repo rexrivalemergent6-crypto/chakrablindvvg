@@ -488,7 +488,7 @@ export default function LandingPage() {
   const stats = useLiveStats();
   useEffect(() => { document.title = 'Cadabra | Make your transactions vanish'; }, []);
   return (
-    <div className="min-h-screen bg-[#07060c] text-white selection:bg-violet-500/40" data-testid="landing-page">
+    <div className="min-h-screen overflow-x-clip bg-[#07060c] text-white selection:bg-violet-500/40" data-testid="landing-page">
       <Nav />
       <main>
         <Hero stats={stats} />

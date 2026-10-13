@@ -8,6 +8,7 @@ ZK proofs, RPC, relayer, indexer). This module only:
   * swaps visible brand text / logos / colours to Cadabra
 """
 import base64
+import functools
 from pathlib import Path
 
 BRAND_DIR = Path(__file__).parent / "brand"
@@ -21,6 +22,7 @@ def _b64(name: str) -> str:
         return ""
 
 
+@functools.lru_cache(maxsize=4)
 def lockup_svg(light: bool = False) -> str:
     mark = _b64("mark-256.png")
     word = "#0b0917" if light else "#ffffff"
