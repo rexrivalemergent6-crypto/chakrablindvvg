@@ -13,7 +13,7 @@ const BIFROST = `${BACKEND}/api/bifrost/v1`;
 //   /track?id=X      -> app  /#track/X         (legacy)
 //   /shield[...]     -> same as above without the /shield prefix (legacy)
 export function shieldUpstream(pathname, search = '', hash = '') {
-  let rest = pathname.replace(/^\/shield(?=\/|$)/, '') || '/';
+  let rest = pathname.replace(/^\/(shield|app)(?=\/|$)/, '') || '/';
   if (rest === '/swap' || rest.startsWith('/swap/')) return `${BIFROST}/app/${hash || '#private-route'}`;
   if (rest === '/track' || rest.startsWith('/track/')) {
     const id = new URLSearchParams(search).get('id') || rest.slice(7);
