@@ -569,6 +569,10 @@
   function chainLabel(k) { return (H_BY_ID[k] && H_BY_ID[k].name) || String(k).replace(' Mainnet', ''); }
   function chainIconFor(k, t) {
     if (H_BY_ID[k] && H_BY_ID[k].icon) return H_BY_ID[k].icon;
+    var lk = String(k).toLowerCase().replace(' mainnet', '').replace(' c-chain', '').replace('binance smart chain', 'bsc').replace('bnb chain', 'bsc');
+    if (H_BY_ID[lk] && H_BY_ID[lk].icon) return H_BY_ID[lk].icon;
+    if (lk === 'near') return JD + 'near.png';
+    if (lk === 'zcash') return JD + 'zec.png';
     if (CHAIN_ICONS[k]) return CHAIN_ICONS[k];
     return t ? chainIcon(t.chainName) : '';
   }
@@ -736,7 +740,8 @@
         var cd = document.getElementById('dk-cd');
         if (!cd) { clearInterval(orderTimer); return; }
         var left = Math.max(0, target - Date.now());
-        cd.textContent = Math.floor(left / 60000) + ':' + String(Math.floor((left % 60000) / 1000)).padStart(2, '0');
+        var hh = Math.floor(left / 3600000), mm = Math.floor((left % 3600000) / 60000), ss = Math.floor((left % 60000) / 1000);
+        cd.textContent = (hh ? hh + 'h ' + String(mm).padStart(2, '0') + 'm' : mm + ':' + String(ss).padStart(2, '0'));
       };
       tick();
       orderTimer = setInterval(tick, 1000);
