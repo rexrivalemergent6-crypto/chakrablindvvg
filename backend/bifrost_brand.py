@@ -199,10 +199,11 @@ function start(){
 if(T==='site'){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
 }else{
- var go=function(){setTimeout(start,60);};
- if(document.readyState==='complete')go();else window.addEventListener('load',go);
+ // reveal as soon as the DOM is parsed (do not wait for every image/font on slow mobile links)
+ var go=function(){setTimeout(start,30);};
+ if(document.readyState!=='loading')go();else document.addEventListener('DOMContentLoaded',go);
 }
-setTimeout(start,7000);
+setTimeout(start,2500);
 })();
 """
 

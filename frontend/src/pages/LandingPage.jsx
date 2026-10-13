@@ -9,7 +9,7 @@ import { PILLARS, FLOW, DOC_TABS, FEES, VISIBILITY, FAQ, ZK_SYSTEMS, ZK_PIPELINE
 
 const BACKEND = process.env.REACT_APP_BACKEND_URL || '';
 const BF = `${BACKEND}/api/bifrost/v1`;
-const APP = '/app';
+const APP = `${process.env.REACT_APP_BACKEND_URL}/api/bifrost/v1/app/`;
 
 const PILLAR_ICON = { shield: ShieldCheck, houdini: Shuffle, near: Network };
 

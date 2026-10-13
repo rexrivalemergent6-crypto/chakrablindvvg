@@ -121,6 +121,45 @@ IMG_HOSTS = ("api.houdiniswap.com", "cdn.jsdelivr.net", "raw.githubusercontent.c
 
 
 _IMG_MISS = {}
+_LOGO = {}  # path -> (ctype, bytes) downscaled token logos
+
+
+def _shrink(body: bytes, size: int = 96):
+    """Downscale a token logo to <=size px WebP (upstream logos can be ~1 MB each)."""
+    try:
+        from PIL import Image
+        import io
+        im = Image.open(io.BytesIO(body))
+        if getattr(im, "is_animated", False):
+            im.seek(0)
+        im = im.convert("RGBA")
+        im.thumbnail((size, size), Image.LANCZOS)
+        out = io.BytesIO()
+        im.save(out, "WEBP", quality=82, method=4)
+        b = out.getvalue()
+        return ("image/webp", b) if len(b) < len(body) else None
+    except Exception:
+        return None
+
+
+async def _logo_small(path: str, request: Request):
+    hit = _LOGO.get(path)
+    if hit:
+        return Response(hit[1], media_type=hit[0], headers={"cache-control": "public, max-age=86400", "x-bifrost": "v1-hit"})
+    url = f"{TARGETS['indexer']}/{path}"
+    try:
+        r = await get_client().get(url, headers={"user-agent": UA, "origin": TARGETS["app"], "referer": TARGETS["app"] + "/"})
+    except Exception as e:
+        return JSONResponse({"error": str(e)[:200]}, status_code=502)
+    if r.status_code != 200:
+        return Response(status_code=r.status_code, headers={"cache-control": "public, max-age=600"})
+    body, ctype = r.content, r.headers.get("content-type", "image/png")
+    small = await asyncio.get_event_loop().run_in_executor(None, _shrink, body) if ctype.startswith("image/") and "svg" not in ctype else None
+    entry = small or (ctype, body)
+    if len(_LOGO) > 3000:
+        _LOGO.clear()
+    _LOGO[path] = entry
+    return Response(entry[1], media_type=entry[0], headers={"cache-control": "public, max-age=86400"})
 
 
 async def _image_proxy(u: str):
@@ -348,6 +387,8 @@ async def proxy_root(target: str, request: Request):
 async def proxy(target: str, path: str, request: Request):
     if target == "_img":
         return await _image_proxy(request.query_params.get("u", ""))
+    if target == "indexer" and path.startswith("v1/logo/") and request.method == "GET":
+        return await _logo_small(path, request)
     if target == "_brand":
         asset = brand_asset(path)
         if not asset:
