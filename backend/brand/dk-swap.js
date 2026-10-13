@@ -42,13 +42,13 @@
         if (html) {
           // an edge/bot check answered instead of our API: retry quietly, never show raw HTML
           var isPost = opts && opts.method === 'POST';
-          if (attempt < (isPost ? 1 : 3)) return new Promise(function (res) { setTimeout(res, 900 * (attempt + 1)); }).then(function () { return req(path, opts, attempt + 1); });
+          if (attempt < (isPost ? 1 : 3)) return (window.__bfHeal ? window.__bfHeal() : new Promise(function (res) { setTimeout(res, 900 * (attempt + 1)); })).then(function () { return req(path, opts, attempt + 1); });
           var ce = new Error('Connection check in progress. Please try again in a few seconds.'); ce.challenge = true; throw ce;
         }
         var d = {};
         try { d = t ? JSON.parse(t) : {}; } catch (e) { d = { error: 'Unexpected response' }; }
         if (!r.ok) {
-          if ((r.status === 502 || r.status === 503 || r.status === 429) && attempt < 2 && (!opts || opts.method !== 'POST')) {
+          if ((r.status === 502 || r.status === 503 || r.status === 429) && attempt < 2 && (!opts || opts.method !== 'POST' || (d && d.busy))) {
             return new Promise(function (res) { setTimeout(res, 800 * (attempt + 1)); }).then(function () { return req(path, opts, attempt + 1); });
           }
           throw new Error((d && (d.error || d.message)) || ('Request failed (' + r.status + ')'));
@@ -79,7 +79,10 @@
       if (!e || !e.challenge) throw e;
       // edge bot-check swallowed the POST (it never reached us): resend through the GET tunnel
       var p = path.split('?')[0];
-      return req('/_post' + p + '?b=' + b64u(json));
+      return req('/_post' + p + '?b=' + b64u(json)).catch(function (e2) {
+        if (!e2 || !e2.challenge || !window.__bfHeal) throw e2;
+        return window.__bfHeal().then(function () { return req('/_post' + p + '?b=' + b64u(json)); });
+      });
     });
   }
   function nearIcon(t) {
@@ -414,7 +417,7 @@
   }
 
   function friendlyErr(m) {
-    if (/Connection check/i.test(m || '')) return 'Network check still running. Tap the button again in a few seconds; nothing was charged.';
+    if (/Connection check|Upstream is busy/i.test(m || '')) return 'Network check still running. Tap the button again in a few seconds; nothing was charged.';
     if (/recipient|address/i.test(m || '')) return 'The destination address is not valid for ' + ((S.recv && S.recv.chainName) || 'this network') + '. Double-check it and retry.';
     return m || 'Could not create the order. Please retry.';
   }

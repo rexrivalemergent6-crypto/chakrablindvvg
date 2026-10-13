@@ -131,14 +131,30 @@ def _cache_ttl(path: str) -> int:
     return 0  # quotes / orders / status must always be live
 
 
-async def _ds_request(method: str, url: str, params=None, content=None, retries: int = 2):
+def _is_challenge(resp) -> bool:
+    ct = resp.headers.get("content-type", "")
+    if resp.headers.get("cf-mitigated") == "challenge":
+        return True
+    return "text/html" in ct or resp.content[:1] == b"<"
+
+
+async def _ds_request(method: str, url: str, params=None, content=None, retries: int = 3):
     """Perform the upstream request with retry + exponential backoff."""
-    client = _get_ds_client()
+    global _ds_client
     last_exc = None
     resp = None
     for attempt in range(retries + 1):
+        client = _get_ds_client()
         try:
             resp = await client.request(method, url, params=params, content=content)
+            if _is_challenge(resp):
+                logger.warning(f"ds upstream challenge on {url} (attempt {attempt + 1})")
+                if attempt < retries:
+                    await client.aclose()
+                    _ds_client = None
+                    await asyncio.sleep(0.6 * (2 ** attempt))
+                    continue
+                return httpx.Response(503, json={"error": "Upstream is busy. Please retry in a few seconds.", "busy": True})
             if resp.status_code in RETRY_STATUS and attempt < retries:
                 await asyncio.sleep(0.4 * (2 ** attempt))
                 continue
@@ -198,6 +214,9 @@ async def ds_proxy_get(path: str, request: Request):
             return Response(content=body, status_code=status, media_type="application/json")
         return Response(content='{"error":"upstream unreachable"}', status_code=502,
                         media_type="application/json")
+    if r.status_code == 503 and key in _ds_cache:
+        _, status, body = _ds_cache[key]
+        return Response(content=body, status_code=status, media_type="application/json")
     body = _scrub(r.content)
     if ttl and r.status_code == 200:
         _ds_cache[key] = (now, r.status_code, body)

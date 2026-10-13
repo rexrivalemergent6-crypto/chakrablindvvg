@@ -471,8 +471,19 @@ async def proxy(target: str, path: str, request: Request):
         _INFLIGHT[url] = fut
         try:
             r = await get_client().get(url, headers=fwd)
+            if "text/html" in r.headers.get("content-type", ""):
+                await asyncio.sleep(0.8)
+                r = await get_client().get(url, headers=fwd)
             raw = r.content
             hd = dict(r.headers)
+            if "text/html" in hd.get("content-type", ""):
+                stale = _MICRO.get(url)
+                if stale:
+                    fut.set_result((stale[1], stale[2], stale[3]))
+                    return _build_response(stale[1], stale[2], stale[3], target, origin, cached=True)
+                fut.set_result((503, {"content-type": "application/json"}, b'{"error":"Upstream is busy. Please retry in a few seconds.","busy":true}'))
+                return JSONResponse({"error": "Upstream is busy. Please retry in a few seconds.", "busy": True}, status_code=503,
+                                    headers={"access-control-allow-origin": "*", "retry-after": "3"})
             if r.status_code == 200:
                 _MICRO[url] = (time.time(), r.status_code, hd, raw)
                 if len(_MICRO) > 2000:
@@ -516,6 +527,13 @@ async def proxy(target: str, path: str, request: Request):
                 return StreamingResponse(gen(), status_code=r.status_code, headers=headers)
             raw = await r.aread()
             await r.aclose()
+            if target not in ("site", "app") and ("text/html" in ctype or r.headers.get("cf-mitigated") == "challenge"):
+                logger.warning(f"bifrost upstream challenge {target}/{path} (attempt {i + 1})")
+                if i < attempts - 1:
+                    await asyncio.sleep(0.6 * (2 ** i))
+                    continue
+                return JSONResponse({"error": "Upstream is busy. Please retry in a few seconds.", "busy": True},
+                                    status_code=503, headers={"access-control-allow-origin": "*", "retry-after": "3"})
             if r.status_code in (502, 503, 504, 429) and i < attempts - 1:
                 await asyncio.sleep(0.4 * (2 ** i))
                 continue

@@ -103,11 +103,38 @@ var hr=history.replaceState,hp=history.pushState;
 if(!DBG.nopretty)try{hr.call(history,history.state,'',pretty(location.href));}catch(e){}
 function hpatch(f){return function(s,t,u){if(u!=null){var pu=pretty(String(u));try{VBASE=vbaseFrom(new URL(pu,location.href).pathname);}catch(e){}u=pu;}return f.call(this,s,t,u);};}
 if(!DBG.nopretty){history.pushState=hpatch(hp);history.replaceState=hpatch(hr);}
-var of=window.fetch;window.__bfFetch=of&&of.bind(window);if(of){window.fetch=function(i,o){try{
+var of=window.fetch;
+var HEAL=null;
+function probe(){return of.call(window,R+'_health?_h='+Date.now(),{cache:'no-store',credentials:'same-origin'}).then(function(r){return r.ok&&(r.headers.get('content-type')||'').indexOf('json')>=0;},function(){return false;});}
+function silent(){return new Promise(function(res){var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');f.tabIndex=-1;f.style.cssText='position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;border:0;left:-9px;top:-9px';var fin=0,done=function(){if(fin)return;fin=1;try{f.remove();}catch(e){}res();};f.onload=function(){setTimeout(done,1200);};setTimeout(done,4000);f.src=R+'_health?_h='+Date.now();(document.body||document.documentElement).appendChild(f);});}
+function ask(){return new Promise(function(res){
+ var w=null,t=null,box=document.createElement('div');box.id='cb-verify';box.setAttribute('data-testid','cb-verify');
+ box.innerHTML='<div class="cbv-card" role="dialog" aria-modal="true" aria-label="Quick security check"><div class="cbv-h"><b>Quick security check</b><button class="cbv-x" data-testid="cb-verify-close" aria-label="Close">&times;</button></div><p>Our network wants to confirm you are human before sending this request. Tap <b>Verify</b>, tick the box in the small window, and we will carry on automatically. Nothing is sent or charged until then.</p><button class="cbv-go" data-testid="cb-verify-go">Verify</button><div class="cbv-s" data-testid="cb-verify-status"></div></div>';
+ var st=document.createElement('style');st.textContent='#cb-verify{position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,3,8,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}#cb-verify .cbv-card{width:min(420px,100%);background:#111016;border:1px solid #2e2d36;border-radius:6px;padding:20px;color:#e9e8ee;font:14px/1.5 system-ui,sans-serif}#cb-verify .cbv-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:16px}#cb-verify .cbv-x{background:none;border:0;color:#9b9aa3;font-size:22px;cursor:pointer}#cb-verify p{color:#a9a8b2;margin:0 0 16px}#cb-verify .cbv-go{width:100%;padding:12px;border:0;border-radius:3px;background:#fff;color:#0b0a10;font-weight:600;cursor:pointer}#cb-verify .cbv-s{margin-top:10px;font-size:12px;color:#8c8c96;min-height:16px}';
+ box.appendChild(st);document.body.appendChild(box);
+ function end(){clearInterval(t);try{w&&w.close();}catch(e){}box.remove();document.removeEventListener('keydown',kd,true);res();}
+ function kd(e){if(e.key==='Escape'){e.stopPropagation();end();}}
+ document.addEventListener('keydown',kd,true);
+ box.querySelector('.cbv-x').onclick=end;
+ box.querySelector('.cbv-go').onclick=function(){
+  w=window.open(R+'_health?verify='+Date.now(),'cbverify','width=460,height=620');
+  box.querySelector('.cbv-s').textContent='Waiting for the check to finish...';
+  clearInterval(t);var n=0;t=setInterval(function(){n++;var ok=false;try{ok=w&&w.document&&w.document.body&&(w.document.body.innerText||'').trim().charAt(0)==='{';}catch(e){}
+   if(ok||n%3===0)probe().then(function(p){if(p||ok)end();});
+   if(n>300)end();},700);
+ };
+});}
+function heal(){if(HEAL)return HEAL;HEAL=probe().then(function(ok){if(ok)return;return silent().then(probe).then(function(ok2){if(!ok2)return ask();});}).then(function(){setTimeout(function(){HEAL=null;},1500);});return HEAL;}
+window.__bfHeal=heal;
+function isChal(r){var ct=(r.headers.get('content-type')||'');return (r.status===403||r.status===503||r.status===429)&&ct.indexOf('text/html')>=0||(r.headers.get('cf-mitigated')==='challenge');}
+function same(u){try{var x=new URL(u,location.href);return x.origin===location.origin&&x.pathname.indexOf('/api/')===0;}catch(e){return false;}}
+function hf(i,o){var u=typeof i==='string'?i:(i&&i.url)||'';var replay=!(i&&i.url&&typeof i!=='string'&&i.body)&&!(o&&o.body&&typeof o.body!=='string');
+ return of.call(window,i,o).then(function(r){if(!same(u)||!replay||!isChal(r))return r;return heal().then(function(){return of.call(window,i,o);});});}
+window.__bfFetch=of&&hf;if(of){window.fetch=function(i,o){try{
  if(typeof i==='string')i=fx(i);
  else if(i instanceof URL)i=fx(i.href);
  else if(i&&i.url){var n=fx(i.url);if(n!==i.url)i=new Request(n,i);}
-}catch(e){}return of.call(this,i,o);};}
+}catch(e){}return hf(i,o);};}
 var xo=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(m,u){
  arguments[1]=fx(typeof u==='string'?u:String(u));return xo.apply(this,arguments);};
 var IMGMAP=[[/veil-lockup/i,BU+'lockup.svg'],[/veil-mark|ext-mark|\/icons\/icon-\d+|\/icons\/apple|veil-wallet|\/wallets\/veil/i,BU+'mark.png'],[/favicon|apple-touch-icon/i,BU+'favicon.png']];
