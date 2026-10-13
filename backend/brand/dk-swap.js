@@ -889,7 +889,7 @@
       var compact = nav.classList.contains('tabbar');
       var btns = Array.prototype.slice.call(nav.querySelectorAll('.nav-i'));
       if (!btns.length) return;
-      var anchor = btns.find(function (b) { return /(Veil|Darkinator|Cadabra)Swap/.test(b.textContent); }) ||
+      var anchor = btns.find(function (b) { return /(Veil|Darkinator|Cadabra)Swap|Bridge out/.test(b.textContent); }) ||
                    btns.find(function (b) { return /Trade/.test(b.textContent); }) || btns[btns.length - 1];
       var frag = document.createDocumentFragment();
       (compact ? [{ k: 'any', label: 'Swaps', hash: 'private-route', icon: IC.route }] : NAV_ITEMS).forEach(function (it) {
@@ -924,6 +924,22 @@
     if (document.querySelector('main.main') && (!document.getElementById('dk-view') || !document.querySelector('nav.side .dk-nav'))) { ensure(); if (parse()) { lastKey = null; sync(); } }
   }, 400);
 
-  function boot() { ensure(); sync(); }
+  // visual-only ordering of the sidebar / bottom bar (CSS order; React keeps its DOM untouched)
+  var SIDE_ORDER = ['overview|home', 'vanish|shield', 'dk:private', 'dk:privacy', 'swap|trade', 'bridge out|cadabraswap',
+    'pay|send', 'request|receive', 'cash out|withdraw', 'yield|earn', 'dk:track', 'history|activity',
+    'burner addresses|addresses', 'referrals|invite', 'vault & keys|keys'];
+  var TAB_ORDER = ['overview|home', 'dk:any', 'vanish|shield', 'swap|trade', 'pay|send', 'more'];
+  function orderNav() {
+    [['nav.side', SIDE_ORDER], ['nav.tabbar', TAB_ORDER]].forEach(function (cfg) {
+      var nav = document.querySelector(cfg[0]); if (!nav) return;
+      Array.prototype.forEach.call(nav.children, function (el) {
+        var key = el.getAttribute('data-dk') ? 'dk:' + el.getAttribute('data-dk') : (el.textContent || '').trim().toLowerCase();
+        var idx = 99;
+        cfg[1].forEach(function (o, i) { if (o.split('|').indexOf(key) >= 0) idx = i; });
+        if (String(el.style.order) !== String(idx)) el.style.order = idx;
+      });
+    });
+  }
+  function boot() { ensure(); sync(); orderNav(); setInterval(orderNav, 1500); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

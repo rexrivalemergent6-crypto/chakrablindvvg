@@ -8,7 +8,7 @@ export const PILLARS = [
     tag: 'ZK Shield',
     title: 'A private balance on Solana',
     body:
-      'Shield any SPL or Token-2022 token into sealed notes. Send, trade and lend from inside the pool with Groth16 proofs built in your browser. The chain checks the maths without learning who, how much or, when fees are paid in SOL, which token.',
+      'Drop any SPL or Token-2022 asset into sealed notes, then pay, swap and lend without leaving the pool. Your browser produces a Groth16 proof for every move; validators confirm it is correct yet learn nothing about the sender, the size or, with SOL fees, even the asset.',
     points: ['Groth16 over BN254', 'Poseidon Merkle tree, 2^26 leaves', 'Keys never leave your browser'],
     href: '/app#shield',
     cta: 'Open ZK Shield',
@@ -18,7 +18,7 @@ export const PILLARS = [
     tag: 'Private route',
     title: 'Multi-hop cross-chain private swaps',
     body:
-      'Swap from Solana into 120+ chains through multi-hop partner routing. You get live quotes from several routes, then send one manual deposit. No wallet connection and no account needed.',
+      'Leave Solana for 120+ networks over chained partner hops. Compare several live routes side by side, fund the winner with a single manual deposit, and skip sign-ups and wallet pop-ups entirely.',
     points: ['Several live routes per quote', 'Manual deposit, no signatures', 'Track every order live'],
     href: '/app#private-route',
     cta: 'Open Private route',
@@ -26,7 +26,7 @@ export const PILLARS = [
   {
     key: 'near',
     tag: 'Privacy swap',
-    title: 'intent-based confidential swaps',
+    title: 'Intent-based confidential swaps',
     body:
       'Exact-input swaps from Solana to Ethereum, Base, Arbitrum, Optimism, Polygon, BNB Chain, NEAR, Solana and native Zcash. Solvers compete to fill your intent, and execution runs in a private shard with restricted visibility.',
     points: ['Intent API · confidential execution', 'Solver network settles cross-chain', 'Solana refund address on every order'],
@@ -74,14 +74,14 @@ assets   /circuits/transaction.wasm · transaction.zkey`,
       {
         h: 'Relayers are bound by the proof',
         p: [
-          'A relayer submits your proof and pays the network fee, so your wallet never signs private actions. The recipient, the fee and any swap terms are hashed into the proof by the program itself. A relayer that changes anything ends up with an invalid proof.',
+          'A relayer broadcasts your proof and covers gas, so private actions never need a wallet signature. Destination, fee and swap terms are baked into the proof hash; tamper with any of them and verification simply fails.',
           'Trades run in two steps (swap_prepare then swap_execute). Your proof locks the input in its own escrow, then the route runs. The program checks that the escrow paid out exactly the input and that the vault received at least your minimum, otherwise it refunds automatically.',
         ],
       },
       {
         h: 'Keys and recovery',
         p: [
-          'Your vault is one random 32-byte root. From it, your browser derives a spending key, a viewing key and every one-time address. It is encrypted with your passphrase (PBKDF2, 600,000 rounds, then AES-GCM) and stored only in this browser.',
+          'Everything grows from a single random 32-byte seed. Your browser branches it into a spend key, a view key and an endless supply of single-use addresses, then locks the lot with your passphrase (PBKDF2 × 600k, AES-GCM) on this device only.',
           'The recovery key, shown once, restores everything on any device. It is not derived from your wallet, so a wallet compromise never exposes your private balance, and vice versa.',
         ],
       },

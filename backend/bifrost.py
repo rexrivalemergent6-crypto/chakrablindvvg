@@ -390,7 +390,42 @@ async def proxy(target: str, path: str, request: Request):
         hit = _cache_get(ckey)
         if hit:
             _, status, headers, raw = hit
-            return _build_response(status, headers, raw, target, origin, cached=True)
+            return _build_response(status, headers, raw, target, origin, cached=True, path=path)
+
+    if _micro_ok(target, path, method):
+        now = time.time()
+        m = _MICRO.get(url)
+        if m and now - m[0] < _MICRO_TTL:
+            return _build_response(m[1], m[2], m[3], target, origin, cached=True)
+        fut = _INFLIGHT.get(url)
+        if fut is not None:
+            try:
+                st, hd, rw = await asyncio.wait_for(asyncio.shield(fut), 20)
+                return _build_response(st, hd, rw, target, origin, cached=True)
+            except Exception:
+                pass
+        loop = asyncio.get_event_loop()
+        fut = loop.create_future()
+        _INFLIGHT[url] = fut
+        try:
+            r = await get_client().get(url, headers=fwd)
+            raw = r.content
+            hd = dict(r.headers)
+            if r.status_code == 200:
+                _MICRO[url] = (time.time(), r.status_code, hd, raw)
+                if len(_MICRO) > 2000:
+                    for k in list(_MICRO)[:500]:
+                        _MICRO.pop(k, None)
+            fut.set_result((r.status_code, hd, raw))
+            return _build_response(r.status_code, hd, raw, target, origin)
+        except Exception as e:
+            if not fut.done():
+                fut.set_exception(e)
+            return JSONResponse({"error": "bifrost upstream unreachable", "detail": str(e)[:200]}, status_code=502)
+        finally:
+            _INFLIGHT.pop(url, None)
+            if fut.done() and fut.exception() if fut.done() and not fut.cancelled() else False:
+                pass
 
     client = get_client()
     attempts = 3 if method in ("GET", "HEAD") else 2
@@ -424,7 +459,7 @@ async def proxy(target: str, path: str, request: Request):
                 continue
             if use_cache and r.status_code == 200:
                 _cache_put(ckey, r.status_code, dict(r.headers), raw)
-            return _build_response(r.status_code, r.headers, raw, target, origin)
+            return _build_response(r.status_code, r.headers, raw, target, origin, path=path)
         except (httpx.TransportError, httpx.TimeoutException) as e:
             last_err = e
             await asyncio.sleep(0.4 * (2 ** i))
@@ -433,7 +468,44 @@ async def proxy(target: str, path: str, request: Request):
                         status_code=502)
 
 
-def _build_response(status, up_headers, raw: bytes, target, origin, cached=False):
+_RCACHE: "OrderedDict" = None  # rendered (rewritten) bodies for immutable assets
+_RCACHE_BYTES = 0
+_RCACHE_MAX = 300 * 1024 * 1024
+_MICRO = {}          # url -> (ts, status, headers, raw) short-TTL cache for live JSON
+_MICRO_TTL = 4.0
+_INFLIGHT = {}       # url -> asyncio.Future (singleflight)
+MICRO_PATHS = ("v1/stats", "v1/root", "v1/feed", "v1/assets", "v1/info", "v1/health",
+               "v1/bridge/routes", "v1/positions", "v1/flows", "v1/nullifiers")
+
+
+def _micro_ok(target, path, method):
+    return method == "GET" and target in ("indexer", "relayer") and path.startswith(MICRO_PATHS)
+
+
+def _immutable(path: str) -> bool:
+    return path.startswith(("_next/static/", "circuits/", "wallets/", "icons/", "fonts/")) or \
+        path.endswith((".webp", ".png", ".svg", ".woff2", ".ico", ".jpg"))
+
+
+def _build_response(status, up_headers, raw: bytes, target, origin, cached=False, path=""):
+    global _RCACHE, _RCACHE_BYTES
+    if cached and path and _immutable(path):
+        from collections import OrderedDict
+        if _RCACHE is None:
+            _RCACHE = OrderedDict()
+        rk = (target, path, origin)
+        hit = _RCACHE.get(rk)
+        if hit:
+            _RCACHE.move_to_end(rk)
+            return Response(content=hit[1], status_code=status, headers=dict(hit[0]))
+        resp = _build_response(status, up_headers, raw, target, origin, cached=False, path=path)
+        hdrs = {k: v for k, v in resp.headers.items() if k.lower() != "content-length"}
+        _RCACHE[rk] = (hdrs, resp.body)
+        _RCACHE_BYTES += len(resp.body)
+        while _RCACHE_BYTES > _RCACHE_MAX and _RCACHE:
+            _, (h0, b0) = _RCACHE.popitem(last=False)
+            _RCACHE_BYTES -= len(b0)
+        return resp
     if isinstance(up_headers, dict):
         hdrs = httpx.Headers(up_headers)
     else:
@@ -451,6 +523,11 @@ def _build_response(status, up_headers, raw: bytes, target, origin, cached=False
         headers["cache-control"] = "no-store"
     if target not in ("site", "app"):
         headers["access-control-allow-origin"] = "*"
+    if path and _immutable(path) and status == 200 and target in ("site", "app"):
+        headers["cache-control"] = "public, max-age=31536000, immutable" if path.startswith(("_next/static/", "circuits/")) \
+            else "public, max-age=86400"
+    elif target in ("indexer", "relayer") and status == 200 and "json" in ctype:
+        headers["cache-control"] = "public, max-age=3"
     headers["x-bifrost"] = "v1" + ("-hit" if cached else "")
     return Response(content=raw, status_code=status, headers=headers)
 

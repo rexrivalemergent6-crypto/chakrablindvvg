@@ -9,8 +9,6 @@ import { PILLARS, FLOW, DOC_TABS, FEES, VISIBILITY, FAQ, ZK_SYSTEMS, ZK_PIPELINE
 
 const BACKEND = process.env.REACT_APP_BACKEND_URL || '';
 const BF = `${BACKEND}/api/bifrost/v1`;
-const HERO_IMG =
-  'https://static.prod-images.emergentagent.com/jobs/2df7d644-6e1d-42af-b815-caf7533916bd/images/e79734c770365930b63201cff945b58b8aa011b1d87fc064e81134df2d5173b0.jpeg';
 const APP = '/app';
 
 const PILLAR_ICON = { shield: ShieldCheck, houdini: Shuffle, near: Network };
@@ -46,7 +44,7 @@ function Nav() {
   return (
     <header className="fixed top-0 inset-x-0 z-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mt-3 flex h-14 items-center justify-between rounded-2xl border border-white/10 bg-[#07060c]/70 px-3 sm:px-4 backdrop-blur-xl">
+        <div className="mt-3 flex h-14 items-center justify-between rounded-2xl border border-white/10 bg-[#07060c]/95 px-3 sm:px-4">
           <a href="#top" data-testid="landing-logo"><Logo size={30} /></a>
           <nav className="hidden md:flex items-center gap-1">
             {links.map(([l, h]) => (
@@ -64,23 +62,71 @@ function Nav() {
   );
 }
 
+const KIND = { deposit: 'Shield', withdraw: 'Withdraw', transfer: 'Private transfer', swap: 'Private trade', trade: 'Private trade', lend: 'Private lend' };
+function useFeed() {
+  const [rows, setRows] = useState([]);
+  useEffect(() => {
+    let dead = false;
+    const load = () => fetch(`${BF}/indexer/v1/feed?limit=7`).then((r) => r.json()).then((d) => !dead && setRows(d.feed || [])).catch(() => {});
+    load();
+    const t = setInterval(load, 20000);
+    return () => { dead = true; clearInterval(t); };
+  }, []);
+  return rows;
+}
+function ago(ts) {
+  const m = Math.max(1, Math.round((Date.now() - ts) / 60000));
+  return m < 60 ? `${m}m ago` : m < 1440 ? `${Math.round(m / 60)}h ago` : `${Math.round(m / 1440)}d ago`;
+}
+function LiveLedger({ stats }) {
+  const rows = useFeed();
+  return (
+    <div className="rounded-[28px] border border-white/10 bg-[#0c0b11]" data-testid="landing-ledger">
+      <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+        <div className="flex items-center gap-2 text-sm font-medium"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />What the chain sees</div>
+        <span className="font-mono text-[11px] text-white/40">{stats.root ? `root ${stats.root.slice(0, 8)}…${stats.root.slice(-4)}` : 'syncing'}</span>
+      </div>
+      <ul className="divide-y divide-white/[.06]">
+        {(rows.length ? rows : Array.from({ length: 6 })).map((r, i) => {
+          if (!r) return <li key={i} className="h-[58px] px-6" />;
+          const pub = r.kind === 'deposit' || r.kind === 'withdraw';
+          const amt = pub && r.amount && r.mint === 'So11111111111111111111111111111111111111112' ? `${(Number(r.amount) / 1e9).toFixed(4)} SOL` : null;
+          return (
+            <li key={r.sig} className="flex items-center justify-between gap-4 px-6 py-3.5">
+              <div className="min-w-0">
+                <div className={`text-[11px] font-semibold uppercase tracking-[.14em] ${pub ? 'text-white/45' : 'text-violet-300'}`}>{KIND[r.kind] || r.kind}{pub ? ' · public' : ' · sealed'}</div>
+                <div className="mt-1 truncate font-mono text-xs text-white/35">{r.nullifiers} spent · {r.commitments} new notes · {r.sig.slice(0, 6)}…{r.sig.slice(-4)}</div>
+              </div>
+              <div className="shrink-0 text-right">
+                <div className="font-mono text-sm">{amt || <span className="inline-block h-3 w-20 rounded bg-white/10 align-middle" />}</div>
+                <div className="mt-1 text-[11px] text-white/35">{ago(r.ts)}</div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="flex items-center justify-between border-t border-white/10 px-6 py-3.5 text-[12px] text-white/45">
+        <span>Who is behind each line? The proof never says.</span>
+        <span className={stats.relayer === false ? 'text-rose-300' : 'text-emerald-300'}>Relayer {stats.relayer === false ? 'offline' : 'online'}</span>
+      </div>
+    </div>
+  );
+}
+
 function Hero({ stats }) {
   return (
     <section id="top" className="relative overflow-hidden pt-32 sm:pt-40 pb-20">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 left-1/2 h-[620px] w-[1100px] -translate-x-1/2 rounded-full bg-violet-600/20 blur-[140px]" />
-        <div className="absolute top-40 right-[-200px] h-[420px] w-[520px] rounded-full bg-cyan-400/10 blur-[120px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.035)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_75%)]" />
       </div>
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 grid lg:grid-cols-[1.05fr_.95fr] gap-14 items-center">
-        <div className="animate-fade-up">
+        <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-3 py-1.5 text-xs text-white/70">
-            <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" /></span>
+            <span className="inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
             The privacy layer for Solana · multiple routes
           </div>
           <h1 className="mt-6 font-display text-[44px] leading-[1.02] sm:text-6xl lg:text-[76px] font-extrabold tracking-[-0.03em]">
             Make your<br />transactions{' '}
-            <span className="bg-gradient-to-r from-violet-200 via-violet-400 to-violet-600 bg-clip-text text-transparent">vanish.</span>
+            <span className="text-violet-400">vanish.</span>
           </h1>
           <p className="mt-6 max-w-xl text-base sm:text-lg leading-relaxed text-white/60">
             Cadabra is the all-in-one privacy layer for Solana. Shield tokens into a zero-knowledge private balance, then send, trade and earn unseen. Swap across 120+ chains through
@@ -88,10 +134,10 @@ function Hero({ stats }) {
             Your keys never leave your browser.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-3">
-            <a href={APP} data-testid="landing-launch-hero" className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 via-indigo-500 to-cyan-400 px-6 py-3.5 text-[15px] font-semibold text-white shadow-[0_10px_40px_-10px_rgba(139,92,246,.8)] hover:brightness-110 transition">
+            <a href={APP} data-testid="landing-launch-hero" className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-[15px] font-semibold text-black hover:bg-violet-100 transition-colors">
               Launch app <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </a>
-            <a href="#tech" data-testid="landing-docs-hero" className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/[.03] px-6 py-3.5 text-[15px] font-medium text-white/90 hover:bg-white/[.07] transition">
+            <a href="#tech" data-testid="landing-docs-hero" className="inline-flex items-center gap-2 rounded-full border border-white/15 px-7 py-3.5 text-[15px] font-medium text-white/90 hover:bg-white/[.07] transition">
               <BookOpen className="h-4 w-4" /> Technical docs
             </a>
           </div>
@@ -109,29 +155,7 @@ function Hero({ stats }) {
             ))}
           </dl>
         </div>
-        <div className="relative">
-          <div className="absolute -inset-6 rounded-[40px] bg-gradient-to-br from-violet-500/20 via-transparent to-cyan-400/10 blur-2xl" />
-          <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-black">
-            <img src={HERO_IMG} alt="Zero-knowledge shield" className="h-[360px] sm:h-[460px] w-full object-cover opacity-90" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#07060c] via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 right-4 grid grid-cols-3 gap-2">
-              {[['ZK Shield', ShieldCheck], ['Private route', Shuffle], ['Privacy swap', Network]].map(([t, I]) => (
-                <div key={t} className="rounded-xl border border-white/10 bg-[#0b0a12]/80 px-3 py-2.5 backdrop-blur-md">
-                  <I className="h-4 w-4 text-violet-300" />
-                  <div className="mt-1 text-[12px] font-semibold">{t}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="absolute -left-6 top-10 hidden sm:block rounded-2xl border border-white/10 bg-[#0b0a12]/90 px-4 py-3 backdrop-blur-md animate-floaty">
-            <div className="text-[10px] uppercase tracking-[.16em] text-white/40">Merkle root</div>
-            <div className="mt-1 font-mono text-xs text-cyan-200">{stats.root ? `${stats.root.slice(0, 10)}…${stats.root.slice(-6)}` : 'syncing…'}</div>
-          </div>
-          <div className="absolute -right-4 -bottom-5 hidden sm:flex items-center gap-2 rounded-2xl border border-white/10 bg-[#0b0a12]/90 px-4 py-3 backdrop-blur-md">
-            <Radio className={`h-4 w-4 ${stats.relayer === false ? 'text-rose-400' : 'text-emerald-400'}`} />
-            <span className="text-xs text-white/70">Relayer {stats.relayer === false ? 'offline' : stats.relayer ? 'online' : '…'}</span>
-          </div>
-        </div>
+        <LiveLedger stats={stats} />
       </div>
     </section>
   );
@@ -146,8 +170,7 @@ function Pillars() {
           {PILLARS.map((p) => {
             const I = PILLAR_ICON[p.key];
             return (
-              <article key={p.key} data-testid={`pillar-${p.key}`} className="group relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[.05] to-transparent p-7 hover:border-violet-400/40 transition-colors">
-                <div className="absolute -right-16 -top-16 h-48 w-48 rounded-full bg-violet-500/10 blur-3xl group-hover:bg-violet-500/20 transition" />
+              <article key={p.key} data-testid={`pillar-${p.key}`} className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[.02] p-7 hover:border-violet-400/40 transition-colors">
                 <div className="relative">
                   <div className="flex items-center justify-between">
                     <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[.04]"><I className="h-5 w-5 text-violet-300" /></span>
@@ -187,7 +210,7 @@ function AppPreview() {
   return (
     <section className="relative py-10">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="relative rounded-[32px] border border-white/10 bg-[#0a0910] p-3 sm:p-4 shadow-[0_40px_120px_-40px_rgba(124,58,237,.6)]">
+        <div className="relative rounded-[32px] border border-white/10 bg-[#0a0910] p-3 sm:p-4">
           <div className="flex items-center gap-1.5 px-2 pb-3">
             <span className="h-2.5 w-2.5 rounded-full bg-white/15" /><span className="h-2.5 w-2.5 rounded-full bg-white/15" /><span className="h-2.5 w-2.5 rounded-full bg-white/15" />
             <span className="ml-3 rounded-md bg-white/5 px-3 py-1 font-mono text-[11px] text-white/40">cadabra · /app</span>
@@ -211,7 +234,7 @@ function AppPreview() {
                       <div className="mb-2 ml-2 text-[14px] text-[#8c8c8c]">{l}</div>
                       <div className="flex gap-1.5">
                         <div className="flex w-[130px] items-center gap-2.5 border border-[#404040] bg-[#25252b] px-3 py-3.5">
-                          <span className={`h-7 w-7 rounded-full ${i ? 'bg-[#2775ca]' : 'bg-gradient-to-br from-[#9945ff] to-[#14f195]'}`} />
+                          <span className={`h-7 w-7 rounded-full ${i ? 'bg-[#2775ca]' : 'bg-[#9945ff]'}`} />
                           <div><div className="text-[15px] font-medium leading-5">{s}</div><div className="text-[11px] text-[#8c8c8c]">{c}</div></div>
                         </div>
                         <div className="flex flex-1 flex-col justify-center border border-[#404040] bg-[#25252b] px-4">
@@ -221,7 +244,7 @@ function AppPreview() {
                       {!i && <div className="mx-auto my-3 flex h-7 w-7 items-center justify-center border border-[#404040] bg-[#25252b]"><ArrowDownUp className="h-3.5 w-3.5 text-[#8c8c8c]" /></div>}
                     </div>
                   ))}
-                  <div className="mt-5 flex h-11 items-center justify-center rounded-full text-[16px] text-[#0d0d0d]" style={{ background: 'linear-gradient(0deg,rgba(255,255,255,.45),rgba(255,255,255,.45)),linear-gradient(91.31deg,#fff -11.98%,#83f4ff 21.23%,#cfb1f8 50.19%,#faedff 100%)' }}>Review swap</div>
+                  <div className="mt-5 flex h-11 items-center justify-center rounded-full text-[16px] text-[#0d0d0d]" style={{ background: '#ffffff' }}>Review swap</div>
                 </div>
               </div>
             </div>
@@ -268,7 +291,7 @@ function HowItWorks() {
             [Cpu, 'Proofs', 'Groth16 proofs built in your browser show the program that balances add up and that you own what you spend.'],
             [Zap, 'Relayers', 'A relayer submits your proof and pays the network fee. It cannot redirect funds, because the recipient and fee are bound into the proof.'],
           ].map(([I, t, d]) => (
-            <div key={t} className="flex gap-4 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[.04] to-transparent p-5">
+            <div key={t} className="flex gap-4 rounded-2xl border border-white/10 bg-white/[.02] p-5">
               <I className="mt-0.5 h-5 w-5 shrink-0 text-cyan-300" />
               <div><div className="font-display font-bold">{t}</div><p className="mt-1 text-sm text-white/55 leading-relaxed">{d}</p></div>
             </div>
@@ -282,12 +305,11 @@ function HowItWorks() {
 function RealZk() {
   return (
     <section id="zk" className="relative py-24">
-      <div className="pointer-events-none absolute left-1/2 top-24 h-80 w-[900px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHead kicker="Real ZK, not ZK marketing" title="It doesn’t just hide. It proves." sub="Plenty of crypto projects call encryption, relayers or mixers “ZK”. Those can give you privacy, but they aren’t zero-knowledge proofs. Cadabra’s privacy is built on a real zk-SNARK system, Groth16, with every proof verified on-chain." />
         <div className="mt-14 grid gap-4 md:grid-cols-3">
           {ZK_SYSTEMS.map((z, i) => (
-            <div key={z.k} data-testid={`zk-system-${i}`} className={`rounded-3xl border p-6 ${z.zk ? 'border-violet-400/50 bg-gradient-to-b from-violet-500/15 to-transparent shadow-[0_20px_60px_-30px_rgba(139,92,246,.8)]' : 'border-white/10 bg-white/[.02]'}`}>
+            <div key={z.k} data-testid={`zk-system-${i}`} className={`rounded-3xl border p-6 ${z.zk ? 'border-violet-400/40 bg-violet-500/[.05]' : 'border-white/10 bg-white/[.02]'}`}>
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs text-white/40">System {String.fromCharCode(65 + i)}</span>
                 {z.zk ? <span className="rounded-full bg-violet-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-violet-100">This is ZK</span> : <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] text-white/45">Not a proof</span>}
@@ -340,7 +362,6 @@ function Tech() {
   const d = DOC_TABS.find((x) => x.key === tab);
   return (
     <section id="tech" className="relative py-24">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <SectionHead kicker="Technical documentation" title="How the engines work." sub="The protocol details behind ZK Shield, multi-hop private routes and intent-based confidential swaps." />
         <div className="mt-12 flex flex-wrap justify-center gap-2" role="tablist">
@@ -449,8 +470,7 @@ function FinalCta() {
   return (
     <section className="relative py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-violet-600/30 via-[#0d0b18] to-cyan-500/10 px-6 py-16 text-center">
-          <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[700px] -translate-x-1/2 rounded-full bg-violet-500/30 blur-[100px]" />
+        <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-white/[.02] px-6 py-16 text-center">
           <div className="relative flex justify-center">
             <Logo size={64} withWord={false} />
           </div>
@@ -474,8 +494,8 @@ function Footer() {
           <a href="/app" className="hover:text-white">App</a>
           <a href="/app#private-route" className="hover:text-white">Private route</a>
           <a href="/app#privacy-swap" className="hover:text-white">Privacy swap</a>
-          <a href="/app/docs" className="hover:text-white">Docs</a>
-          <a href="/app/security" className="hover:text-white">Security</a>
+          <a href="#tech" className="hover:text-white">Docs</a>
+          <a href="#zk" className="hover:text-white">Security</a>
           <a href="#tech" className="hover:text-white">Protocol</a>
         </div>
         <div className="text-xs text-white/30">© {new Date().getFullYear()} Cadabra · Non-custodial</div>
