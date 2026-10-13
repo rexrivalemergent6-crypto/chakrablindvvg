@@ -398,6 +398,9 @@
     S.submitting = true; S.serr = ''; render();
     var ri = S.ri;
     create(sel, near).catch(function (e) {
+      if (e && e.challenge) return new Promise(function (r) { setTimeout(r, 2500); }).then(function () { return create(sel, near); });
+      throw e;
+    }).catch(function (e) {
       if (!/fresh quote|claimed|expired|quote/i.test(e.message || '')) throw e;
       return fetchQuote().then(function () {
         S.ri = Math.min(ri, Math.max(0, S.routes.length - 1));
@@ -411,6 +414,7 @@
   }
 
   function friendlyErr(m) {
+    if (/Connection check/i.test(m || '')) return 'Network check still running. Tap the button again in a few seconds; nothing was charged.';
     if (/recipient|address/i.test(m || '')) return 'The destination address is not valid for ' + ((S.recv && S.recv.chainName) || 'this network') + '. Double-check it and retry.';
     return m || 'Could not create the order. Please retry.';
   }
