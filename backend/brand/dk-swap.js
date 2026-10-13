@@ -672,7 +672,7 @@
       cg.innerHTML = tiles.map(function (c) {
         var ci = c === 'All' ? '' : chainIconFor(c);
         var ic = c === 'All' ? '<span style="font-size:15px;line-height:16px">✦</span>' : (ci ? '<img src="' + esc(IMGP(ci)) + '" alt="" onerror="this.remove()">' : '<span class="dk-cl">' + esc(chainLabel(c).charAt(0)) + '</span>');
-        return '<button class="dk-chain' + (M.chain === c ? ' on' : '') + '" data-act="chain" data-c="' + esc(c) + '" data-testid="dk-chain-' + esc(String(c).replace(/\s+/g, '-')) + '">' + ic + '<span>' + esc(c === 'All' ? 'All chains' : chainLabel(c)) + '</span></button>';
+        return '<button class="dk-chain' + (M.chain === c ? ' on' : '') + '" data-act="chain" data-c="' + esc(c) + '" data-testid="dk-chain-' + esc(String(c).toLowerCase().replace(/\s+/g, '-')) + '">' + ic + '<span>' + esc(c === 'All' ? 'All chains' : chainLabel(c)) + '</span></button>';
       }).join('');
     } else {
       cg.style.display = 'none';
