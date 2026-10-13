@@ -55,7 +55,7 @@
     return s ? 'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@master/128/color/' + s + '.png' : '';
   }
   var api = {
-    tokens: function (side, term) { return req('/tokens?' + qp({ side: side, term: term })).then(function (d) { return d.tokens || []; }); },
+    tokens: function (side, term, chain) { return req('/tokens?' + qp({ side: side, term: term, chain: chain })).then(function (d) { return d.tokens || []; }); },
     quotes: function (o) { return req('/quotes?' + qp(o)).then(function (d) { return d.quotes || []; }); },
     order: function (b) { return post('/orders', b); },
     getOrder: function (id) { return req('/orders/' + encodeURIComponent(id)); },
@@ -98,12 +98,13 @@
     if (/^https:\/\//i.test(u) && u.indexOf(location.origin) !== 0) return '/api/bifrost/v1/_img?u=' + encodeURIComponent(u);
     return u;
   }
+  var JD2 = 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/';
   function coin(src, sym, size, badge) {
     size = size || 30;
     src = IMGP(src); badge = IMGP(badge);
     var letter = esc((sym || '?').replace(/[^A-Za-z0-9]/g, '').slice(0, 1).toUpperCase() || '?');
     var img = src
-      ? '<img class="m" src="' + esc(src) + '" alt="" style="width:' + size + 'px;height:' + size + 'px" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
+      ? '<img class="m" src="' + esc(src) + '" data-fb="' + esc(IMGP(JD2 + String(sym || '').toLowerCase().replace(/[^a-z0-9]/g, '') + '.png')) + '" alt="" style="width:' + size + 'px;height:' + size + 'px" onerror="if(this.dataset.fb&&this.src.indexOf(\'spothq\')<0&&this.src!==this.dataset.fb){this.src=this.dataset.fb;}else{this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';}">' +
         '<span class="lt" style="display:none;width:' + size + 'px;height:' + size + 'px">' + letter + '</span>'
       : '<span class="lt" style="width:' + size + 'px;height:' + size + 'px">' + letter + '</span>';
     var b = badge ? '<img class="b" src="' + esc(badge) + '" alt="" onerror="this.remove()">' : '';
@@ -116,6 +117,9 @@
     "html:not(.dk-on) #dk-view{display:none!important}",
     "html.dk-on main.main>:not(#dk-view){display:none!important}",
     "html.dk-on .nav-i.on:not(.dk-nav){background:transparent!important;color:var(--fg-2)!important}",
+    "html.dk-on nav.tabbar .nav-i.on:not(.dk-nav),html.dk-on nav.tabbar .nav-i.on:not(.dk-nav) *{color:var(--fg-3)!important;background:transparent!important;box-shadow:none!important}",
+    "nav.tabbar:has(.dk-nav){grid-template-columns:repeat(6,minmax(0,1fr))!important}",
+    "nav.tabbar .dk-nav span{white-space:nowrap}",
     "#dk-view{display:block;padding:34px 16px 70px;font-family:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;color:var(--dk-fg)}",
     "#dk-view *,#dk-modal *{box-sizing:border-box}",
     ".dk-wrap{width:min(460px,100%);margin:0 auto}",
@@ -124,6 +128,8 @@
     ".dk-seg button+button{border-left:0}",
     ".dk-seg button:hover{color:#fff}",
     ".dk-seg button.on{background:#3a3a41;color:#fff}",
+    ".dk-seg button{white-space:nowrap}",
+    ".dk-cl{width:16px;height:16px;border-radius:50%;background:#3a3a41;color:#fff;font-size:10px;display:inline-flex;align-items:center;justify-content:center}",
     ".dk-card{background:var(--dk-bg);border:1px solid var(--dk-line);padding:20px 20px 28px}",
     ".dk-lbl{color:var(--dk-mut);font-size:16px;margin:10px 10px 10px 10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}",
     ".dk-lbl small{font-size:12px;color:#6d6d74;font-family:'Space Mono',monospace}",
@@ -223,7 +229,8 @@
     ".dk-recent{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:10px;border:1px solid var(--dk-line);background:#25252b;padding:11px 12px;margin-top:6px;font-size:13px}",
     ".dk-recent:hover{border-color:#6a6a72}",
     ".dk-recent code{margin-left:auto;font-family:'Space Mono',monospace;font-size:11px;color:var(--dk-mut);max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
-    "@media (max-width:520px){.dk-tok{width:122px}#dk-view{padding:20px 10px 90px}.dk-card{padding:16px 14px 22px}}"
+    "@media (max-width:520px){.dk-tok{width:122px}#dk-view{padding:20px 10px 170px}.dk-card{padding:16px 14px 22px}"
+    + ".dk-seg{width:100%}.dk-seg button{flex:1;justify-content:center;padding:9px 6px;font-size:13px;gap:5px}.dk-seg button svg{display:none}}"
   ].join('\n');
 
   function injectCSS() {
@@ -336,7 +343,7 @@
   /* ---------------- render: swap ---------------- */
   function tokBtn(side) {
     var t = side === 'source' ? S.send : S.recv;
-    var badge = side === 'source' ? SOL_ICON : (t && chainIcon(t.chainName));
+    var badge = side === 'source' ? SOL_ICON : (t && chainIconFor(chainKey(t), t));
     if (!t) {
       return '<button class="dk-tok" data-act="pick" data-side="' + side + '" data-testid="dk-pick-' + side + '">' +
         '<span class="dk-ico" style="width:30px;height:30px"><span class="lt" style="width:30px;height:30px">' + SV(IC.chev, 14) + '</span></span>' +
@@ -533,26 +540,110 @@
     renderPicker(true);
     loadTokens('');
   }
+  var JD = 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/';
+  var H_CHAINS = [
+    { id: 'ethereum', name: 'Ethereum', icon: JD + 'eth.png', nat: 'ETH' },
+    { id: 'base', name: 'Base', icon: '', nat: 'ETH' },
+    { id: 'arbitrum', name: 'Arbitrum', icon: '', nat: 'ETH', gov: 'ARB' },
+    { id: 'solana', name: 'Solana', icon: JD + 'sol.png', nat: 'SOL' },
+    { id: 'bsc', name: 'BNB Chain', icon: JD + 'bnb.png', nat: 'BNB' },
+    { id: 'polygon', name: 'Polygon', icon: JD + 'matic.png', nat: 'POL' },
+    { id: 'optimism', name: 'Optimism', icon: '', nat: 'ETH', gov: 'OP' },
+    { id: 'avalanche', name: 'Avalanche', icon: JD + 'avax.png', nat: 'AVAX' },
+    { id: 'bitcoin', name: 'Bitcoin', icon: JD + 'btc.png', nat: 'BTC' },
+    { id: 'tron', name: 'Tron', icon: JD + 'trx.png', nat: 'TRX' },
+    { id: 'ton', name: 'TON', icon: '', nat: 'TON' }
+  ];
+  var H_BY_ID = {}; H_CHAINS.forEach(function (c) { H_BY_ID[c.id] = c; });
+  var POPULAR = ['USDC', 'USDT', 'ETH', 'BTC', 'SOL', 'BNB', 'WBTC', 'WETH', 'DAI', 'POL', 'AVAX', 'TRX', 'TON', 'ZEC', 'wNEAR', 'NEAR', 'ARB', 'OP', 'LINK', 'UNI', 'JUP', 'BONK'];
+  var CH_PRI = ['ethereum', 'Ethereum Mainnet', 'Ethereum', 'base', 'Base', 'arbitrum', 'Arbitrum', 'solana', 'Solana', 'bsc', 'Binance Smart Chain', 'BNB Chain', 'polygon', 'Polygon', 'optimism', 'Optimism', 'avalanche', 'Avalanche C-Chain', 'bitcoin', 'Bitcoin', 'tron', 'Tron', 'ton', 'TON', 'NEAR', 'Zcash'];
+  function rankChain(c) { var i = CH_PRI.indexOf(c); return i < 0 ? 999 : i; }
+  function rankSym(sy) { var i = POPULAR.indexOf(sy); return i < 0 ? 999 : i; }
+  function popularSort(list) {
+    return list.map(function (t, i) { return [t, i]; }).sort(function (a, b) {
+      var d = rankSym(a[0].symbol) - rankSym(b[0].symbol);
+      return d || a[1] - b[1];
+    }).map(function (x) { return x[0]; });
+  }
+  function chainKey(t) { return isNear() ? (t.chainName || 'Other') : (t.chain || t.chainName || 'Other'); }
+  function chainLabel(k) { return (H_BY_ID[k] && H_BY_ID[k].name) || String(k).replace(' Mainnet', ''); }
+  function chainIconFor(k, t) {
+    if (H_BY_ID[k] && H_BY_ID[k].icon) return H_BY_ID[k].icon;
+    if (CHAIN_ICONS[k]) return CHAIN_ICONS[k];
+    return t ? chainIcon(t.chainName) : '';
+  }
+  // learn governance-token icons for L2s once (ARB, OP, ...) straight from the upstream list
+  var govLearned = false;
+  function learnGov() {
+    if (govLearned) return; govLearned = true;
+    H_CHAINS.forEach(function (c) {
+      var sym = c.gov || (c.icon ? null : c.nat);
+      if (!sym || c.icon) return;
+      api.tokens('destination', sym, c.id).then(function (l) {
+        var hit = (l || []).find(function (t) { return t.symbol === sym && t.icon; }) || (l || []).find(function (t) { return t.icon; });
+        if (hit) { c.icon = hit.icon; if (M && M.kind === 'pick') renderPicker(false); }
+      }).catch(function () {});
+    });
+  }
+  function mergeTokens(lists) {
+    var seen = {}, out = [];
+    lists.forEach(function (l) { (l || []).forEach(function (t) { var k = t.id || (t.symbol + '|' + t.chain); if (!seen[k]) { seen[k] = 1; out.push(t); } }); });
+    return out;
+  }
   function loadTokens(term) {
     if (!M) return;
     var id = ++M.req, near = isNear(), side = M.side;
     M.loading = true; renderPickerList();
-    (near ? api.nTokens(side, term) : api.tokens(side, term)).then(function (list) {
+    var job;
+    if (near) {
+      job = api.nTokens(side, term).then(function (list) {
+        list = popularSort(list || []);
+        // order by chain priority, popular first inside each chain
+        return list.map(function (t, i) { return [t, i]; }).sort(function (a, b) {
+          return (rankChain(a[0].chainName) - rankChain(b[0].chainName)) || (a[1] - b[1]);
+        }).map(function (x) { return x[0]; });
+      });
+    } else {
+      var ch = (side === 'destination' && M.chain !== 'All') ? M.chain : undefined;
+      if (term) {
+        job = api.tokens(side, term, ch).then(function (l) {
+          var T = term.toUpperCase();
+          return (l || []).map(function (t, i) { return [t, i]; }).sort(function (a, b) {
+            var ea = a[0].symbol.toUpperCase() === T ? 0 : 1, eb = b[0].symbol.toUpperCase() === T ? 0 : 1;
+            return (ea - eb) || (rankChain(a[0].chain) - rankChain(b[0].chain)) || (a[1] - b[1]);
+          }).map(function (x) { return x[0]; });
+        });
+      } else {
+        var terms = side === 'source' ? ['SOL', 'USDC', 'USDT'] :
+          (ch ? ['USDC', 'USDT', (H_BY_ID[ch] || {}).nat || 'ETH'] : ['USDC', 'USDT', 'ETH', 'BTC', 'SOL', 'BNB']);
+        var calls = terms.map(function (q) {
+          return api.tokens(side, q, ch).then(function (l) {
+            var ex = (l || []).filter(function (t) { return t.symbol.toUpperCase() === q; });
+            return ex.sort(function (a, b) { return rankChain(a.chain) - rankChain(b.chain); });
+          }).catch(function () { return []; });
+        });
+        calls.push(api.tokens(side, '', ch).catch(function () { return []; }));
+        job = Promise.all(calls).then(function (ls) {
+          var pop = mergeTokens(ls.slice(0, -1));
+          return mergeTokens([pop, ls[ls.length - 1]]);
+        });
+      }
+    }
+    job.then(function (list) {
       if (!M || id !== M.req) return;
       M.tokens = Array.isArray(list) ? list : [];
       learnChains(M.tokens);
-      if (!term) {
+      if (near && !term) {
         var seen = {}, cs = [];
         M.tokens.forEach(function (t) { var c = t.chainName || 'Other'; if (!seen[c]) { seen[c] = 1; cs.push(c); } });
-        var PRI = ['Ethereum Mainnet', 'Ethereum', 'Base', 'Arbitrum', 'Solana', 'Binance Smart Chain', 'BNB Chain', 'Polygon', 'Optimism', 'Avalanche C-Chain', 'NEAR', 'Zcash'];
-        cs.sort(function (a, b) {
-          var ia = PRI.indexOf(a), ib = PRI.indexOf(b);
-          return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-        });
+        cs.sort(function (a, b) { return rankChain(a) - rankChain(b); });
         M.allChains = cs;
+      } else if (!near) {
+        M.allChains = H_CHAINS.map(function (c) { return c.id; });
       }
     }).catch(function () { if (M && id === M.req) M.tokens = []; })
       .then(function () { if (M && id === M.req) { M.loading = false; renderPicker(false); } });
+    if (!near && side === 'destination') learnGov();
   }
   function renderPicker(first) {
     var m = document.getElementById('dk-modal');
@@ -571,12 +662,13 @@
     var cg = m.querySelector('#dk-chains');
     var chains = M.allChains || [];
     if (M.side === 'destination' && chains.length > 1) {
-      var tiles = ['All'].concat(chains).slice(0, 9);
-      if (M.chain !== 'All' && tiles.indexOf(M.chain) < 0) tiles[8] = M.chain;
+      var tiles = ['All'].concat(chains).slice(0, 12);
+      if (M.chain !== 'All' && tiles.indexOf(M.chain) < 0) tiles[11] = M.chain;
       cg.style.display = '';
       cg.innerHTML = tiles.map(function (c) {
-        var ic = c === 'All' ? '<span style="font-size:15px;line-height:16px">✦</span>' : (chainIcon(c) ? '<img src="' + esc(IMGP(chainIcon(c))) + '" alt="" onerror="this.remove()">' : '');
-        return '<button class="dk-chain' + (M.chain === c ? ' on' : '') + '" data-act="chain" data-c="' + esc(c) + '">' + ic + '<span>' + esc(c === 'All' ? 'All chains' : c.replace(' Mainnet', '')) + '</span></button>';
+        var ci = c === 'All' ? '' : chainIconFor(c);
+        var ic = c === 'All' ? '<span style="font-size:15px;line-height:16px">✦</span>' : (ci ? '<img src="' + esc(IMGP(ci)) + '" alt="" onerror="this.remove()">' : '<span class="dk-cl">' + esc(chainLabel(c).charAt(0)) + '</span>');
+        return '<button class="dk-chain' + (M.chain === c ? ' on' : '') + '" data-act="chain" data-c="' + esc(c) + '" data-testid="dk-chain-' + esc(String(c).replace(/\s+/g, '-')) + '">' + ic + '<span>' + esc(c === 'All' ? 'All chains' : chainLabel(c)) + '</span></button>';
       }).join('');
     } else {
       cg.style.display = 'none';
@@ -592,7 +684,7 @@
   }
   function filtered() {
     if (!M) return [];
-    return M.chain === 'All' ? M.tokens : M.tokens.filter(function (t) { return (t.chainName || 'Other') === M.chain; });
+    return M.chain === 'All' ? M.tokens : M.tokens.filter(function (t) { return chainKey(t) === M.chain; });
   }
   function renderPickerList() {
     var m = document.getElementById('dk-modal');
@@ -602,13 +694,13 @@
     if (M.loading) { l.innerHTML = '<div class="dk-empty"><span class="dk-spin"></span>Loading tokens…</div>'; return; }
     var list = filtered();
     if (!list.length) { l.innerHTML = '<div class="dk-empty">No tokens found.</div>'; return; }
-    var h = '', last = null, grouped = M.side === 'destination' && M.chain === 'All';
+    var h = '', last = null, grouped = isNear() && M.side === 'destination' && M.chain === 'All' && !M.term;
     list.forEach(function (t) {
       var c = t.chainName || 'Other';
       if (grouped && c !== last) { h += '<div class="dk-sec">' + esc(c) + '</div>'; last = c; }
       var price = t.price ? '$' + (Number(t.price) >= 1 ? Number(t.price).toLocaleString(undefined, { maximumFractionDigits: 2 }) : Number(t.price).toPrecision(2)) : '';
       h += '<button class="dk-it" data-act="choose" data-i="' + M.tokens.indexOf(t) + '" data-testid="dk-token-' + esc(t.symbol) + '">' +
-        coin(t.icon, t.symbol, 30, M.side === 'destination' ? chainIcon(c) : SOL_ICON) +
+        coin(t.icon, t.symbol, 30, M.side === 'destination' ? chainIconFor(chainKey(t), t) : SOL_ICON) +
         '<span><div class="n">' + esc(t.name || t.symbol) + '</div><div class="s">' + esc(t.symbol) + '</div></span>' +
         '<span class="p">' + esc(price) + '<br>' + esc(c) + '</span></button>';
     });
@@ -671,7 +763,7 @@
     else if (act === 'track') { var q = document.getElementById('dk-track-q'); doTrack(q ? q.value : S.track.q); }
     else if (act === 'recent') doTrack(a.getAttribute('data-id'));
     else if (act === 'close') closeModal();
-    else if (act === 'chain') { M.chain = a.getAttribute('data-c'); renderPicker(false); }
+    else if (act === 'chain') { M.chain = a.getAttribute('data-c'); if (isNear()) renderPicker(false); else { renderPicker(false); loadTokens((M.term || '').trim()); } }
     else if (act === 'choose') {
       var t = M && M.tokens[+a.getAttribute('data-i')];
       if (t) {
