@@ -6,7 +6,7 @@ const BACKEND = process.env.REACT_APP_BACKEND_URL || '';
 const BIFROST = `${BACKEND}/api/bifrost/v1`;
 
 // Map any pretty site URL to the Bifrost v1 upstream mirror (one single site):
-//   /                -> app  /            (Darkinator app: wallet, shield, trade, swaps...)
+//   /                -> app  /            (Cadabra app: wallet, shield, trade, swaps...)
 //   /docs, /security -> app  /docs ...
 //   /about[...]      -> site /...         (landing)
 //   /swap            -> app  /#private-route   (legacy)
@@ -27,7 +27,7 @@ export function shieldUpstream(pathname, search = '', hash = '') {
   return `${BIFROST}/${target}${rest}${search}${hash}`;
 }
 
-// ZK Shield: full-page Darkinator-branded Veil experience served by Bifrost v1
+// ZK Shield: full-page Cadabra-branded Veil experience served by Bifrost v1
 // (no iframe). This route just hands the browser over to the mirror, which
 // rewrites the address bar back to /shield.
 export default function ShieldPage() {
@@ -44,7 +44,7 @@ export default function ShieldPage() {
       <div className="animate-pulse">
         <Logo size={44} />
       </div>
-      <p className="text-sm text-white/50 tracking-wide">Loading Darkinator…</p>
+      <p className="text-sm text-white/50 tracking-wide">Loading Cadabra…</p>
     </div>
   );
 }

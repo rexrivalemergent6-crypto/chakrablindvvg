@@ -1,4 +1,4 @@
-/* Darkinator swaps inside the app shell: Private route (DarkSwap/Houdini) + Privacy swap (NEAR Intents) + Track.
+/* Cadabra swaps inside the app shell: Private route (DarkSwap/Houdini) + Privacy swap (NEAR Intents) + Track.
    Mayan-style swap UI. Live data via /api/ds (our backend proxy). */
 (function () {
   if (window.__dkSwap) return;
@@ -731,7 +731,7 @@
     if (o.depositMemo) h += copyField('Deposit memo / tag (required)', o.depositMemo);
     h += '<div class="dk-cf"><div class="k">Receiving address</div><div class="v"><code>' + esc(o.addressTo || '') + '</code></div></div>';
     h += '<button class="dk-cta" data-act="trackorder" data-id="' + esc(o.id) + '" data-testid="dk-order-track">Track this order</button>';
-    h += '<div class="dk-note">Live order via Darkinator. Only deposit from your own Solana wallet.</div></div>';
+    h += '<div class="dk-note">Live order via Cadabra. Only deposit from your own Solana wallet.</div></div>';
     m.innerHTML = h;
     clearInterval(orderTimer);
     if (o.expires) {
@@ -889,7 +889,7 @@
       var compact = nav.classList.contains('tabbar');
       var btns = Array.prototype.slice.call(nav.querySelectorAll('.nav-i'));
       if (!btns.length) return;
-      var anchor = btns.find(function (b) { return /(Veil|Darkinator)Swap/.test(b.textContent); }) ||
+      var anchor = btns.find(function (b) { return /(Veil|Darkinator|Cadabra)Swap/.test(b.textContent); }) ||
                    btns.find(function (b) { return /Trade/.test(b.textContent); }) || btns[btns.length - 1];
       var frag = document.createDocumentFragment();
       (compact ? [{ k: 'any', label: 'Swaps', hash: 'private-route', icon: IC.route }] : NAV_ITEMS).forEach(function (it) {

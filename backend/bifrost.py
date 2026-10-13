@@ -346,7 +346,7 @@ async def proxy(target: str, path: str, request: Request):
         if not asset:
             return JSONResponse({"error": "not found"}, status_code=404)
         return Response(asset[0], media_type=asset[1],
-                        headers={"cache-control": "no-cache" if path.endswith(".js") else "public, max-age=3600"})
+                        headers={"cache-control": "no-cache"})
     upstream = TARGETS.get(target)
     if not upstream:
         return JSONResponse({"error": "unknown bifrost target", "targets": list(TARGETS)},

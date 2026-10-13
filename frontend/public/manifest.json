@@ -1,10 +1,22 @@
 {
-  "short_name": "Darkinator",
-  "name": "Darkinator | Private swaps from Solana",
+  "short_name": "Cadabra",
+  "name": "Cadabra | Make your transactions vanish",
   "icons": [
-    { "src": "favicon.ico", "sizes": "48x48", "type": "image/x-icon" },
-    { "src": "brand/favicon-192.png", "type": "image/png", "sizes": "192x192" },
-    { "src": "brand/favicon-512.png", "type": "image/png", "sizes": "512x512" }
+    {
+      "src": "favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "brand/favicon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "brand/favicon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
   ],
   "start_url": ".",
   "display": "standalone",

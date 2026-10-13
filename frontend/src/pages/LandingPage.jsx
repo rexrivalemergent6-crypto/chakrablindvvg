@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import Logo from '../components/Logo';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
-import { PILLARS, FLOW, DOC_TABS, FEES, VISIBILITY, FAQ } from './landingContent';
+import { PILLARS, FLOW, DOC_TABS, FEES, VISIBILITY, FAQ, ZK_SYSTEMS, ZK_PIPELINE, ZK_PROVEN } from './landingContent';
 
 const BACKEND = process.env.REACT_APP_BACKEND_URL || '';
 const BF = `${BACKEND}/api/bifrost/v1`;
@@ -38,6 +38,7 @@ function Nav() {
   const links = [
     ['Features', '#features'],
     ['How it works', '#how'],
+    ['Real ZK', '#zk'],
     ['Technology', '#tech'],
     ['Fees', '#fees'],
     ['FAQ', '#faq'],
@@ -75,15 +76,15 @@ function Hero({ stats }) {
         <div className="animate-fade-up">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-3 py-1.5 text-xs text-white/70">
             <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" /></span>
-            Live on Solana mainnet · Groth16 · NEAR Intents · Houdini
+            The privacy layer for Solana · multiple routes
           </div>
           <h1 className="mt-6 font-display text-[44px] leading-[1.02] sm:text-6xl lg:text-[76px] font-extrabold tracking-[-0.03em]">
-            The all-in-one<br />
-            <span className="text-gradient">private DeFi</span> app.
+            Make your<br />transactions{' '}
+            <span className="bg-gradient-to-r from-violet-200 via-violet-400 to-violet-600 bg-clip-text text-transparent">vanish.</span>
           </h1>
           <p className="mt-6 max-w-xl text-base sm:text-lg leading-relaxed text-white/60">
-            Shield tokens into a zero-knowledge private balance, then send, trade and earn unseen. Swap across 120+ chains through
-            <span className="text-white"> Houdini private routes</span> and <span className="text-white">NEAR Intents confidential swaps</span>, all from one app.
+            Cadabra is the all-in-one privacy layer for Solana. Shield tokens into a zero-knowledge private balance, then send, trade and earn unseen. Swap across 120+ chains through
+            <span className="text-white"> multi-hop private routes</span> and <span className="text-white">intent-based confidential swaps</span>, all from one app.
             Your keys never leave your browser.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -140,7 +141,7 @@ function Pillars() {
   return (
     <section id="features" className="relative py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHead kicker="One app, three privacy engines" title="Everything private, in one place." sub="A shielded pool for your balance, plus two independent cross-chain routes. Pick the right tool for each move without leaving the app." />
+        <SectionHead kicker="One privacy layer, multiple routes" title="Everything private, in one place." sub="A shielded pool for your balance, plus two independent cross-chain routes. Pick the right tool for each move without leaving the app." />
         <div className="mt-14 grid md:grid-cols-3 gap-5">
           {PILLARS.map((p) => {
             const I = PILLAR_ICON[p.key];
@@ -189,11 +190,11 @@ function AppPreview() {
         <div className="relative rounded-[32px] border border-white/10 bg-[#0a0910] p-3 sm:p-4 shadow-[0_40px_120px_-40px_rgba(124,58,237,.6)]">
           <div className="flex items-center gap-1.5 px-2 pb-3">
             <span className="h-2.5 w-2.5 rounded-full bg-white/15" /><span className="h-2.5 w-2.5 rounded-full bg-white/15" /><span className="h-2.5 w-2.5 rounded-full bg-white/15" />
-            <span className="ml-3 rounded-md bg-white/5 px-3 py-1 font-mono text-[11px] text-white/40">darkinator · /app</span>
+            <span className="ml-3 rounded-md bg-white/5 px-3 py-1 font-mono text-[11px] text-white/40">cadabra · /app</span>
           </div>
           <div className="grid lg:grid-cols-[210px_1fr_300px] gap-3">
             <div className="hidden lg:block rounded-2xl border border-white/5 bg-white/[.02] p-3 text-sm">
-              {['Home', 'Shield', 'Trade', 'DarkinatorSwap', 'Private route', 'Privacy swap', 'Track order', 'Send', 'Receive', 'Withdraw', 'Earn'].map((x, i) => (
+              {['Home', 'Shield', 'Trade', 'CadabraSwap', 'Private route', 'Privacy swap', 'Track order', 'Send', 'Receive', 'Withdraw', 'Earn'].map((x, i) => (
                 <div key={x} className={`rounded-lg px-3 py-2 ${i === 4 ? 'bg-violet-500/15 text-white' : 'text-white/50'}`}>{x}</div>
               ))}
             </div>
@@ -278,6 +279,62 @@ function HowItWorks() {
   );
 }
 
+function RealZk() {
+  return (
+    <section id="zk" className="relative py-24">
+      <div className="pointer-events-none absolute left-1/2 top-24 h-80 w-[900px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
+        <SectionHead kicker="Real ZK, not ZK marketing" title="It doesn’t just hide. It proves." sub="Plenty of crypto projects call encryption, relayers or mixers “ZK”. Those can give you privacy, but they aren’t zero-knowledge proofs. Cadabra’s privacy is built on a real zk-SNARK system, Groth16, with every proof verified on-chain." />
+        <div className="mt-14 grid gap-4 md:grid-cols-3">
+          {ZK_SYSTEMS.map((z, i) => (
+            <div key={z.k} data-testid={`zk-system-${i}`} className={`rounded-3xl border p-6 ${z.zk ? 'border-violet-400/50 bg-gradient-to-b from-violet-500/15 to-transparent shadow-[0_20px_60px_-30px_rgba(139,92,246,.8)]' : 'border-white/10 bg-white/[.02]'}`}>
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-xs text-white/40">System {String.fromCharCode(65 + i)}</span>
+                {z.zk ? <span className="rounded-full bg-violet-500/20 px-2.5 py-0.5 text-[11px] font-semibold text-violet-100">This is ZK</span> : <span className="rounded-full bg-white/5 px-2.5 py-0.5 text-[11px] text-white/45">Not a proof</span>}
+              </div>
+              <h3 className="mt-5 font-display text-2xl font-bold">{z.k}</h3>
+              <p className="mt-3 text-[15px] italic leading-relaxed text-white/75">{z.q}</p>
+              <p className="mt-3 text-sm leading-relaxed text-white/50">{z.d}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6 rounded-3xl border border-white/10 bg-[#0a0910] p-6 sm:p-8">
+          <div className="text-xs font-semibold uppercase tracking-[.2em] text-white/40">The proof pipeline</div>
+          <ol className="mt-5 flex flex-col gap-2 md:flex-row md:items-stretch" data-testid="zk-pipeline">
+            {ZK_PIPELINE.map((step, i) => (
+              <li key={step} className="flex flex-1 items-center gap-2">
+                <div className={`flex-1 rounded-2xl border px-4 py-4 text-center text-sm font-semibold ${i === ZK_PIPELINE.length - 1 ? 'border-emerald-400/40 bg-emerald-400/10 text-emerald-100' : i === 2 ? 'border-violet-400/50 bg-violet-500/15 text-white' : 'border-white/10 bg-white/[.03] text-white/80'}`}>{step}</div>
+                {i < ZK_PIPELINE.length - 1 && <ArrowRight className="hidden h-4 w-4 shrink-0 text-white/30 md:block" />}
+              </li>
+            ))}
+          </ol>
+          <p className="mt-5 text-sm text-white/50">The chain never needs to know the secret. It only checks whether the proof is valid.</p>
+        </div>
+        <div className="mt-6 grid gap-4 lg:grid-cols-3">
+          <div className="rounded-3xl border border-white/10 bg-white/[.02] p-6 lg:col-span-2">
+            <h3 className="flex items-center gap-2 font-display text-lg font-bold"><Cpu className="h-4 w-4 text-violet-300" />What is actually being proven</h3>
+            <p className="mt-3 text-sm leading-relaxed text-white/55">Every note commits to its token, amount and spending authority. Commitments live in a Poseidon Merkle tree. When you spend, your browser builds a proof that says:</p>
+            <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+              {ZK_PROVEN.map((x) => <li key={x} className="flex gap-2 rounded-xl border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white/80"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-300" />{x}</li>)}
+            </ul>
+            <p className="mt-4 text-sm leading-relaxed text-white/55">The program checks the maths and moves on. The note owner and your wallet are never part of the public inputs: ownership is separated from public execution.</p>
+          </div>
+          <div className="flex flex-col gap-4">
+            <div className="rounded-3xl border border-white/10 bg-white/[.02] p-6">
+              <h3 className="flex items-center gap-2 font-display text-lg font-bold"><KeyRound className="h-4 w-4 text-cyan-300" />Nullifiers</h3>
+              <p className="mt-2 text-sm leading-relaxed text-white/55">Each spend publishes a nullifier. The chain can enforce “this balance hasn’t already been spent” without ever asking who owns it.</p>
+            </div>
+            <div className="rounded-3xl border border-amber-300/20 bg-amber-300/[.04] p-6">
+              <h3 className="font-display text-lg font-bold text-amber-100">No magic</h3>
+              <p className="mt-2 text-sm leading-relaxed text-white/55">Real ZK doesn’t mean everything is invisible. Public entry and exit amounts, timing and network metadata can still create links. A ZK system is only as strong as its circuits, setup, contracts and key handling.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Tech() {
   const [tab, setTab] = useState(DOC_TABS[0].key);
   const d = DOC_TABS.find((x) => x.key === tab);
@@ -285,7 +342,7 @@ function Tech() {
     <section id="tech" className="relative py-24">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/40 to-transparent" />
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <SectionHead kicker="Technical documentation" title="How the engines work." sub="The protocol details behind ZK Shield, Houdini private routes and NEAR Intents confidential swaps." />
+        <SectionHead kicker="Technical documentation" title="How the engines work." sub="The protocol details behind ZK Shield, multi-hop private routes and intent-based confidential swaps." />
         <div className="mt-12 flex flex-wrap justify-center gap-2" role="tablist">
           {DOC_TABS.map((t) => (
             <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)} data-testid={`tech-tab-${t.key}`}
@@ -394,10 +451,10 @@ function FinalCta() {
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-gradient-to-br from-violet-600/30 via-[#0d0b18] to-cyan-500/10 px-6 py-16 text-center">
           <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-[700px] -translate-x-1/2 rounded-full bg-violet-500/30 blur-[100px]" />
-          <div className="relative">
-            <Logo size={52} withWord={false} />
+          <div className="relative flex justify-center">
+            <Logo size={64} withWord={false} />
           </div>
-          <h2 className="relative mt-6 font-display text-3xl sm:text-5xl font-extrabold tracking-[-0.02em]">Go private in under a minute.</h2>
+          <h2 className="relative mt-6 font-display text-3xl sm:text-5xl font-extrabold tracking-[-0.02em]">Abracadabra. It’s gone.</h2>
           <p className="relative mx-auto mt-4 max-w-xl text-white/60">Create a wallet in your browser, shield a token, or start a cross-chain private swap. No sign-up.</p>
           <a href={APP} data-testid="landing-launch-final" className="relative mt-9 inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-4 text-[15px] font-semibold text-[#07060c] hover:bg-white/90 transition">
             Launch app <ArrowRight className="h-4 w-4" />
@@ -421,7 +478,7 @@ function Footer() {
           <a href="/app/security" className="hover:text-white">Security</a>
           <a href="#tech" className="hover:text-white">Protocol</a>
         </div>
-        <div className="text-xs text-white/30">© {new Date().getFullYear()} Darkinator · Non-custodial</div>
+        <div className="text-xs text-white/30">© {new Date().getFullYear()} Cadabra · Non-custodial</div>
       </div>
     </footer>
   );
@@ -429,7 +486,7 @@ function Footer() {
 
 export default function LandingPage() {
   const stats = useLiveStats();
-  useEffect(() => { document.title = 'Darkinator · All-in-one private DeFi'; }, []);
+  useEffect(() => { document.title = 'Cadabra | Make your transactions vanish'; }, []);
   return (
     <div className="min-h-screen bg-[#07060c] text-white selection:bg-violet-500/40" data-testid="landing-page">
       <Nav />
@@ -438,6 +495,7 @@ export default function LandingPage() {
         <AppPreview />
         <Pillars />
         <HowItWorks />
+        <RealZk />
         <Tech />
         <Visibility />
         <Fees />

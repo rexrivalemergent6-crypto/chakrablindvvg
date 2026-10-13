@@ -1,6 +1,6 @@
-// Technical content for the Darkinator launch page.
-// Sourced from the upstream protocol documentation (ZK shielded pool, Houdini private routing,
-// NEAR Intents confidential swaps, Solana pool-mixing design). Keep wording factual.
+// Technical content for the Cadabra launch page.
+// Sourced from the upstream protocol documentation (ZK shielded pool, multi-hop private routing,
+// intent-based confidential swaps, Solana pool-mixing design). Keep wording factual.
 
 export const PILLARS = [
   {
@@ -16,7 +16,7 @@ export const PILLARS = [
   {
     key: 'houdini',
     tag: 'Private route',
-    title: 'Houdini cross-chain private swaps',
+    title: 'Multi-hop cross-chain private swaps',
     body:
       'Swap from Solana into 120+ chains through multi-hop partner routing. You get live quotes from several routes, then send one manual deposit. No wallet connection and no account needed.',
     points: ['Several live routes per quote', 'Manual deposit, no signatures', 'Track every order live'],
@@ -26,21 +26,21 @@ export const PILLARS = [
   {
     key: 'near',
     tag: 'Privacy swap',
-    title: 'NEAR Intents confidential swaps',
+    title: 'intent-based confidential swaps',
     body:
       'Exact-input swaps from Solana to Ethereum, Base, Arbitrum, Optimism, Polygon, BNB Chain, NEAR, Solana and native Zcash. Solvers compete to fill your intent, and execution runs in a private shard with restricted visibility.',
-    points: ['1Click API · confidentiality: basic', 'Solver network settles cross-chain', 'Solana refund address on every order'],
+    points: ['Intent API · confidential execution', 'Solver network settles cross-chain', 'Solana refund address on every order'],
     href: '/app#privacy-swap',
     cta: 'Open Privacy swap',
   },
 ];
 
 export const FLOW = [
-  { k: 'Your wallet', s: 'Public', d: 'Phantom, Solflare or Backpack stays your public entry and exit. Nothing else about you is needed.' },
+  { k: 'Your wallet', s: 'Public', d: 'Any Solana wallet stays your public entry and exit. Nothing else about you is needed.' },
   { k: 'Shield', s: 'Enter', d: 'One wallet signature moves tokens behind the privacy wall. The note is sealed in your browser.' },
   { k: 'Private balance', s: 'Sealed', d: 'Your balance is the set of notes only your viewing key can open and only your spending key can spend.' },
   { k: 'Send · Trade · Earn', s: 'Sealed', d: 'Every action spends notes and creates new ones, each with a zero-knowledge proof. A relayer pays the network fee.' },
-  { k: 'Withdraw / Swap out', s: 'Exit', d: 'Exit to a fresh one-time address, or swap cross-chain with Houdini routes and NEAR Intents.' },
+  { k: 'Withdraw / Swap out', s: 'Exit', d: 'Exit to a fresh one-time address, or swap cross-chain with multi-hop routes and intent-based confidential swaps.' },
 ];
 
 export const DOC_TABS = [
@@ -99,7 +99,7 @@ assets   /circuits/transaction.wasm · transaction.zkey`,
   },
   {
     key: 'houdini',
-    label: 'Houdini private route',
+    label: 'Private route',
     intro:
       'The Private route uses a partner routing network for discovery, quotes, orders and status. It is a manual-deposit flow: you review a live quote, create an order, and choose whether to fund it from your own Solana wallet.',
     blocks: [
@@ -128,15 +128,15 @@ GET  /api/ds/orders/{id}   → status, deposit, payout`,
   },
   {
     key: 'near',
-    label: 'NEAR Intents privacy swap',
+    label: 'Privacy swap',
     intro:
-      'Privacy swap asks NEAR Intents 1Click for basic confidentiality on both the dry preview and the deposit order. An intent says what you want; solvers compete to deliver it, and the verifier contract settles atomically across chains.',
+      'Privacy swap asks the intent network for basic confidentiality on both the dry preview and the deposit order. An intent says what you want; solvers compete to deliver it, and the verifier contract settles atomically across chains.',
     blocks: [
       {
         h: 'Intents, solvers and settlement',
         p: [
           'You state an exact-input intent: a Solana origin asset, a destination asset and chain, a recipient and a Solana refund address. Market makers (solvers) quote to fill it, and the best one is returned as a dry quote.',
-          'After you confirm, 1Click returns deposit instructions. Your manual Solana deposit is detected, the solver delivers on the destination chain, and the verifier contract settles. If execution fails, funds go back to your refund address.',
+          'After you confirm, the intent network returns deposit instructions. Your manual Solana deposit is detected, the solver delivers on the destination chain, and the verifier contract settles. If execution fails, funds go back to your refund address.',
         ],
         code: `POST /v0/quote  {
   "swapType": "EXACT_INPUT",
@@ -190,8 +190,8 @@ export const FEES = [
   ['Private send', 'None', 'Network fee + rent per note spent'],
   ['Private trade / earn', '0.3% of the input', 'Network fee + rent'],
   ['Withdraw', '0.3% of the amount', 'Network fee + rent'],
-  ['Private route (Houdini)', 'Inside the live quote', 'Solana network fee for your deposit'],
-  ['Privacy swap (NEAR Intents)', '0.40% partner fee, in the quote', 'Network costs per chain'],
+  ['Private route (multi-hop)', 'Inside the live quote', 'Solana network fee for your deposit'],
+  ['Privacy swap (intents)', '0.40% partner fee, in the quote', 'Network costs per chain'],
 ];
 
 export const VISIBILITY = [
@@ -203,10 +203,26 @@ export const VISIBILITY = [
 ];
 
 export const FAQ = [
-  ['Does Darkinator ever hold my keys?', 'No. Your vault is generated and encrypted in your browser, and proofs are built there too. The relayer and indexer never see your keys.'],
+  ['Does Cadabra ever hold my keys?', 'No. Your vault is generated and encrypted in your browser, and proofs are built there too. The relayer and indexer never see your keys.'],
   ['Can anyone freeze or take my funds?', 'No instruction lets anyone move notes without the owner’s proof. The multisig can pause deposits, transfers and swaps in an emergency, but withdrawals stay open.'],
   ['Do the cross-chain swaps need a wallet connection?', 'No. Private route and Privacy swap are manual-deposit flows. You create an order, then send the exact amount from any Solana wallet. Creating an order never moves funds.'],
-  ['What is the difference between ZK Shield and Privacy swap?', 'ZK Shield hides activity inside a zero-knowledge pool on Solana. Privacy swap uses NEAR Intents’ confidential processing to move value cross-chain. Different mechanisms, different trust boundaries, one app.'],
+  ['What is the difference between ZK Shield and Privacy swap?', 'ZK Shield hides activity inside a zero-knowledge pool on Solana. Privacy swap uses confidential intent processing to move value cross-chain. Different mechanisms, different trust boundaries, one app.'],
   ['Is it anonymous?', 'It hides the link between your wallet and your private activity. How well depends on the crowd and your habits (amounts, timing, tokens). No tool makes you 100% anonymous.'],
   ['What if I lose my recovery key?', 'If you lose both this browser and the recovery key, nobody can restore the funds. Keep the recovery key offline and private.'],
+];
+
+// "Real ZK" explainer
+export const ZK_SYSTEMS = [
+  { k: 'Encryption', q: '“I hid the transaction details so nobody can read them.”', d: 'Protects information, but proves nothing about whether the transaction is valid.', zk: false },
+  { k: 'Relayer', q: '“I sent it through another wallet so your address isn’t directly visible.”', d: 'A routing or anonymity technique. Useful, but it isn’t a proof.', zk: false },
+  { k: 'Zero-knowledge', q: '“I can mathematically prove this transaction is authorized and valid without revealing the secret behind it.”', d: 'Cadabra uses all three. Only this one gives the cryptographic proof property.', zk: true },
+];
+
+export const ZK_PIPELINE = ['Private information', 'ZK circuit', 'Groth16 proof', 'On-chain verifier', 'Accept or reject'];
+
+export const ZK_PROVEN = [
+  'I possess a valid note',
+  'I am authorized to spend it',
+  'The note exists in the committed state of the pool (Poseidon Merkle membership)',
+  'The resulting transaction obeys the protocol’s rules: amounts balance and fees are bound',
 ];

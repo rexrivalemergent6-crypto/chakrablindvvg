@@ -1,17 +1,17 @@
 """
-Bifrost v1 — browser shim + Darkinator re-branding layer for the Veil mirror.
+Bifrost v1 — browser shim + Cadabra re-branding layer for the Veil mirror.
 
 Veil's own client code still runs unmodified in the browser (wallet creation,
 ZK proofs, RPC, relayer, indexer). This module only:
   * injects a shim that routes every network call through /api/bifrost/v1/*
   * keeps the URL bar on pretty paths (/shield, /shield/about, /shield/docs …)
-  * swaps visible brand text / logos / colours to Darkinator
+  * swaps visible brand text / logos / colours to Cadabra
 """
 import base64
 from pathlib import Path
 
 BRAND_DIR = Path(__file__).parent / "brand"
-BRAND_NAME = "Darkinator"
+BRAND_NAME = "Cadabra"
 
 
 def _b64(name: str) -> str:
@@ -24,16 +24,11 @@ def _b64(name: str) -> str:
 def lockup_svg(light: bool = False) -> str:
     mark = _b64("mark-256.png")
     word = "#0b0917" if light else "#ffffff"
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 560 128" width="560" height="128">
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 456 128" width="456" height="128">
 <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
-<stop offset="0" stop-color="#c4b5fd"/><stop offset=".3" stop-color="#a78bfa"/>
-<stop offset=".55" stop-color="#818cf8"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
-<linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8b5cf6" stop-opacity=".55"/>
-<stop offset="1" stop-color="#22d3ee" stop-opacity=".35"/></linearGradient></defs>
-<rect x="6" y="6" width="116" height="116" rx="34" fill="url(#t)" opacity=".55"/>
-<rect x="10" y="10" width="108" height="108" rx="32" fill="#07060c" stroke="#ffffff22" stroke-width="2"/>
-<image href="data:image/png;base64,{mark}" xlink:href="data:image/png;base64,{mark}" x="22" y="22" width="84" height="84"/>
-<text x="142" y="89" font-family="Sora, Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="-2.5"><tspan fill="{word}">Dark</tspan><tspan fill="url(#g)">inator</tspan></text>
+<stop offset="0" stop-color="#c4b5fd"/><stop offset=".45" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
+<image href="data:image/png;base64,{mark}" xlink:href="data:image/png;base64,{mark}" x="0" y="4" width="120" height="120"/>
+<text x="134" y="88" font-family="Sora, Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="-2"><tspan fill="{word}">Cada</tspan><tspan fill="url(#g)">bra</tspan></text>
 </svg>"""
 
 
@@ -56,7 +51,7 @@ h1,h2,h3,.hero h1,.display,.hb-amt,.big{font-family:'Sora','Inter',ui-sans-serif
 ::selection{background:rgba(139,92,246,.45)}
 html:not(.bf-ready) body{opacity:0}
 html.bf-ready body{opacity:1;transition:opacity .18s ease}
-img[src*="_brand/lockup"]{object-fit:contain;filter:none!important;width:auto!important;max-width:none!important}
+img[src*="_brand/lockup"]{object-fit:contain;height:26px!important;filter:none!important;width:auto!important;max-width:none!important}
 """
 
 _SHIM = r"""
@@ -140,7 +135,7 @@ var wo=window.open;window.open=function(u){if(typeof u==='string')arguments[0]=f
 document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');
  if(!a)return;var h=a.getAttribute('href');if(!h||SKIP.test(h))return;var n=fx(h);if(n!==h)a.setAttribute('href',n);},true);
 
-/* ---------- Darkinator branding ---------- */
+/* ---------- Cadabra branding ---------- */
 var TXT=/veilit\.xyz|Veil|ContractWolf|veil-core|(^|[^$A-Za-z0-9_\/.:@-])veil(?![A-Za-z0-9_-])/;
 function rt(s){
  return s.replace(/app\.veilit\.xyz/g,location.host+'/shield')
@@ -163,7 +158,7 @@ function brandEl(el){
  if(el.tagName==='IMG'){
   var s=el.getAttribute('src')||'';var b=bimg(s);
   if(!b&&el.closest&&el.closest('a.brand,.brand'))b=LK();
-  if(!b&&/^(veil|darkinator)$/i.test(el.getAttribute('alt')||''))b=LK();
+  if(!b&&/^(veil|darkinator|cadabra)$/i.test(el.getAttribute('alt')||''))b=LK();
   if(b&&s!==b&&s.indexOf(b)<0){sa.call(el,'src',b);el.removeAttribute('srcset');}
  }
 }
