@@ -120,6 +120,9 @@ IMG_HOSTS = ("api.houdiniswap.com", "cdn.jsdelivr.net", "raw.githubusercontent.c
              "assets.coingecko.com", "coin-images.coingecko.com", "static.jup.ag", "arweave.net")
 
 
+_IMG_MISS = {}
+
+
 async def _image_proxy(u: str):
     """Same-origin image relay for swap token icons (upstream CDNs are blocked cross-origin by ORB)."""
     try:
@@ -130,6 +133,9 @@ async def _image_proxy(u: str):
     host = (pu.hostname or "").lower()
     if pu.scheme != "https" or not any(host == h or host.endswith("." + h) for h in IMG_HOSTS):
         return JSONResponse({"error": "host not allowed"}, status_code=400)
+    miss = _IMG_MISS.get(u)
+    if miss and time.time() - miss < 3600:
+        return Response(status_code=404, headers={"cache-control": "public, max-age=3600"})
     ckey = ("_img", u)
     hit = _cache_get(ckey)
     if hit:
@@ -141,7 +147,8 @@ async def _image_proxy(u: str):
         return JSONResponse({"error": str(e)[:200]}, status_code=502)
     ctype = r.headers.get("content-type", "")
     if r.status_code != 200 or not (ctype.startswith("image/") or ctype == "application/octet-stream"):
-        return Response(status_code=404)
+        _IMG_MISS[u] = time.time()
+        return Response(status_code=404, headers={"cache-control": "public, max-age=3600"})
     body = r.content
     if ctype == "application/octet-stream":
         ctype = "image/png"
