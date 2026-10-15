@@ -52,3 +52,4 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 ## Iteration 9 — Re-imported into new workspace (Oct 2026)
 - Source: https://github.com/rexrivalemergent6-crypto/swapcreate---darkpricnow-
 - Created backend/.env + frontend/.env, installed deps, services running. Verified landing (/), app (/app#private-route), Bifrost health, live NEAR quote via proxy.
+- Iter 9 audit (iteration_12.json, 100%): every veilit.xyz indexer/relayer endpoint matches upstream via proxy. Fixed: ingress replaced 502/504 bodies with HTML (GatewayStatusMiddleware -> 503 JSON + x-upstream-status); relayer quote/fee retries w/ backoff on shared Jupiter 429 + 3s micro cache; POSTs not re-sent on 502 unless rate-limited/busy.
