@@ -585,6 +585,7 @@
   function render() {
     var el = viewEl();
     if (!el || !S.view) return;
+    if (S.view === 'chain') { el.innerHTML = chainHTML(); return; }
     var ae = document.activeElement, fid = ae && ae.id && el.contains(ae) ? ae.id : null;
     var ss = fid && ae.selectionStart, se = fid && ae.selectionEnd;
     var seg = '<div class="dk-seg">' +
@@ -910,12 +911,77 @@
     b.textContent = c.text;
   }
 
+  /* ---------------- Chain: live on-chain terminal page ---------------- */
+  var CH = { stats: null, feed: [], assets: {}, err: null, at: 0, seen: {}, fresh: {}, timer: null, clock: null, first: true };
+  var BFI = '/api/bifrost/v1/indexer/v1/';
+  function chJ(p) { return fetch(BFI + p, { cache: 'no-store' }).then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }); }
+  function chLoad() {
+    var a = Object.keys(CH.assets).length ? Promise.resolve(null) : chJ('assets').then(function (d) { (d.assets || []).forEach(function (x) { CH.assets[x.mint] = x; }); CH.nAssets = (d.assets || []).length; CH.nVer = (d.assets || []).filter(function (x) { return x.verified; }).length; });
+    return Promise.all([chJ('stats'), chJ('feed?limit=60'), a]).then(function (res) {
+      CH.stats = res[0]; CH.err = null; CH.at = Date.now();
+      var feed = (res[1] && res[1].feed) || [];
+      CH.fresh = {};
+      if (!CH.first) feed.forEach(function (f) { if (!CH.seen[f.sig]) CH.fresh[f.sig] = 1; });
+      feed.forEach(function (f) { CH.seen[f.sig] = 1; });
+      CH.first = false; CH.feed = feed;
+    }).catch(function (e) { CH.err = e.message || 'offline'; }).then(function () { if (S.view === 'chain') render(); });
+  }
+  function startChain() {
+    if (CH.timer) return;
+    chLoad();
+    CH.timer = setInterval(function () { if (S.view !== 'chain') { clearInterval(CH.timer); clearInterval(CH.clock); CH.timer = CH.clock = null; return; } chLoad(); }, 10000);
+    CH.clock = setInterval(function () {
+      if (S.view !== 'chain') return;
+      var n = document.querySelector('#dk-view .ch-next'); if (n) n.textContent = Math.max(0, 10 - Math.floor((Date.now() - CH.at) / 1000)) + 's';
+      document.querySelectorAll('#dk-view [data-ts]').forEach(function (e) { e.textContent = chAgo(+e.getAttribute('data-ts')); });
+    }, 1000);
+  }
+  function chAgo(ts) {
+    var s = Math.max(0, Math.floor((Date.now() - ts) / 1000));
+    if (s < 60) return s + 's ago'; if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago'; return Math.floor(s / 86400) + 'd ago';
+  }
+  function chShort(a, n) { a = String(a || ''); n = n || 4; return a.length > n * 2 + 1 ? a.slice(0, n) + '\u2026' + a.slice(-n) : a; }
+  function chAmt(f) {
+    var a = CH.assets[f.mint]; if (!f.amount) return '';
+    var d = a ? a.decimals : 0, v = Number(f.amount) / Math.pow(10, d || 0);
+    var t = v >= 1000 ? v.toLocaleString(undefined, { maximumFractionDigits: 0 }) : v.toLocaleString(undefined, { maximumFractionDigits: 4 });
+    return t + ' ' + (a ? a.symbol : chShort(f.mint, 3));
+  }
+  function chainHTML() {
+    var st = CH.stats || {}, live = !CH.err && CH.stats;
+    var kinds = { deposit: ['SHIELD', 'in'], withdraw: ['EXIT', 'out'], swap: ['PRIVATE TRADE', 'sw'], transfer: ['PRIVATE PAY', 'sw'] };
+    var cnt = { deposit: 0, withdraw: 0, swap: 0 }; CH.feed.forEach(function (f) { if (cnt[f.kind] !== undefined) cnt[f.kind]++; });
+    var rows = CH.feed.map(function (f, i) {
+      var k = kinds[f.kind] || [String(f.kind || 'tx').toUpperCase(), 'sw'];
+      var who = f.kind === 'deposit' ? '<b>' + esc(chShort(f.account)) + '</b> \u2192 pool' : f.kind === 'withdraw' ? 'pool \u2192 <b>' + esc(chShort(f.account)) + '</b>' : '<i class="ch-redact">\u2588\u2588\u2588\u2588</i> \u2192 <i class="ch-redact">\u2588\u2588\u2588\u2588</i>';
+      var amt = chAmt(f);
+      return '<a class="ch-row ' + k[1] + (CH.fresh[f.sig] ? ' new' : '') + '" style="animation-delay:' + Math.min(i, 20) * 25 + 'ms" href="https://solscan.io/tx/' + encodeURIComponent(f.sig) + '" target="_blank" rel="noopener noreferrer" data-testid="chain-row">' +
+        '<span class="ch-k">[' + k[0] + ']</span><span class="ch-who">' + who + '</span><span class="ch-amt">' + (amt ? esc(amt) : '<i class="ch-redact">\u2588\u2588\u2588</i>') + '</span>' +
+        '<span class="ch-meta">' + (f.nullifiers || 0) + 'n \u00b7 ' + (f.commitments || 0) + 'c \u00b7 ' + esc(chShort(f.sig, 5)) + '</span><span class="ch-t" data-ts="' + f.ts + '">' + chAgo(f.ts) + '</span></a>';
+    }).join('');
+    function stat(k, v, t) { return '<div class="ch-stat"><span>$ ' + k + '</span><b' + (t ? ' title="' + esc(t) + '"' : '') + '>' + v + '</b></div>'; }
+    return '<div class="ch-page" data-testid="chain-page"><div class="ch-term">' +
+      '<div class="ch-bar"><i></i><i></i><i></i><span>root@nullcash:~$ watch --chain solana-mainnet<em>_</em></span>' +
+      '<span class="ch-live ' + (live ? 'on' : 'off') + '" data-testid="chain-live">' + (live ? '\u25cf LIVE \u00b7 sync <b class="ch-next">10s</b>' : (CH.err ? '\u25cb RECONNECTING' : '\u25cb CONNECTING')) + '</span></div>' +
+      '<div class="ch-stats" data-testid="chain-stats">' +
+        stat('merkle_root', st.root ? esc(chShort(st.root, 6)) : '\u2026', st.root) +
+        stat('commitments', st.leaves != null ? Number(st.leaves).toLocaleString() : '\u2026') +
+        stat('nullifiers', st.nullifiers != null ? Number(st.nullifiers).toLocaleString() : '\u2026') +
+        stat('tokens', CH.nAssets ? CH.nVer + '<small>/' + CH.nAssets + ' verified</small>' : '\u2026') +
+      '</div>' +
+      '<div class="ch-mix"><span>// last ' + CH.feed.length + ' tx</span><span class="in">shield ' + cnt.deposit + '</span><span class="sw">trade ' + cnt.swap + '</span><span class="out">exit ' + cnt.withdraw + '</span></div>' +
+      '<div class="ch-feed">' + (rows || '<div class="ch-empty">' + (CH.err ? '! feed unavailable, retrying\u2026' : 'loading stream\u2026') + '</div>') + '</div>' +
+    '</div></div>';
+  }
+
   /* ---------------- routing + shell integration ---------------- */
   function parse() {
     var h = location.hash || '';
     if (h === '#private-route') return { view: 'swap', method: 'private' };
     if (h === '#privacy-swap') return { view: 'swap', method: 'privacy' };
     if (h.indexOf('#track') === 0) return { view: 'track', id: decodeURIComponent(h.slice(7) || '') };
+    if (h === '#chain') return { view: 'chain' };
     return null;
   }
   function go(v) {
@@ -950,13 +1016,17 @@
           if (sol) { S.send = sol; render(); }
         }).catch(function () {});
       }
+    } else if (r.view === 'chain') {
+      S.view = 'chain';
+      render();
+      startChain();
     } else {
       S.view = 'track';
       render();
       if (r.id && r.id !== S.track.q) doTrack(r.id);
       else if (r.id && !S.track.searched) doTrack(r.id);
     }
-    markNav(r.view === 'track' ? 'track' : r.method);
+    markNav(r.view === 'swap' ? r.method : r.view);
     try { var mn = document.querySelector('main.main'); if (mn) mn.scrollTop = 0; window.scrollTo(0, 0); } catch (e) {}
   }
   function markNav(which) {
@@ -970,7 +1040,8 @@
   var NAV_ITEMS = [
     { k: 'private', label: 'Private route', hash: 'private-route', icon: IC.route, nw: true },
     { k: 'privacy', label: 'Privacy swap', hash: 'privacy-swap', icon: IC.shield, nw: true },
-    { k: 'track', label: 'Track', hash: 'track', icon: IC.track }
+    { k: 'track', label: 'Track', hash: 'track', icon: IC.track },
+    { k: 'chain', label: 'Chain', hash: 'chain', icon: IC.track }
   ];
   function ensure() {
     injectCSS();
@@ -1002,7 +1073,7 @@
       });
       anchor.parentNode.insertBefore(frag, anchor.nextSibling);
       var r = parse();
-      markNav(r ? (r.view === 'track' ? 'track' : r.method) : null);
+      markNav(r ? (r.view === 'swap' ? r.method : r.view) : null);
     });
   }
 
@@ -1024,7 +1095,7 @@
 
   // visual-only ordering of the sidebar / bottom bar (CSS order; React keeps its DOM untouched)
   var SIDE_ORDER = ['home|overview', 'shield|vanish', 'send|pay', 'swap|trade', 'bridge|bridge out|nullcashswap',
-    'dk:private', 'dk:privacy', 'dk:track', 'history|activity', 'nc:more',
+    'dk:private', 'dk:privacy', 'dk:track', 'history|activity', 'dk:chain', 'nc:more',
     'receive|request', 'withdraw|cash out', 'earn|yield', 'addresses|burner addresses', 'invite|referrals', 'keys|vault & keys'];
   var TAB_ORDER = ['home|overview', 'dk:any', 'shield|vanish', 'swap|trade', 'send|pay', 'more'];
   function orderNav() {
@@ -1226,6 +1297,7 @@
     eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
     coin: '<circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.9 0-3 .9-3 2s1 1.7 3 2 3 .9 3 2-1.1 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6v2M12 16v2"/>',
     book: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5v-17Z"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>',
+    term: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 9 3 3-3 3M13 15h4"/>',
     out: '<path d="M7 17 17 7M8 7h9v9"/>', chev: '<path d="m9 6 6 6-6 6"/>'
   };
   var DOCK = [
@@ -1235,7 +1307,8 @@
   var TILES = [
     { k: 'bridge', label: 'Bridge', ico: 'bridge' }, { k: 'dk:private-route', label: 'Private route', ico: 'route' },
     { k: 'dk:privacy-swap', label: 'Privacy swap', ico: 'lock' }, { k: 'dk:track', label: 'Track', ico: 'track' },
-    { k: 'history', label: 'History', ico: 'clock' }, { k: 'receive', label: 'Receive', ico: 'inbox' },
+    { k: 'history', label: 'History', ico: 'clock' }, { k: 'dk:chain', label: 'Chain', ico: 'term' },
+    { k: 'receive', label: 'Receive', ico: 'inbox' },
     { k: 'withdraw', label: 'Withdraw', ico: 'exit' }, { k: 'addresses', label: 'Addresses', ico: 'pin' },
     { k: 'keys', label: 'Keys', ico: 'key' }
   ];
@@ -1257,7 +1330,7 @@
   }
   function currentKey() {
     var r = document.documentElement.classList.contains('dk-on') ? parse() : null;
-    if (r) return r.view === 'track' ? 'dk:track' : (r.method === 'privacy' ? 'dk:privacy-swap' : 'dk:private-route');
+    if (r) return r.view === 'track' ? 'dk:track' : r.view === 'chain' ? 'dk:chain' : (r.method === 'privacy' ? 'dk:privacy-swap' : 'dk:private-route');
     var on = document.querySelector('nav.side .nav-i.on:not(.dk-nav)');
     return on ? (on.textContent || '').trim().toLowerCase() : 'home';
   }
