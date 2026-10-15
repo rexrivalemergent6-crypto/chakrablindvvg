@@ -16,7 +16,7 @@ export const DOC_GROUPS = [
             ['Chain', 'Solana mainnet'],
             ['Custody', 'Non-custodial; secrets are created and kept in your browser'],
             ['Privacy engine', 'Zero-knowledge proofs (Groth16) over a shared note pool'],
-            ['Ways out', 'Fresh one-time Solana address, or 120+ networks via cross-chain routes'],
+            ['Ways out', 'Fresh one-time Solana address, or any chain via cross-chain routes'],
           ] },
           { k: 'note', t: 'Privacy grows with the crowd. Odd amounts, instant in-and-out timing and rare tokens make you easier to spot, so spread things out.' },
         ],
@@ -102,7 +102,7 @@ export const DOC_GROUPS = [
       {
         id: 'private-route',
         title: 'Private route',
-        lead: 'Multi-hop swaps out of Solana to 120+ networks, compared side by side.',
+        lead: 'Multi-hop swaps out of Solana to any chain, compared side by side.',
         blocks: [
           { k: 'steps', items: [
             ['Pick a pair', 'Choose a Solana token to send and any destination token and chain.'],

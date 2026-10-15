@@ -18,7 +18,7 @@ export const PILLARS = [
     tag: 'Private route',
     title: 'Multi-hop cross-chain private swaps',
     body:
-      'Leave Solana for 120+ networks over chained partner hops. Compare several live routes side by side, fund the winner with a single manual deposit, and skip sign-ups and wallet pop-ups entirely.',
+      'Leave Solana for any chain over chained partner hops. Compare several live routes side by side, fund the winner with a single manual deposit, and skip sign-ups and wallet pop-ups entirely.',
     points: ['Several live routes per quote', 'Manual deposit, no signatures', 'Track every order live'],
     href: '/app#private-route',
     cta: 'Open Private route',
@@ -106,7 +106,7 @@ assets   /circuits/transaction.wasm · transaction.zkey`,
       {
         h: 'Order lifecycle',
         p: [
-          '1 · Choose a Solana source token and any destination token across 120+ chains, then enter an amount.',
+          '1 · Choose a Solana source token and any destination token across any chain, then enter an amount.',
           '2 · Several routes are quoted live. Each shows output, expected time, rate and limits, and refreshes before it expires.',
           '3 · Create the order to reveal the deposit instructions. Creating an order never moves funds.',
           '4 · Send exactly the instructed amount on Solana to the order’s deposit address, with its memo if one is shown, before the deadline.',

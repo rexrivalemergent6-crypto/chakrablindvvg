@@ -13,7 +13,7 @@ export const PRODUCTS = [
     key: 'houdini',
     tag: 'Route',
     title: 'Hop to any chain',
-    body: 'Land on 120+ networks with one plain deposit and no wallet hookup.',
+    body: 'Land on any chain with one plain deposit and no wallet hookup.',
     href: '/app#private-route',
     cta: 'Find a route',
   },
@@ -83,5 +83,5 @@ export const TECH = [
   ['Nullifiers', 'No double-spends, no trail back to you'],
   ['PBKDF2 600k + AES-GCM', 'Vault locked on your device, never on a server'],
   ['Relayer-paid gas', 'No wallet pop-ups that give you away'],
-  ['120+ networks', 'Exit anywhere, without a wallet link'],
+  ['Any chain', 'Exit anywhere, without a wallet link'],
 ];

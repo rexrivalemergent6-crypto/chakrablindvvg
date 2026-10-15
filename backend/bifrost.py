@@ -16,6 +16,7 @@ import logging
 import re
 import time
 from collections import OrderedDict
+from pathlib import Path
 from typing import Optional
 
 import httpx
@@ -152,10 +153,43 @@ def _shrink(body: bytes, size: int = 96):
         return None
 
 
+# Logos also persist on disk so a restart never makes visitors wait for ~100 cold fetches.
+_LOGO_DIR = Path(__file__).parent / ".cache" / "logos"
+try:
+    _LOGO_DIR.mkdir(parents=True, exist_ok=True)
+except Exception:
+    pass
+
+
+def _logo_disk_key(path: str) -> Path:
+    import hashlib
+    return _LOGO_DIR / hashlib.sha1(path.encode()).hexdigest()
+
+
+def _logo_disk_get(path: str):
+    try:
+        f = _logo_disk_key(path)
+        if f.exists():
+            raw = f.read_bytes()
+            ctype, _, body = raw.partition(b"\n")
+            return (ctype.decode(), body)
+    except Exception:
+        return None
+    return None
+
+
+def _logo_disk_put(path: str, entry):
+    try:
+        _logo_disk_key(path).write_bytes(entry[0].encode() + b"\n" + entry[1])
+    except Exception:
+        pass
+
+
 async def _logo_small(path: str, request: Request):
-    hit = _LOGO.get(path)
+    hit = _LOGO.get(path) or _logo_disk_get(path)
     if hit:
-        return Response(hit[1], media_type=hit[0], headers={"cache-control": "public, max-age=86400", "x-bifrost": "v1-hit"})
+        _LOGO[path] = hit
+        return Response(hit[1], media_type=hit[0], headers={"cache-control": "public, max-age=604800", "x-bifrost": "v1-hit"})
     url = f"{TARGETS['indexer']}/{path}"
     try:
         r = await get_client().get(url, headers={"user-agent": UA, "origin": TARGETS["app"], "referer": TARGETS["app"] + "/"})
@@ -169,7 +203,41 @@ async def _logo_small(path: str, request: Request):
     if len(_LOGO) > 3000:
         _LOGO.clear()
     _LOGO[path] = entry
-    return Response(entry[1], media_type=entry[0], headers={"cache-control": "public, max-age=86400"})
+    _logo_disk_put(path, entry)
+    return Response(entry[1], media_type=entry[0], headers={"cache-control": "public, max-age=604800"})
+
+
+async def _idx_fetch(path: str, qs: str):
+    url = f"{TARGETS['indexer']}/{path}" + (f"?{qs}" if qs else "")
+    return await get_client().get(url, headers={"user-agent": UA, "origin": TARGETS["app"], "referer": TARGETS["app"] + "/"})
+
+
+async def warm_logos():
+    """Pre-fetch every pool token logo + the catalog once at startup (disk cache makes this cheap)."""
+    await asyncio.sleep(3)
+    try:
+        r = await _idx_fetch("v1/assets", "")
+        import json as _json
+        mints = []
+        for a in (_json.loads(r.content).get("assets") or []):
+            m = a.get("mint") or a.get("address") or a.get("id")
+            if isinstance(m, str):
+                mints.append(m)
+        sem = asyncio.Semaphore(6)
+
+        class _R:  # minimal stand-in for Request
+            pass
+
+        async def one(m):
+            async with sem:
+                try:
+                    await _logo_small(f"v1/logo/{m}", _R())
+                except Exception:
+                    pass
+        await asyncio.gather(*(one(m) for m in mints[:400]))
+        logger.info(f"bifrost: warmed {len(mints)} logos")
+    except Exception as e:
+        logger.warning(f"bifrost: logo warm failed: {e}")
 
 
 async def _image_proxy(u: str):

@@ -1227,7 +1227,7 @@
   // ---- per-tab explainers (users always know what a tab does) ----
   var X_URL = 'https://x.com/usenullcash';
   var INTRO = {
-    'dk:private': ['Private route · no wallet needed', 'Swap from Solana to 120+ networks without connecting a wallet. NullCash compares several multi-hop routes, you pick one and send a single deposit to a one-time address; the route converts and delivers to your destination address. Nothing links your Solana wallet to the receiving address beyond the route itself.', ['No wallet connection', 'Multi-hop routing', 'One deposit']],
+    'dk:private': ['Private route · no wallet needed', 'Swap from Solana to any chain without connecting a wallet. NullCash compares several multi-hop routes, you pick one and send a single deposit to a one-time address; the route converts and delivers to your destination address. Nothing links your Solana wallet to the receiving address beyond the route itself.', ['No wallet connection', 'Multi-hop routing', 'One deposit']],
     'dk:privacy': ['Privacy swap · no wallet needed', 'Intent-based confidential swap. You state what you want (send X, receive at least Y on chain Z); a competitive solver network fills it and settlement runs through confidential processing. Refunds return to your Solana refund address if the intent is not filled.', ['Solver competition', 'Confidential settlement', 'Auto refund']],
     'dk:track': ['Track order', 'Paste an order ID to see its live status, from waiting for deposit through confirmation, exchange and delivery. Orders created on this device are listed below.', ['Live status', 'Local order list']],
     'home': ['Home', 'Your private balance, recent activity and quick actions. Everything shown here is decrypted locally from your notes; nothing about it is readable on-chain.', ['Local decryption', 'Notes', 'No tracking']],
@@ -1341,7 +1341,7 @@
   var TOUR = [
     ['Welcome to NullCash', 'Private money on Solana.', 'Shield your tokens into a zero-knowledge pool. Your balance and history become notes only you can read.', 'mark'],
     ['Shield, send, swap', 'Everything happens inside the pool.', 'Pay anyone, trade tokens and earn yield with proofs instead of public transfers. Nobody sees who, what or how much.', '<path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>'],
-    ['No wallet? No problem', 'Private route & Privacy swap.', 'Swap from Solana to 120+ networks with one deposit to a one-time address. Track every order live.', '<path d="M7 7h11l-3-3M17 17H6l3 3"/>'],
+    ['No wallet? No problem', 'Private route & Privacy swap.', 'Swap from Solana to any chain with one deposit to a one-time address. Track every order live.', '<path d="M7 7h11l-3-3M17 17H6l3 3"/>'],
     ['Your keys, your device', 'Nothing to reset, nothing to leak.', 'Keys are derived and encrypted locally. Back up your recovery key and you are in control.', '<circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M16 7l2 2M14 9l2 2"/>']
   ];
   function showTour(force) {

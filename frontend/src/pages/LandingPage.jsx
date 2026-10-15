@@ -14,13 +14,12 @@ const LINKS = [['Features', '#features'], ['How it works', '#flow'], ['Real ZK',
 
 /* ---------------- data ---------------- */
 function useLiveStats() {
-  const [s, setS] = useState({ leaves: null, nullifiers: null, assets: null, chains: null });
+  const [s, setS] = useState({ leaves: null, nullifiers: null, assets: null });
   useEffect(() => {
     let dead = false;
     const j = (u) => fetch(u).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
     j(`${BF}/indexer/v1/stats`).then((d) => !dead && setS((p) => ({ ...p, leaves: d.leaves, nullifiers: d.nullifiers }))).catch(() => {});
     j(`${BF}/indexer/v1/assets`).then((d) => !dead && setS((p) => ({ ...p, assets: (d.assets || []).length }))).catch(() => {});
-    j(`${BACKEND}/api/ds/chains`).then((d) => !dead && setS((p) => ({ ...p, chains: (d.chains || []).length }))).catch(() => {});
     return () => { dead = true; };
   }, []);
   return s;
@@ -128,7 +127,7 @@ function Hero({ stats }) {
           </Reveal>
           <Reveal delay={120}>
             <p className="mt-6 max-w-[560px] text-[17px] uppercase leading-[1.45] tracking-[.02em] text-[#202221]/85 sm:text-[22px]">
-              A zero-knowledge vault for Solana that pays, trades and bridges to 120+ networks.
+              A zero-knowledge vault for Solana that pays, trades and bridges to any chain.
             </p>
           </Reveal>
 
@@ -158,10 +157,10 @@ function Hero({ stats }) {
           </Reveal>
 
           <dl className="mt-8 grid max-w-[520px] grid-cols-3 gap-2" data-testid="hero-stats">
-            {[['Spent nullifiers', stats.nullifiers], ['Shieldable tokens', stats.assets], ['Swap networks', stats.chains]].map(([k, v]) => (
+            {[['Spent nullifiers', fmt(stats.nullifiers)], ['Shieldable tokens', fmt(stats.assets)], ['Swap to', 'Any chain']].map(([k, v]) => (
               <div key={k} className="rounded-[10px] border border-[#202221]/25 px-3 py-2.5">
                 <dt className="text-[11px] uppercase tracking-[.08em] text-[#202221]/55">{k}</dt>
-                <dd className="nm-h mt-1 text-[20px] font-semibold text-[#202221]">{fmt(v)}</dd>
+                <dd className="nm-h mt-1 text-[20px] font-semibold text-[#202221]">{v}</dd>
               </div>
             ))}
           </dl>
@@ -200,7 +199,7 @@ const CARDS = [
   ['icon_browser_key', 'Keys are born in your browser and never leave it.'],
   ['icon_shield_coin', 'One signature seals any SPL token.'],
   ['icon_bolt', 'Relayers pay the gas, so private moves need no pop-ups.'],
-  ['icon_route', 'Exit to 120+ networks with no wallet link.'],
+  ['icon_route', 'Exit to any chain with no wallet link.'],
   ['icon_vault', 'Fully non-custodial. Only your proof moves your notes.'],
 ];
 function Features() {

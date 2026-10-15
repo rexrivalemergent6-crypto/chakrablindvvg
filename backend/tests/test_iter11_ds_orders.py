@@ -61,6 +61,11 @@ def test_private_route_order_created(sess):
 
 
 # ---------- Privacy swap (near / 1Click) ----------
+def _near_outage(r):
+    t = (r.text or "").lower()
+    return r.status_code in (400, 404, 422, 502, 503) and any(x in t for x in ("no privacy swap route", "not available", "no route", "quoting"))
+
+
 def test_privacy_swap_order_created(sess):
     src = _find_token(sess, "source", symbol="SOL", near=True)
     dst = _find_token(sess, "destination", chain="eth", symbol="USDC", near=True)
@@ -69,6 +74,8 @@ def test_privacy_swap_order_created(sess):
         "from": src["id"], "to": dst["id"], "amount": "0.5",
         "recipient": EVM_DEST, "refundTo": SOL_REFUND
     }, timeout=40)
+    if _near_outage(nq):
+        pytest.skip("NEAR Intents provider not quoting right now (upstream outage)")
     assert nq.status_code == 200, f"near/quote: {nq.status_code} {nq.text}"
     quote = nq.json()
     qid = quote.get("quoteId")

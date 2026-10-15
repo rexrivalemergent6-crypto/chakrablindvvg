@@ -2,6 +2,7 @@ from fastapi import FastAPI, APIRouter, Request, Response
 from dotenv import load_dotenv
 import httpx
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
@@ -11,7 +12,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid
-from bifrost import router as bifrost_router, close_client as bifrost_close, opaque_image_urls
+from bifrost import router as bifrost_router, close_client as bifrost_close, opaque_image_urls, warm_logos
 from datetime import datetime, timezone
 
 
@@ -265,6 +266,7 @@ async def _ds_warm_loop():
 @app.on_event("startup")
 async def _start_warm():
     asyncio.create_task(_ds_warm_loop())
+    asyncio.create_task(warm_logos())
 
 
 def _scrub(body: bytes) -> bytes:
@@ -327,6 +329,8 @@ class GatewayStatusMiddleware:
 
 
 app.add_middleware(GatewayStatusMiddleware)
+# compress JSON/HTML/JS (the token catalog alone is ~380 KB raw)
+app.add_middleware(GZipMiddleware, minimum_size=1400, compresslevel=5)
 
 app.add_middleware(
     CORSMiddleware,
