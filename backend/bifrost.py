@@ -441,7 +441,15 @@ def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
             # next flight / json payload references
             text = re.sub(r'(?<![A-Za-z0-9_/.])/_next/', f"{p}/_next/", text)
             if "text/html" in ctype:
-                inj = _inject_script(target)
+                # NullCash icons with fresh (cache-busted) URLs so browsers / iOS drop any old icon
+                text = re.sub(r'<link\b[^>]*rel=["\'](?:shortcut )?(?:icon|apple-touch-icon(?:-precomposed)?|mask-icon)["\'][^>]*>', "", text)
+                text = re.sub(r'<link\b[^>]*rel=["\']manifest["\'][^>]*>', "", text)
+                icons = (f'<link rel="icon" href="{PREFIX}/_brand/favicon-32.png?v=5" sizes="32x32" type="image/png"/>'
+                         f'<link rel="icon" href="{PREFIX}/_brand/favicon-192.png?v=5" sizes="192x192" type="image/png"/>'
+                         f'<link rel="apple-touch-icon" href="{PREFIX}/_brand/apple-touch-icon.png?v=5" sizes="180x180"/>'
+                         f'<link rel="manifest" href="{PREFIX}/_brand/manifest.webmanifest?v=5"/>'
+                         '<meta name="apple-mobile-web-app-title" content="NullCash"/>')
+                inj = _inject_script(target) + icons
                 if "<head>" in text:
                     text = text.replace("<head>", "<head>" + inj, 1)
                 elif re.search(r"<head[^>]*>", text):

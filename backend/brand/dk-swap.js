@@ -181,6 +181,9 @@
     ".dk-seg button:hover{color:var(--dk-fg)}.dk-seg button:active{transform:scale(.95)}",
     ".dk-seg button.on{background:var(--dk-bg);color:var(--dk-fg);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px -6px rgba(0,0,0,.18)}",
     ".dk-cl{width:16px;height:16px;border-radius:50%;background:var(--veil-wash);color:var(--veil-hi);font-size:10px;display:inline-flex;align-items:center;justify-content:center}",
+    ".dk-ci{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:10px 12px;border-radius:14px;border:1px solid var(--dk-line);background:var(--dk-box)}",
+    ".dk-ci-ic{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:9px;background:#14160f;color:#f4f6ee}",
+    ".dk-ci b{display:block;font-size:13px;font-weight:650}.dk-ci small{display:block;margin-top:2px;font-size:11.5px;color:var(--dk-mut);line-height:1.35}",
     ".dk-card{background:var(--dk-bg);border:1px solid var(--nc-card-line,var(--dk-line));border-radius:26px;padding:18px 18px 22px;box-shadow:var(--nc-shadow,none);animation:ncRise .45s var(--dk-ease) both}",
     ".dk-lbl{color:var(--dk-mut);font-size:13.5px;font-weight:500;margin:8px 6px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}",
     ".dk-lbl small{font-size:12px;color:var(--dk-mut)}",
@@ -555,6 +558,7 @@
     var usdIn = sel ? usd(sel.usdIn) : (S.send && amt > 0 ? usd(amt * (S.send.price || 0)) : '');
     var h = '';
     h += '<div class="dk-card" data-testid="dk-swap-card">';
+    if (near) h += '<div class="dk-ci" data-testid="dk-confidential-intents"><span class="dk-ci-ic"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.7-7 9-4-1.3-7-4.5-7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span><div><b>Runs in Confidential Intents</b><small>Your swap settles as a shielded intent: solvers fill it without seeing who you are.</small></div></div>';
     h += '<div class="dk-lbl"><span>From</span><small>Solana · Min $3</small></div>';
     h += '<div class="dk-row">' + tokBtn('source') +
       '<label class="dk-amt"><input id="dk-amount" data-testid="dk-amount" inputmode="decimal" autocomplete="off" placeholder="0" value="' + esc(S.amount) + '">' +
@@ -596,7 +600,7 @@
     if (S.qerr || S.serr) h += '<div class="dk-err" data-testid="dk-error">' + esc(S.serr || S.qerr) +
       (!S.serr && S.qerrSwitch ? ' <button type="button" class="dk-err-sw" data-act="go" data-v="private-route" data-testid="dk-err-switch">Use Private route \u2192</button>' : '') + '</div>';
     h += '<button class="dk-cta" data-act="submit" data-testid="dk-submit"' + (c.ok ? '' : ' disabled') + '>' + (S.submitting ? '<span class="dk-spin"></span>' : '') + esc(c.text) + '</button>';
-    h += '<div class="dk-note">Creating an order moves no funds · live on-chain quotes</div>';
+    h += '<div class="dk-note">' + (near ? 'Powered by Confidential Intents · ' : '') + 'Creating an order moves no funds · live on-chain quotes</div>';
     h += '</div>';
     return h;
   }
