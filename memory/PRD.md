@@ -84,3 +84,10 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 ## Iteration 14 — Lime accent removed (iteration_19.json: frontend 100%, 0 lime hits)
 - Landing/docs/nav: graphite buttons (#2B2F33, white text) on light sections, light-steel buttons (#E3E7EC) on dark sections, steel accent #B9C1CC; illustrations recoloured to steel.
 - App theme (nc-theme.css, dk-swap.js): lime vars -> steel (#c5ccd6), primary buttons graphite gradient, --veil/--veil-rgb greens -> graphite, Chain terminal neutral. NOTE: theme CSS is lru_cached in bifrost_brand.py -> restart backend after editing nc-theme.css.
+
+## Iteration 15 — Launch check + speed (iteration_20/21.json: 100%)
+- "120+ networks" copy replaced with "any chain" everywhere (landing, docs, in-app). Hero stat tile = "Swap to: Any chain".
+- Speed: DS proxy stale-while-revalidate + startup/background warm loop (server.py _ds_warm_loop); token logos persisted to backend/.cache/logos + pre-warmed at startup (bifrost.warm_logos); GZipMiddleware. /app all resources ~2.5s (was ~5.9s); DS lists ~0.1s cold.
+- Privacy swap: friendly provider-outage message + "Use Private route" switch (dk-err-switch). Tests skip on NEAR provider outage.
+- Known external limits: NEAR Intents had a provider-wide quoting outage (recovered); upstream swap API rate-limits order creation per server IP (429) — for scale, get an official partner/API key.
+- Declined: scrubbing all upstream (Veil/DarkSwap) traces from proxies/network so inspectors can't see who operates the pool/swaps.
