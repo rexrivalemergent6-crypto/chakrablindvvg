@@ -331,3 +331,55 @@ main.main .mini{min-height:0!important}
 #nc-splash .sp-bar i{display:block;height:100%;width:40%;border-radius:9px;background:linear-gradient(90deg,#9945ff,#568cff,#19fb9b);animation:ncBar 1.6s var(--nc-ease) infinite}
 @keyframes ncBar{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
 @media (max-width:520px){#nc-splash canvas{height:150px}#nc-splash .sp-bot b{font-size:19px}}
+
+/* ---------- live chain rail: left side, cypherpunk terminal ---------- */
+@media (min-width:1381px){
+ .shell{grid-template-columns:340px minmax(0,1fr)!important;grid-template-areas:"top top" "rail main"!important}
+ aside.rail{display:flex!important;flex-direction:column;grid-area:rail!important;position:sticky!important;top:var(--top)!important;height:calc(100vh - var(--top))!important;
+  margin:0!important;padding:16px 14px 18px!important;border:0!important;border-right:1px solid #1d2117!important;background:#07080a!important;color:#b8f53c!important;
+  font-family:"JetBrains Mono","Space Mono",ui-monospace,SFMono-Regular,Menlo,monospace!important;overflow:hidden;z-index:2}
+ aside.rail::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px),radial-gradient(120% 60% at 0% 0%,rgba(200,241,53,.08),transparent 60%)}
+ aside.rail *{font-family:inherit!important;color:inherit;letter-spacing:0!important}
+ aside.rail .rail-h{display:flex;align-items:center;gap:8px;padding:2px 2px 12px!important;margin:0!important;border:0!important}
+ aside.rail .rail-h::before{content:"";display:flex;width:44px;height:10px;flex:none;
+  background:radial-gradient(circle,#ff5f56 3.5px,transparent 4px) 0 0/14px 10px no-repeat,radial-gradient(circle,#ffbd2e 3.5px,transparent 4px) 15px 0/14px 10px no-repeat,radial-gradient(circle,#27c93f 3.5px,transparent 4px) 30px 0/14px 10px no-repeat}
+ aside.rail .rail-h h2{font-size:0!important;margin:0!important}
+ aside.rail .rail-h h2::before{content:"root@nullcash:~$ watch --chain";font-size:12px;font-weight:500;color:#7c8a63}
+ aside.rail .rail-h h2::after{content:"_";font-size:12px;color:#c8f135;margin-left:2px;animation:ncBlink 1s steps(1) infinite}
+ aside.rail .rail-stats{display:grid!important;grid-template-columns:1fr!important;gap:0!important;padding:10px 12px!important;margin:0 0 12px!important;border-radius:10px!important;
+  background:#0c0e0b!important;border:1px solid #1f2618!important;box-shadow:inset 0 0 0 1px rgba(200,241,53,.04),0 0 24px -10px rgba(200,241,53,.25)!important}
+ aside.rail .rail-stats>div{display:flex!important;justify-content:space-between;align-items:baseline;gap:10px;padding:5px 0!important;border:0!important;background:none!important;border-bottom:1px dashed #1f2618!important}
+ aside.rail .rail-stats>div:last-child{border-bottom:0!important}
+ aside.rail .rail-stats .lbl{font-size:11px!important;text-transform:lowercase!important;color:#6f7d58!important;font-weight:400!important}
+ aside.rail .rail-stats .lbl::before{content:"$ "; color:#3d4a2a}
+ aside.rail .rail-stats .v{font-size:13px!important;font-weight:600!important;color:#c8f135!important;text-shadow:0 0 8px rgba(200,241,53,.45)}
+ aside.rail .rail-stats .v-of{color:#5d6a48!important;text-shadow:none}
+ aside.rail .feed{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#25301a transparent;padding-right:2px;
+  -webkit-mask-image:linear-gradient(180deg,#000 85%,transparent);mask-image:linear-gradient(180deg,#000 85%,transparent)}
+ aside.rail .feed::before{content:"// live tx stream";display:block;font-size:10.5px;color:#4d5a38;margin:0 2px 6px}
+ aside.rail .ev{display:block!important;margin:0 0 2px!important;padding:8px 10px 8px 22px!important;border-radius:6px!important;background:transparent!important;border:0!important;box-shadow:none!important;position:relative;
+  border-left:2px solid transparent!important;transition:background .15s,border-color .15s!important;animation:ncType .5s steps(12) both}
+ aside.rail .ev::before{content:">";position:absolute;left:8px;top:8px;font-size:12px;color:#5d6a48}
+ aside.rail .ev:hover{background:#10140c!important;border-left-color:#c8f135!important}
+ aside.rail .ev:hover::before{color:#c8f135}
+ aside.rail .ev-h{display:flex;justify-content:space-between;gap:8px;font-size:10.5px!important;text-transform:uppercase;color:#7c8a63!important}
+ aside.rail .ev-k{background:none!important;padding:0!important;border:0!important;color:#c8f135!important;font-weight:700!important;font-size:10.5px!important}
+ aside.rail .ev-k::before{content:"[";color:#4d5a38}aside.rail .ev-k::after{content:"]";color:#4d5a38}
+ aside.rail .ev-k svg,aside.rail .ev-k img,aside.rail .ev-k i{display:none!important}
+ aside.rail .ev-t{color:#56623f!important}
+ aside.rail .ev-line{font-size:12px!important;color:#d6e6b8!important;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ aside.rail .ev-line .a{color:#9dff6a!important;font-weight:600}
+ aside.rail .ev-hash{font-size:10.5px!important;color:#4f5b3a!important;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ aside.rail .rail-foot,aside.rail .rail-mine{color:#6f7d58!important;font-size:11px!important}
+ nav.side{left:210px!important}
+}
+@keyframes ncBlink{50%{opacity:0}}
+@keyframes ncType{from{opacity:0;clip-path:inset(0 100% 0 0)}to{opacity:1;clip-path:inset(0 0 0 0)}}
+@media (min-width:1381px){
+ aside.rail .rail-h{flex-wrap:nowrap!important;justify-content:flex-start!important}
+ aside.rail .rail-h h2{flex:1;min-width:0;white-space:nowrap;overflow:hidden;line-height:1!important;display:flex!important;align-items:center}
+ aside.rail .rail-h>*:not(h2){flex:none}
+}
+@media (min-width:1381px){aside.rail .rail-h h2{background:none!important;padding:0!important;border:0!important;box-shadow:none!important}aside.rail .rail-h h2>*{display:none!important}aside.rail .rail-h::after{display:none!important}}
+@media (min-width:1381px){aside.rail .rail-h h2::before,aside.rail .rail-h h2::after{background:none!important;width:auto!important;height:auto!important;border-radius:0!important;box-shadow:none!important;position:static!important;display:inline!important}aside.rail .rail-h h2::before{animation:none!important}}
