@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Optional
 
 import httpx
-from bifrost_brand import head_inject, brand_asset
+from bifrost_brand import head_inject, brand_asset, brand_icon_for
 import websockets
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse, Response, StreamingResponse
@@ -555,6 +555,13 @@ async def proxy(target: str, path: str, request: Request):
     if not upstream:
         return JSONResponse({"error": "unknown bifrost target", "targets": list(TARGETS)},
                             status_code=404)
+    if target in ("site", "app") and request.method in ("GET", "HEAD"):
+        icon = brand_icon_for(path)
+        if icon:
+            asset = brand_asset(icon)
+            if asset:
+                return Response(asset[0], media_type=asset[1],
+                                headers={"cache-control": "public, max-age=300"})
     method = request.method
     origin = public_origin(request)
     if path.startswith("cdn-cgi/"):

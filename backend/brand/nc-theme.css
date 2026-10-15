@@ -431,3 +431,28 @@ aside.rail{display:none!important}
 }
 #dk-view:has(.ch-page){max-width:1100px!important;width:100%!important}
 @media (min-width:901px){.ch-row{grid-template-columns:130px minmax(170px,1fr) 160px 200px 64px}}
+
+/* ---------- header: never crowded (dynamic overflow into More) + CA chip ---------- */
+@media (min-width:1024px){
+ nav.side .nav-i.nc-ovf{display:none!important}
+ nav.side.nc-tight .nav-i,nav.side.nc-tight .nc-more-btn{padding:0 9px!important;font-size:13.5px!important}
+ header.top{gap:16px!important}
+ header.top .top-right{flex:none!important;position:relative;z-index:30}
+}
+header .top-right{display:flex!important;align-items:center!important;flex-wrap:nowrap!important;min-width:0}
+header .top-right>*{flex:none}
+header .wallet-btn{max-width:240px!important;min-width:0;overflow:hidden}
+header .wallet-btn>span:not(.wb-dot){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+header .nc-ca{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 10px 0 5px;border-radius:12px;
+ border:1px solid var(--line,rgba(20,22,25,.12));background:var(--nc-card,#fff);color:var(--fg,#14160f);
+ font:500 12px/1 "JetBrains Mono","Space Mono",ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:-.01em;white-space:nowrap;
+ transition:transform .25s var(--nc-spring,ease),box-shadow .2s,border-color .2s}
+header .nc-ca:hover{transform:translateY(-1px);box-shadow:0 8px 20px -12px rgba(20,22,25,.5)}
+header .nc-ca:active{transform:scale(.97)}
+header .nc-ca b{display:inline-grid;place-items:center;height:24px;padding:0 7px;border-radius:8px;background:#14160f;color:#f4f6ee;font-size:10px;font-weight:700;letter-spacing:.08em}
+header .nc-ca i{display:inline-flex;opacity:.65;font-style:normal}
+header .nc-ca:hover i,header .nc-ca.ok i{opacity:1}
+header .nc-ca .nc-ca-f{display:none}
+@media (min-width:1600px){header .nc-ca .nc-ca-f{display:inline}header .nc-ca .nc-ca-s{display:none}}
+@media (max-width:520px){header .nc-ca{height:34px;gap:6px;padding:0 8px 0 4px;font-size:11px}header .nc-ca b{height:22px;padding:0 5px;font-size:9px}header .top-right .dk-x{display:none!important}}
+@media (max-width:360px){header .nc-ca i{display:none}}

@@ -35,7 +35,7 @@ def lockup_svg(light: bool = False) -> str:
 BRAND_CSS = """
 /* project token removed: only swap tokens remain */
 /* third-party / upstream brand surfaces removed (extension promo, audit badges, upstream socials) */
-a.xc,.xc,a[href*="chromewebstore.google.com"],a[href*="x.com/veil"],a[href*="twitter.com/veil"],
+a.xc,.xc,a[href*="chromewebstore.google.com"],
 a[href*="t.me/veil"],a[href*="github.com/veil"],a[href*="@veilit.xyz"],.foot-audit,.batch-tag[href*="contractwolf.io"],
 img[src*="audit-contractwolf"],li:has(> a[href*="contractwolf.io"]),#extension,.ext-soon,.ext-get,
 section#developers,a[href="#developers"],a[href$="docs#developers"],a[href="#extension"]{display:none!important}
@@ -158,7 +158,7 @@ document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&
  if(!a)return;var h=a.getAttribute('href');if(!h||SKIP.test(h))return;var n=fx(h);if(n!==h)a.setAttribute('href',n);},true);
 
 /* ---------- NullCash branding ---------- */
-var TXT=/veilit\.xyz|Veil|ContractWolf|Jupiter|veil-core|(^|[^$A-Za-z0-9_\/.:@-])veil(?![A-Za-z0-9_-])/;
+var TXT=/veilit\.xyz|Veil|ContractWolf|Jupiter|veil-core|@veil|NEAR Intents|NEAR intents|1Click|DarkSwap|Darkswap|Dark Swap|HoudiniSwap|Houdini|Mayan|Cadabra|Darkinator|Bifrost|(^|[^$A-Za-z0-9_\/.:@-])veil(?![A-Za-z0-9_-])/;
 function rt(s){
  return s.replace(/app\.veilit\.xyz/g,location.host+'/shield')
   .replace(/(?:www\.)?veilit\.xyz/g,location.host)
@@ -168,6 +168,9 @@ function rt(s){
   .replace(/ContractWolf · /g,'Independent audit · ')
   .replace(/ContractWolf/g,'an independent auditor')
   .replace(/veil-core/g,BRAND.toLowerCase()+'-core')
+  .replace(/@veil[A-Za-z0-9_]*/g,'@usenullcash')
+  .replace(/NEAR [Ii]ntents( 1Click)?/g,'Intent network').replace(/1Click/g,'Intent')
+  .replace(/HoudiniSwap|Houdini/g,'Private route').replace(/Dark ?[Ss]wap|Darkinator|Cadabra|Bifrost/g,BRAND).replace(/Mayan/g,BRAND)
   .replace(/Jupiter Lend Earn/g,'Lending vault').replace(/Jupiter/g,'Aggregator')
   .replace(/(^|[^$A-Za-z])Veil/g,'$1'+BRAND)
   .replace(/(^|[^$A-Za-z0-9_\/.:@-])veil(?![A-Za-z0-9_-])/g,'$1'+BRAND.toLowerCase());
@@ -184,6 +187,7 @@ function brandEl(el){
   if(!b&&/^(veil|darkinator|nullcash)$/i.test(el.getAttribute('alt')||''))b=LK();
   if(b&&s!==b&&s.indexOf(b)<0){sa.call(el,'src',b);el.removeAttribute('srcset');}
  }
+ if(el.tagName==='A'){var hh=el.getAttribute('href')||'';if(/(x|twitter)\.com\/veil/i.test(hh))sa.call(el,'href','https://x.com/usenullcash');}
 }
 var PARA=__PARA__;
 function brandText(n){if(DBG.notext)return;if(n.parentNode&&(SKIPTAG[n.parentNode.nodeName]||n.parentNode.nodeName==='TITLE'))return;var v=n.nodeValue;if(!v)return;var r=TXT.test(v)?rt(v):v;var tr=r.trim();if(tr&&PARA.hasOwnProperty(tr)){r=r.replace(tr,PARA[tr]);}if(r!==v)n.nodeValue=r;}
@@ -200,7 +204,7 @@ function start(){
  if(started)return;started=true;
  if(DBG.nobrand){document.documentElement.classList.add('bf-ready');return;}
  walk(document.documentElement);
- try{var fl=document.createElement('link');sa.call(fl,'rel','icon');sa.call(fl,'href',BU+'favicon.png');sa.call(fl,'id','bf-icon');document.head.appendChild(fl);}catch(e){}
+ try{var fl=document.createElement('link');sa.call(fl,'rel','icon');sa.call(fl,'href',BU+'favicon.png?v=4');sa.call(fl,'id','bf-icon');document.head.appendChild(fl);}catch(e){}
  var syncTitle=function(){var t=document.title;if(t&&TXT.test(t)){var nt=rt(t);if(nt!==t)document.title=nt;}};
  syncTitle();setInterval(syncTitle,800);
  var CNT=0;window.__bft={};
@@ -272,6 +276,49 @@ def head_inject(target: str, prefix: str) -> str:
     )
 
 
+_ICON_V = "4"
+
+
+def nullcash_manifest():
+    b = "/api/bifrost/v1/_brand/"
+    return {
+        "name": "NullCash · Private money on Solana",
+        "short_name": "NullCash",
+        "description": "Private balances, transfers, trades and swaps on Solana.",
+        "id": "/app",
+        "start_url": "/app",
+        "scope": "/",
+        "display": "standalone",
+        "background_color": "#ffffff",
+        "theme_color": "#ffffff",
+        "icons": [
+            {"src": f"{b}favicon-192.png?v={_ICON_V}", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+            {"src": f"{b}favicon-512.png?v={_ICON_V}", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+            {"src": f"{b}maskable-512.png?v={_ICON_V}", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+        ],
+    }
+
+
+def brand_icon_for(path: str):
+    """Map any upstream favicon / app-icon / manifest path to a NullCash brand asset name."""
+    p = path.lower().split("?", 1)[0]
+    base = p.rsplit("/", 1)[-1]
+    if base in ("manifest.webmanifest", "manifest.json", "site.webmanifest"):
+        return "manifest.webmanifest"
+    if base == "favicon.ico":
+        return "favicon.ico"
+    if base.startswith("apple-touch-icon"):
+        return "apple-touch-icon.png"
+    if base.startswith("maskable"):
+        return "maskable-512.png"
+    if base.startswith(("favicon", "android-chrome", "icon-")) and base.endswith((".png", ".svg", ".webp", ".ico")):
+        import re as _re
+        m = _re.search(r"(\d+)", base)
+        n = int(m.group(1)) if m else 64
+        return "favicon-32.png" if n <= 32 else "favicon-64.png" if n <= 64 else "favicon-192.png" if n <= 192 else "favicon-512.png"
+    return None
+
+
 def brand_asset(name: str):
     """Return (bytes, content_type) or None."""
     if name == "lockup.svg":
@@ -291,6 +338,17 @@ def brand_asset(name: str):
         p = BRAND_DIR / "mark-white-256.png"
     elif name == "favicon.png":
         p = BRAND_DIR / "favicon-192.png"
+    elif name == "favicon.ico":
+        try:
+            return (BRAND_DIR / "favicon.ico").read_bytes(), "image/x-icon"
+        except Exception:
+            return None
+    elif name in ("favicon-32.png", "favicon-64.png", "favicon-192.png", "favicon-512.png",
+                  "apple-touch-icon.png", "maskable-512.png"):
+        p = BRAND_DIR / name
+    elif name == "manifest.webmanifest":
+        import json as _json
+        return _json.dumps(nullcash_manifest()).encode(), "application/manifest+json"
     else:
         return None
     try:

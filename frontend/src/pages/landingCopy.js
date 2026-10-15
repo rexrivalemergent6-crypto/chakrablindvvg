@@ -10,7 +10,7 @@ export const PRODUCTS = [
     cta: 'Start shielding',
   },
   {
-    key: 'houdini',
+    key: 'route',
     tag: 'Route',
     title: 'Hop to any chain',
     body: 'Land on any chain with one plain deposit and no wallet hookup.',
@@ -18,7 +18,7 @@ export const PRODUCTS = [
     cta: 'Find a route',
   },
   {
-    key: 'near',
+    key: 'intent',
     tag: 'Intent',
     title: 'Name the result, solvers race',
     body: 'Say what you want; solvers race to fill it inside a confidential shard.',

@@ -1279,7 +1279,56 @@
       tr.insertBefore(a, tr.firstChild);
     }
   }
+  /* ---- NullCash: contract address chip in header (all app pages) ---- */
+  var NC_CA = '31GYUbJW5vjF1o7VM5SGP9Emj5WDBHb1cdcR8BM6pump';
+  var CA_COPY = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>';
+  var CA_OK = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>';
+  function ensureCA() {
+    var tr = document.querySelector('header .top-right'); if (!tr || tr.querySelector('.nc-ca')) return;
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'nc-ca';
+    b.setAttribute('data-testid', 'nc-ca-chip'); b.title = 'Copy contract address ' + NC_CA;
+    b.setAttribute('aria-label', 'Copy contract address ' + NC_CA);
+    b.innerHTML = '<b>CA</b><span class="nc-ca-f" data-testid="nc-ca-full">' + NC_CA + '</span><span class="nc-ca-s">' + NC_CA.slice(0, 4) + '…' + NC_CA.slice(-4) + '</span><i>' + CA_COPY + '</i>';
+    b.addEventListener('click', function (e) {
+      e.preventDefault(); e.stopPropagation();
+      var done = function () { b.classList.add('ok'); b.querySelector('i').innerHTML = CA_OK; setTimeout(function () { b.classList.remove('ok'); b.querySelector('i').innerHTML = CA_COPY; }, 1600); };
+      try { navigator.clipboard.writeText(NC_CA).then(done, function () { fallback(); done(); }); } catch (_) { fallback(); done(); }
+      function fallback() { var t = document.createElement('textarea'); t.value = NC_CA; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (x) {} t.remove(); }
+    });
+    var x = tr.querySelector('.dk-x');
+    tr.insertBefore(b, x || tr.firstChild);
+  }
+  /* ---- NullCash: keep desktop top tabs clear of the header controls ---- */
+  var OVF_ORDER = ['chain', 'history', 'bridge', 'track'];
+  function fitNav() {
+    var nav = document.querySelector('nav.side'), tr = document.querySelector('header .top-right');
+    if (!nav || !tr) return;
+    var items = nav.querySelectorAll('.nav-i');
+    if (window.innerWidth < 1024) {
+      Array.prototype.forEach.call(items, function (b) { if (b.classList.contains('nc-ovf')) b.classList.remove('nc-ovf'); });
+      nav.style.removeProperty('right'); nav.style.removeProperty('left'); return;
+    }
+    var brand = document.querySelector('header .brand');
+    var left = brand ? Math.round(brand.getBoundingClientRect().right + 24) : 160;
+    var right = Math.max(0, Math.round(window.innerWidth - tr.getBoundingClientRect().left + 16));
+    if (nav.style.getPropertyValue('right') !== right + 'px') nav.style.setProperty('right', right + 'px', 'important');
+    if (nav.style.getPropertyValue('left') !== left + 'px') nav.style.setProperty('left', left + 'px', 'important');
+    var byKey = {};
+    Array.prototype.forEach.call(items, function (b) {
+      if (b.classList.contains('nc-more-item') || b.classList.contains('nc-hide')) return;
+      byKey[(b.textContent || '').trim().toLowerCase()] = b;
+    });
+    var was = Array.prototype.filter.call(items, function (b) { return b.classList.contains('nc-ovf'); });
+    was.forEach(function (b) { b.classList.remove('nc-ovf'); });
+    for (var i = 0; i < OVF_ORDER.length && nav.scrollWidth > nav.clientWidth + 1; i++) {
+      var it = byKey[OVF_ORDER[i]]; if (it) it.classList.add('nc-ovf');
+    }
+    var now = Array.prototype.filter.call(items, function (b) { return b.classList.contains('nc-ovf'); });
+    nav.classList.toggle('nc-tight', nav.scrollWidth > nav.clientWidth + 1);
+    if (now.length !== was.length && document.getElementById('nc-more-pop')) closeMore();
+  }
   /* ---- NullCash: top-tab "More" menu (desktop) ---- */
+  var MORE_OVF = { 'chain': 'Live pool terminal', 'history': 'Your local activity', 'bridge': 'Move funds across chains', 'track': 'Follow a swap order live' };
   var MORE = { 'receive': 'Get paid to a private address', 'withdraw': 'Exit to any Solana address',
     'addresses': 'One-time burner addresses', 'keys': 'Vault, viewing & recovery keys' };
   var MORE_ICO = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
@@ -1291,13 +1340,15 @@
     closeMore();
     var nav = document.querySelector('nav.side'); if (!nav) return;
     var pop = document.createElement('div'); pop.id = 'nc-more-pop'; pop.setAttribute('data-testid', 'nc-more-menu');
-    Array.prototype.forEach.call(nav.querySelectorAll('.nav-i.nc-more-item'), function (orig) {
+    var ovf = Array.prototype.slice.call(nav.querySelectorAll('.nav-i.nc-ovf'));
+    var more = Array.prototype.slice.call(nav.querySelectorAll('.nav-i.nc-more-item'));
+    ovf.concat(more).forEach(function (orig) {
       var label = (orig.textContent || '').trim(), k = label.toLowerCase();
       var it = document.createElement('button'); it.type = 'button';
       it.setAttribute('data-testid', 'nc-more-' + k.replace(/[^a-z]+/g, '-'));
       if (orig.classList.contains('on')) it.className = 'on';
       var ico = orig.querySelector('i'); 
-      it.innerHTML = '<i>' + (ico ? ico.innerHTML : '') + '</i><span>' + esc(label) + '<small>' + esc(MORE[k] || '') + '</small></span>';
+      it.innerHTML = '<i>' + (ico ? ico.innerHTML : '') + '</i><span>' + esc(label) + '<small>' + esc(MORE[k] || MORE_OVF[k] || '') + '</small></span>';
       it.addEventListener('click', function () { closeMore(); orig.click(); });
       pop.appendChild(it);
     });
@@ -1313,7 +1364,7 @@
     closeMore();
   }, true);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMore(); });
-  window.addEventListener('resize', closeMore);
+  window.addEventListener('resize', function () { closeMore(); try { fitNav(); } catch (e) {} });
   function ensureMore() {
     var nav = document.querySelector('nav.side'); if (!nav) return;
     var anyOn = false;
@@ -1333,7 +1384,7 @@
       mb.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); if (mb.classList.contains('open')) closeMore(); else openMore(mb); });
       nav.appendChild(mb);
     }
-    mb.classList.toggle('on', anyOn);
+    mb.classList.toggle('on', anyOn || !!nav.querySelector('.nav-i.nc-ovf.on'));
   }
 
   /* ---- NullCash: welcome tour (first visit) ---- */
@@ -1686,7 +1737,7 @@
   })();
   document.addEventListener('input', function () { setTimeout(ensureFees, 120); }, true);
   window.addEventListener('hashchange', function () { Array.prototype.forEach.call(document.querySelectorAll('.nc-fee-tog'), function (b) { b.setAttribute('data-open', '0'); }); ensureFees(); });
-  function tick() { orderNav(); ensureX(); syncIntro(); ensureMore(); ensureFoot(); ensureWalletBtn(); ensureDock(); ensurePitch(); ensureSplash(); ensureFees(); }
+  function tick() { orderNav(); ensureX(); ensureCA(); syncIntro(); ensureMore(); fitNav(); ensureFoot(); ensureWalletBtn(); ensureDock(); ensurePitch(); ensureSplash(); ensureFees(); }
   setTimeout(function () { if (document.querySelector('main.main')) showTour(false); }, 1400);
   function boot() { ensure(); sync(); tick(); setInterval(tick, 700); document.addEventListener('click', function () { setTimeout(tick, 60); }, true); window.addEventListener('hashchange', function () { setTimeout(tick, 60); }); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

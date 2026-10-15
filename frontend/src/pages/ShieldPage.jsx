@@ -27,7 +27,7 @@ export function shieldUpstream(pathname, search = '', hash = '') {
   return `${BIFROST}/${target}${rest}${search}${hash}`;
 }
 
-// ZK Shield: full-page NullCash-branded Veil experience served by Bifrost v1
+// ZK Shield: full-page NullCash app experience served by the app mirror
 // (no iframe). This route just hands the browser over to the mirror, which
 // rewrites the address bar back to /shield.
 export default function ShieldPage() {

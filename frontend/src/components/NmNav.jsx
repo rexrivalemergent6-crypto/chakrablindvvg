@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowRight, BookOpen, Radio, Workflow, Receipt, ShieldCheck, HelpCircle, Repeat } from 'lucide-react';
 import Logo from './Logo';
+import CaChip from './CaChip';
 
 export const X_URL = 'https://x.com/usenullcash';
 
@@ -44,7 +45,8 @@ export default function NmNav() {
       <div className={`mx-auto max-w-[1180px] overflow-hidden rounded-[14px] border backdrop-blur-md transition-colors duration-500 ${line} ${d ? 'bg-[#202221]/80 text-[#D9D9D9]' : 'bg-[#D9D9D9]/90 text-[#202221]'}`}>
         <div className="flex h-[64px] items-center justify-between gap-3 px-3 sm:px-4">
           <a href="/" data-testid="nav-logo" className="shrink-0"><Logo light={d} /></a>
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <CaChip line={line} />
             <a href={X_URL} target="_blank" rel="noopener noreferrer" aria-label="NullCash on X" data-testid="nav-x"
               className={`grid h-10 w-10 place-items-center rounded-[10px] border transition hover:-translate-y-0.5 ${line}`}><XGlyph /></a>
             <button type="button" onClick={() => setOpen((v) => !v)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} data-testid="nav-menu"
