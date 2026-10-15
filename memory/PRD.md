@@ -68,3 +68,8 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - Verified live: Private route (quote -> order -> status), Privacy swap (near quote -> order -> status, 6/6 consecutive OK), Track (valid + bogus id), token picker, address validation, mobile layout.
 - Fix: missing token logos (/indexer/v1/logo/*, /_img) now return a neutral SVG placeholder (200) instead of 404 -> zero console errors on swap pages.
 - Known upstream behaviour: swap provider occasionally shows a Cloudflare "Quick security check" on submit (user taps Verify; client retries).
+
+## Iteration 12 — Portal-style token picker (iteration_17.json: frontend 100%)
+- dk-swap.js picker restyled after portalbridge.com: centred "Select token" + round close, "Choose network" 5-col grid (9 tiles + More/Less, or + All tile when <=9 chains), pill search "Search for a token or paste an address", "All tokens" list (42px icon + chain badge, symbol, name · short contract ↗ explorer link), selected row highlight, bottom sheet w/ grab handle on mobile. NullCash light theme kept.
+- Paste contract address -> exact token match (Privacy swap tokens carry contractAddress). Explorer links never select the row.
+- Fixed: chain icons for Base/Arbitrum/Optimism/TON/NEAR (coingecko via _img relay); icon URLs with spaces were cut by opaque_image_urls regex (400) -> encoded %20; placeholder SVG is 1x1 so client falls back to spothq icon / letter avatar.
