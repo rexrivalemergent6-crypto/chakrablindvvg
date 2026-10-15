@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, Menu, X } from 'lucide-react';
 import Logo from './Logo';
 
-const X_URL = 'https://x.com/darkinatorswaps';
+const X_URL = 'https://x.com/usenullcash';
 
 const links = [
   { label: 'Home', to: '/' },

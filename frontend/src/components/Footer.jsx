@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 
-const X_URL = 'https://x.com/darkinatorswaps';
+const X_URL = 'https://x.com/usenullcash';
 
 function XIcon({ className = 'h-4 w-4' }) {
   return (

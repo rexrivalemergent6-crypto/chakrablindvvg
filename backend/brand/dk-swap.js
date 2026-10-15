@@ -1214,7 +1214,7 @@
   }
 
   // ---- per-tab explainers (users always know what a tab does) ----
-  var X_URL = 'https://x.com/cadabrazk';
+  var X_URL = 'https://x.com/usenullcash';
   var INTRO = {
     'dk:private': ['Private route · no wallet needed', 'Swap from Solana to 120+ networks without connecting a wallet. NullCash compares several multi-hop routes, you pick one and send a single deposit to a one-time address; the route converts and delivers to your destination address. Nothing links your Solana wallet to the receiving address beyond the route itself.', ['No wallet connection', 'Multi-hop routing', 'One deposit']],
     'dk:privacy': ['Privacy swap · no wallet needed', 'Intent-based confidential swap. You state what you want (send X, receive at least Y on chain Z); a competitive solver network fills it and settlement runs through confidential processing. Refunds return to your Solana refund address if the intent is not filled.', ['Solver competition', 'Confidential settlement', 'Auto refund']],
@@ -1365,7 +1365,7 @@
     if (!f) {
       f = document.createElement('footer'); f.id = 'nc-foot'; f.setAttribute('data-testid', 'nc-footer');
       f.innerHTML = '<span>© ' + new Date().getFullYear() + ' NullCash</span><nav>' +
-        '<a href="/#flow">How it works</a><a href="/#zk">Privacy model</a><a href="/#tech">Docs</a><a href="/#fees">Fees</a>' +
+        '<a href="/#flow">How it works</a><a href="/#zk">Privacy model</a><a href="/docs">Docs</a><a href="/#fees">Fees</a>' +
         '<a href="#" data-nc-tour="1">Take the tour</a><a href="' + X_URL + '" target="_blank" rel="noopener noreferrer">X</a></nav>';
       f.querySelector('[data-nc-tour]').addEventListener('click', function (e) { e.preventDefault(); showTour(true); });
     }
@@ -1417,7 +1417,7 @@
   ];
   var LEARN = [
     { label: 'How NullCash works', ico: 'spark', act: 'tour' }, { label: 'Privacy model', ico: 'eye', href: '/#zk' },
-    { label: 'Fees', ico: 'coin', href: '/#fees' }, { label: 'Docs', ico: 'book', href: '/#tech', ext: true }
+    { label: 'Fees', ico: 'coin', href: '/#fees' }, { label: 'Docs', ico: 'book', href: '/docs', ext: true }
   ];
   function dsv(n, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 22) + '" height="' + (w || 22) + '" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + DI[n] + '</svg>'; }
   function nativeNav(k) {
@@ -1605,7 +1605,62 @@
   }
   var spT = setInterval(function () { ensureSplash(); if (document.querySelector('main.main') && !document.querySelector('.vl')) clearInterval(spT); }, 60);
 
-  function tick() { orderNav(); ensureX(); syncIntro(); ensureMore(); ensureFoot(); ensureWalletBtn(); ensureDock(); ensurePitch(); ensureSplash(); }
+  /* ---- collapsible fee summaries on every in-app page (Send, Shield, Swap, Bridge...) ---- */
+  // every fee box starts closed; state lives on its own toggle and resets on page change
+  function feeSummary(box) {
+    var rows = Array.prototype.slice.call(box.querySelectorAll(':scope > .r'));
+    var pick = null;
+    rows.forEach(function (r) {
+      var k = (r.children[0] && r.children[0].textContent || '').trim(), v = (r.children[1] && r.children[1].textContent || '').trim();
+      if (!pick && /fee/i.test(k) && /\d/.test(v)) pick = [k, v];
+    });
+    if (!pick) rows.some(function (r) { var k = (r.children[0] && r.children[0].textContent || '').trim(); if (/fee/i.test(k)) { pick = [k, (r.children[1] && r.children[1].textContent || '').trim()]; return true; } return false; });
+    if (!pick && rows[0]) pick = [(rows[0].children[0] || {}).textContent || '', (rows[0].children[1] || {}).textContent || ''];
+    return pick ? (pick[0].trim() + ': ' + pick[1].trim()) : 'Fees and details';
+  }
+  function ensureFees() {
+    var main = document.querySelector('main.main') || document.body;
+    // drop toggles whose panel React removed
+    Array.prototype.forEach.call(main.querySelectorAll('.nc-fee-tog'), function (b) {
+      var n = b.nextElementSibling; if (!n || !n.classList.contains('sum')) b.remove();
+    });
+    Array.prototype.forEach.call(main.querySelectorAll('div.sum'), function (box) {
+      if (box.closest('#dk-view') || box.querySelectorAll(':scope > .r').length < 1) { if (!box.classList.contains('nc-fee-ok')) box.classList.add('nc-fee-ok'); return; }
+      var tog = box.previousElementSibling;
+      if (!tog || !tog.classList.contains('nc-fee-tog')) {
+        tog = document.createElement('button');
+        tog.type = 'button'; tog.className = 'nc-fee-tog'; tog.setAttribute('data-testid', 'nc-fee-toggle');
+        tog.innerHTML = '<span class="k">Fees &amp; details</span><span class="v"></span><span class="c" aria-hidden="true"></span>';
+        tog.setAttribute('data-open', '0');
+        tog.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); tog.setAttribute('data-open', tog.getAttribute('data-open') === '1' ? '0' : '1'); ensureFees(); });
+        box.parentNode.insertBefore(tog, box);
+      }
+      var sum = feeSummary(box), v = tog.querySelector('.v');
+      if (v && v.textContent !== sum) v.textContent = sum;
+      if (!box.classList.contains('nc-fee-ok')) box.classList.add('nc-fee-ok');
+      var isOpen = tog.getAttribute('data-open') === '1';
+      if (tog.getAttribute('aria-expanded') !== String(isOpen)) tog.setAttribute('aria-expanded', String(isOpen));
+      if (box.classList.contains('nc-fee-shut') === isOpen) box.classList.toggle('nc-fee-shut', !isOpen);
+    });
+  }
+  (function feeCss() {
+    if (document.getElementById('nc-fee-css')) return;
+    var st = document.createElement('style'); st.id = 'nc-fee-css';
+    st.textContent = '.nc-fee-tog{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:10px;margin-top:14px;padding:11px 14px;border:1px solid var(--line,rgba(0,0,0,.08));border-radius:14px;background:var(--s-field,#f3f4ee);font-size:13.5px;color:var(--fg-2,#4a4d42);transition:background .2s,border-color .2s}' +
+      '.nc-fee-tog:hover{border-color:var(--line-2,rgba(0,0,0,.16))}' +
+      '.nc-fee-tog .k{font-weight:600;color:var(--fg,#14160f);white-space:nowrap}' +
+      '.nc-fee-tog .v{flex:1;min-width:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--fg-3,#8a8d80)}' +
+      '.nc-fee-tog .c{width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .25s;flex:none}' +
+      '.nc-fee-tog[aria-expanded=true]{border-bottom-left-radius:4px;border-bottom-right-radius:4px}' +
+      '.nc-fee-tog[aria-expanded=true] .c{transform:rotate(-135deg) translateY(-2px)}' +
+      '.nc-fee-tog[aria-expanded=true] + .sum{margin-top:4px!important;animation:ncFeeIn .25s ease both}' +
+      '.sum.nc-fee-shut{display:none!important}main.main form .sum:not(.nc-fee-ok){display:none}' +
+      '@keyframes ncFeeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}';
+    (document.head || document.documentElement).appendChild(st);
+  })();
+  document.addEventListener('input', function () { setTimeout(ensureFees, 120); }, true);
+  window.addEventListener('hashchange', function () { Array.prototype.forEach.call(document.querySelectorAll('.nc-fee-tog'), function (b) { b.setAttribute('data-open', '0'); }); ensureFees(); });
+  function tick() { orderNav(); ensureX(); syncIntro(); ensureMore(); ensureFoot(); ensureWalletBtn(); ensureDock(); ensurePitch(); ensureSplash(); ensureFees(); }
   setTimeout(function () { if (document.querySelector('main.main')) showTour(false); }, 1400);
   function boot() { ensure(); sync(); tick(); setInterval(tick, 700); document.addEventListener('click', function () { setTimeout(tick, 60); }, true); window.addEventListener('hashchange', function () { setTimeout(tick, 60); }); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
