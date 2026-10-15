@@ -367,6 +367,40 @@ def null_prefix_js(text: str) -> str:
     text = text.replace('starts with veilsk2', 'starts with nullsk2')
     return text
 
+CHUNK_VER = "nc2"
+_CHUNK_REF_RE = re.compile(r'(static/chunks/[A-Za-z0-9_-]+)\.js(?![A-Za-z0-9_.])')
+_CHUNK_ALIAS_RE = re.compile(r'\.nc\d+\.js$')
+_NC_RETRY = ("(window.__ncR||(window.__ncR=function(f,n,d){return Promise.race([Promise.resolve().then(f),"
+             "new Promise(function(z){setTimeout(function(){z(null)},15000)})]).catch(function(){return null})"
+             ".then(function(r){return r==null&&n>0?new Promise(function(z){setTimeout(z,d)})"
+             ".then(function(){return window.__ncR(f,n-1,d)}):r})}))")
+_SEND_PLAN_RE = re.compile(r'(\w+)\.planSend\((\w+)\.key,(\w+)\)\.then\((\w+)=>\{(\w+)&&(\w+)\(\4\)\}\)')
+_TRADE_QUOTE_RE = re.compile(r'(\w+)\.quote\((\w+)\.key,(\w+)\.key,(\w+)\)\.then\((\w+)\)\.finally\(\(\)=>(\w+)\(!1\)\)')
+
+
+def app_js_fixes(text: str) -> str:
+    """Stop the in-app Send / Swap screens from hanging on a spinner.
+    - Send: planSend() returns null when the vault has no notes to cover the amount,
+      which left the button on "Working out the fee..." forever. If the private
+      balance can't cover it, resolve a zero-fee plan so the UI says
+      "Not enough private <TOKEN>"; otherwise retry the planner (2x, 1.5s apart).
+    - Swap: a relayer quote that hangs kept "quoting..." on screen forever. Each try
+      is capped at 15s and a null/failed quote is retried twice before giving up."""
+    if "planSend" in text:
+        def _send(m):
+            st, tk, amt, r, alive, setter = m.groups()
+            return (f"((({st}.priv[{tk}.key]??0n)<{amt})?Promise.resolve({{fee:0n,feeKey:{tk}.key,notes:1}}):"
+                    f"{_NC_RETRY}(()=>{st}.planSend({tk}.key,{amt}),2,1500)).then({r}=>{{{alive}&&{setter}({r})}})")
+        text = _SEND_PLAN_RE.sub(_send, text)
+    if ".quote(" in text:
+        def _quote(m):
+            st, a, b, amt, setter, busy = m.groups()
+            return (f"{_NC_RETRY}(()=>{st}.quote({a}.key,{b}.key,{amt}),2,1200)"
+                    f".then({setter}).finally(()=>{busy}(!1))")
+        text = _TRADE_QUOTE_RE.sub(_quote, text)
+    return text
+
+
 
 def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
     base = f"{origin}{PREFIX}"
@@ -382,6 +416,9 @@ def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
         # JSON-escaped variants (Next flight data)
         text = text.replace(up.replace("/", "\\/"), f"{base}/{t}".replace("/", "\\/"))
     p = f"{PREFIX}/{target}"
+    if target == "app":
+        # versioned chunk names so CDN/browser caches never serve a pre-fix chunk
+        text = _CHUNK_REF_RE.sub(rf"\1.{CHUNK_VER}.js", text)
     if target in ("site", "app"):
         if "text/html" in ctype or "text/x-component" in ctype:
             # root-relative attribute urls
@@ -418,6 +455,7 @@ def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
             text = text.replace('TURBOPACK_CHUNK_BASE_PATH:"/_next/"', f'TURBOPACK_CHUNK_BASE_PATH:"{p}/_next/"')
             if target == "app":
                 text = null_prefix_js(text)
+                text = app_js_fixes(text)
         elif "json" in ctype:
             text = re.sub(r'("(?:src|start_url|scope|url|href)"\s*:\s*")/(?!/|api/bifrost/)',
                           rf"\1{p}/", text)
@@ -530,6 +568,8 @@ async def proxy(target: str, path: str, request: Request):
             "access-control-max-age": "86400",
         })
 
+    if target == "app" and path.startswith("_next/static/"):
+        path = _CHUNK_ALIAS_RE.sub(".js", path)  # cache-busted alias -> real upstream chunk
     url = f"{upstream}/{path}"
     if request.url.query:
         url += "?" + request.url.query
@@ -614,7 +654,11 @@ async def proxy(target: str, path: str, request: Request):
     last_err = None
     for i in range(attempts):
         try:
-            req = client.build_request(method, url, headers=fwd, content=body)
+            if attempts == 4:  # relayer quote/fee: fail fast so the UI never hangs
+                req = client.build_request(method, url, headers=fwd, content=body,
+                                           timeout=httpx.Timeout(10.0, connect=6.0))
+            else:
+                req = client.build_request(method, url, headers=fwd, content=body)
             r = await client.send(req, stream=True)
             ctype = r.headers.get("content-type", "")
             big_binary = (not any(t in ctype for t in REWRITE_TYPES)) and not use_cache
