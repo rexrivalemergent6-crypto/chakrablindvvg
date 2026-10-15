@@ -58,7 +58,7 @@ function LimeBtn({ href, children, testid, big = false, className = '' }) {
 function Kicker({ children, dark = false }) {
   return (
     <div className={`inline-flex items-center gap-2 rounded-[8px] border px-2.5 py-1 font-mono text-[11px] uppercase tracking-[.16em] ${dark ? 'border-white/20 text-white/70' : 'border-[#202221]/25 text-[#202221]/70'}`}>
-      <span className="h-1.5 w-1.5 rounded-full bg-[#CDEF33] shadow-[0_0_0_3px_rgba(205,239,51,.25)]" />{children}
+      <span className={`h-1.5 w-1.5 rounded-full ${dark ? 'bg-[#B9C1CC] shadow-[0_0_0_3px_rgba(185,193,204,.25)]' : 'bg-[#2B2F33] shadow-[0_0_0_3px_rgba(43,47,51,.18)]'}`} />{children}
     </div>
   );
 }
@@ -98,7 +98,7 @@ function DotCounter({ value, label }) {
         const d = dots[i];
         if (d.on) {
           const a = 0.75 + 0.25 * Math.sin(t * 2 + d.p);
-          ctx.fillStyle = `rgba(205,239,51,${a})`;
+          ctx.fillStyle = `rgba(236,239,243,${a})`;
           ctx.beginPath(); ctx.arc(d.x, d.y, 1.85, 0, 6.283); ctx.fill();
         } else {
           const a = 0.06 + 0.1 * Math.max(0, Math.sin(t * d.s + d.p + d.x * 0.02));
@@ -135,7 +135,7 @@ function Hero({ stats }) {
           <Reveal delay={180}>
             <div className="nm-live mt-8 w-full max-w-[520px] overflow-hidden rounded-[12px] border border-[#202221] bg-[#202221] text-[#D9D9D9]" data-testid="hero-live">
               <div className="flex items-center justify-between px-4 pt-3 font-mono text-[11px] uppercase tracking-[.18em]">
-                <span className="flex items-center gap-2 text-[#CDEF33]"><span className="nm-pulse" />Sealed notes in the pool</span>
+                <span className="flex items-center gap-2 text-[#B9C1CC]"><span className="nm-pulse" />Sealed notes in the pool</span>
                 <span className="text-white/45">live · indexer</span>
               </div>
               <div className="px-3"><DotCounter value={fmt(stats.leaves)} label="Sealed notes" /></div>
@@ -149,7 +149,7 @@ function Hero({ stats }) {
           <Reveal delay={240}>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <a href="/app#private-route" data-testid="hero-swap"
-                className="group inline-flex items-center gap-2 rounded-[10px] border border-[#202221] px-3.5 py-2 text-[14px] font-medium text-[#202221] transition hover:bg-[#202221] hover:text-[#CDEF33]">
+                className="group inline-flex items-center gap-2 rounded-[10px] border border-[#202221] px-3.5 py-2 text-[14px] font-medium text-[#202221] transition hover:bg-[#202221] hover:text-[#B9C1CC]">
                 Swap without a wallet <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </a>
               <a href={X_URL} target="_blank" rel="noopener noreferrer" data-testid="hero-x"
@@ -209,7 +209,7 @@ function Features() {
       <div className="mx-auto max-w-[1180px] px-5">
         <Reveal>
           <h2 className="nm-h text-[44px] font-semibold leading-[1.02] tracking-[-0.03em] sm:text-[68px]">Your ledger was an open book.</h2>
-          <p className="nm-h mt-1 text-[44px] font-semibold leading-[1.05] tracking-[-0.03em] text-[#CDEF33] sm:text-[68px]"><span className="nm-chev">&gt;&gt;&gt;</span> Close it.</p>
+          <p className="nm-h mt-1 text-[44px] font-semibold leading-[1.05] tracking-[-0.03em] text-[#B9C1CC] sm:text-[68px]"><span className="nm-chev">&gt;&gt;&gt;</span> Close it.</p>
         </Reveal>
         <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {CARDS.map(([img, t], i) => (
@@ -233,15 +233,15 @@ function Features() {
             <Reveal key={p.key} delay={i * 60}>
               <a href={p.href} data-testid={`pillar-${p.key}`}
                 className="nm-row group grid gap-5 border-b border-[#D9D9D9]/25 py-8 md:grid-cols-[90px_1.1fr_1.4fr_auto] md:items-start">
-                <span className="font-mono text-[44px] font-bold leading-none text-[#D9D9D9]/25 transition-colors duration-300 group-hover:text-[#CDEF33]">0{i + 1}</span>
+                <span className="font-mono text-[44px] font-bold leading-none text-[#D9D9D9]/25 transition-colors duration-300 group-hover:text-[#B9C1CC]">0{i + 1}</span>
                 <span>
-                  <span className="inline-block rounded-[6px] border border-[#CDEF33]/70 px-2 py-0.5 font-mono text-[11px] uppercase tracking-[.14em] text-[#CDEF33]">{p.tag}</span>
+                  <span className="inline-block rounded-[6px] border border-[#B9C1CC]/70 px-2 py-0.5 font-mono text-[11px] uppercase tracking-[.14em] text-[#B9C1CC]">{p.tag}</span>
                   <span className="nm-h mt-3 block text-[26px] font-semibold leading-[1.1] text-white sm:text-[30px]">{p.title}</span>
                 </span>
                 <span>
                   <span className="block text-[17px] leading-[1.5] text-[#D9D9D9]/75 md:pt-9">{p.body}</span>
                 </span>
-                <span className="inline-flex items-center gap-2 self-center whitespace-nowrap rounded-[10px] border border-[#D9D9D9]/40 px-4 py-2.5 text-[14px] font-semibold transition-all duration-300 group-hover:border-[#CDEF33] group-hover:bg-[#CDEF33] group-hover:text-[#202221]">{p.cta}<ArrowUpRight className="h-4 w-4" /></span>
+                <span className="inline-flex items-center gap-2 self-center whitespace-nowrap rounded-[10px] border border-[#D9D9D9]/40 px-4 py-2.5 text-[14px] font-semibold transition-all duration-300 group-hover:border-[#B9C1CC] group-hover:bg-[#B9C1CC] group-hover:text-[#202221]">{p.cta}<ArrowUpRight className="h-4 w-4" /></span>
               </a>
             </Reveal>
           ))}
@@ -266,10 +266,10 @@ function Flow() {
           {JOURNEY.map((s, i) => (
             <Reveal key={s.t} delay={i * 60}>
               <li className={`relative rounded-[12px] p-5 ${s.tone === 'dark' ? 'bg-[#202221] text-[#D9D9D9]' : 'border border-[#202221]/60'}`} data-testid={`flow-step-${i}`}>
-                <span className={`absolute -left-[37px] top-5 grid h-6 w-6 place-items-center rounded-full border-2 border-[#202221] text-[11px] font-bold ${s.tone === 'dark' ? 'bg-[#CDEF33] text-[#202221]' : 'bg-[#D9D9D9] text-[#202221]'}`}>{i + 1}</span>
+                <span className={`absolute -left-[37px] top-5 grid h-6 w-6 place-items-center rounded-full border-2 border-[#202221] text-[11px] font-bold ${s.tone === 'dark' ? 'bg-[#B9C1CC] text-[#202221]' : 'bg-[#D9D9D9] text-[#202221]'}`}>{i + 1}</span>
                 <span className="flex items-center justify-between gap-3">
                   <span className={`nm-h text-[21px] font-semibold ${s.tone === 'dark' ? 'text-white' : 'text-[#202221]'}`}>{s.t}</span>
-                  <span className={`font-mono text-[10.5px] uppercase tracking-[.14em] ${s.tone === 'dark' ? 'text-[#CDEF33]' : 'text-[#202221]/55'}`}>{s.tone === 'dark' ? 'off the record' : 'on the record'}</span>
+                  <span className={`font-mono text-[10.5px] uppercase tracking-[.14em] ${s.tone === 'dark' ? 'text-[#B9C1CC]' : 'text-[#202221]/55'}`}>{s.tone === 'dark' ? 'off the record' : 'on the record'}</span>
                 </span>
                 <p className={`mt-2 text-[15px] leading-[1.6] ${s.tone === 'dark' ? 'text-[#D9D9D9]/75' : 'text-[#202221]/75'}`}>{s.d}</p>
               </li>
@@ -288,7 +288,7 @@ function RealZk() {
         <div className="grid items-center gap-8 lg:grid-cols-[1.4fr_1fr]">
           <Reveal>
             <Kicker dark>Real zero-knowledge</Kicker>
-            <h2 className="nm-h mt-5 text-[38px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[56px]">Hiding is easy.<br /><span className="text-[#CDEF33]">Proving is the point.</span></h2>
+            <h2 className="nm-h mt-5 text-[38px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[56px]">Hiding is easy.<br /><span className="text-[#B9C1CC]">Proving is the point.</span></h2>
             <p className="mt-5 max-w-[620px] text-[17px] leading-[1.6] text-[#D9D9D9]/70">Others blur the trail. NullCash proves every move.</p>
           </Reveal>
           <Reveal delay={80}><img src={IMG('icon_proof')} alt="Sealed proof" className="nm-float-slow mx-auto w-[220px] lg:ml-auto lg:mr-0" draggable="false" /></Reveal>
@@ -296,10 +296,10 @@ function RealZk() {
 
         <div className="mt-12 overflow-hidden rounded-[12px] border border-[#D9D9D9]/20">
           {METHODS.map((z, i) => (
-            <div key={z.k} className={`grid gap-2 px-5 py-5 sm:grid-cols-[200px_1fr_auto] sm:items-center ${i ? 'border-t border-[#D9D9D9]/15' : ''} ${z.zk ? 'bg-[#CDEF33] text-[#202221]' : ''}`} data-testid={`zk-system-${i}`}>
+            <div key={z.k} className={`grid gap-2 px-5 py-5 sm:grid-cols-[200px_1fr_auto] sm:items-center ${i ? 'border-t border-[#D9D9D9]/15' : ''} ${z.zk ? 'bg-[#B9C1CC] text-[#202221]' : ''}`} data-testid={`zk-system-${i}`}>
               <span className="nm-h text-[20px] font-semibold">{z.k}</span>
               <span className={`text-[15px] leading-[1.5] ${z.zk ? 'text-[#202221]/85' : 'text-[#D9D9D9]/75'}`}><b className="font-semibold">{z.line}</b> {z.verdict}</span>
-              <span className={`inline-flex w-fit items-center gap-1.5 rounded-[8px] px-2.5 py-1 font-mono text-[11px] uppercase tracking-[.12em] ${z.zk ? 'bg-[#202221] text-[#CDEF33]' : 'border border-[#D9D9D9]/25 text-[#D9D9D9]/60'}`}>{z.zk ? <><Check className="h-3.5 w-3.5" />proof</> : <><XIcon className="h-3.5 w-3.5" />no proof</>}</span>
+              <span className={`inline-flex w-fit items-center gap-1.5 rounded-[8px] px-2.5 py-1 font-mono text-[11px] uppercase tracking-[.12em] ${z.zk ? 'bg-[#202221] text-[#B9C1CC]' : 'border border-[#D9D9D9]/25 text-[#D9D9D9]/60'}`}>{z.zk ? <><Check className="h-3.5 w-3.5" />proof</> : <><XIcon className="h-3.5 w-3.5" />no proof</>}</span>
             </div>
           ))}
         </div>
@@ -311,7 +311,7 @@ function RealZk() {
               <ol className="mt-4 space-y-2" data-testid="zk-pipeline">
                 {PIPE.map((s, i) => (
                   <li key={s} className="flex items-center gap-3 font-mono text-[13.5px]">
-                    <span className={`grid h-7 w-7 place-items-center rounded-[7px] text-[12px] ${i === 2 ? 'bg-[#CDEF33] text-[#202221]' : 'border border-[#D9D9D9]/30'}`}>{i + 1}</span>{s}
+                    <span className={`grid h-7 w-7 place-items-center rounded-[7px] text-[12px] ${i === 2 ? 'bg-[#B9C1CC] text-[#202221]' : 'border border-[#D9D9D9]/30'}`}>{i + 1}</span>{s}
                   </li>
                 ))}
               </ol>
@@ -365,7 +365,7 @@ function Tech() {
             <div className="mt-5 grid gap-px overflow-hidden rounded-[12px] border border-[#202221]/70 bg-[#202221]/70 sm:grid-cols-2 lg:grid-cols-3" data-testid="tech-grid">
               {TECH.map(([k, v]) => (
                 <div key={k} className="group bg-[#D9D9D9] p-5 transition-colors duration-300 hover:bg-[#202221]">
-                  <div className="font-mono text-[13px] font-bold text-[#202221] transition-colors group-hover:text-[#CDEF33]">{k}</div>
+                  <div className="font-mono text-[13px] font-bold text-[#202221] transition-colors group-hover:text-[#B9C1CC]">{k}</div>
                   <div className="mt-2 text-[15px] leading-[1.45] text-[#202221]/75 transition-colors group-hover:text-[#D9D9D9]">{v}</div>
                 </div>
               ))}
@@ -390,7 +390,7 @@ function Fees() {
                 <span className="nm-h block text-[24px] font-semibold text-[#202221] sm:text-[30px]">Fees</span>
                 <span className="mt-1 block text-[14.5px] text-[#202221]/70">Private sends are free. Everything else is shown before you confirm.</span>
               </span>
-              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-[10px] border border-[#202221] transition-transform duration-300 ${open ? 'rotate-180 bg-[#202221] text-[#CDEF33]' : ''}`}><ChevronDown className="h-5 w-5" /></span>
+              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-[10px] border border-[#202221] transition-transform duration-300 ${open ? 'rotate-180 bg-[#202221] text-[#B9C1CC]' : ''}`}><ChevronDown className="h-5 w-5" /></span>
             </button>
             <div className={`grid transition-all duration-500 ease-[cubic-bezier(.2,.9,.25,1)] ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
               <div className="overflow-hidden">
@@ -450,7 +450,7 @@ function FinalCta() {
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
             <a href={APP} data-testid="cta-launch" className="nm-lime flex h-12 items-center justify-center gap-2 rounded-[10px] text-[16px] font-semibold text-[#202221]">Open the app <ArrowRight className="h-4 w-4" /></a>
             <a href={X_URL} target="_blank" rel="noopener noreferrer" data-testid="cta-x"
-              className="flex h-12 items-center justify-center gap-2 rounded-[10px] border border-[#D9D9D9] text-[16px] transition-all duration-300 hover:border-[#CDEF33] hover:bg-[#CDEF33] hover:text-[#202221]"><XGlyph /> Follow @usenullcash</a>
+              className="flex h-12 items-center justify-center gap-2 rounded-[10px] border border-[#D9D9D9] text-[16px] transition-all duration-300 hover:border-[#B9C1CC] hover:bg-[#B9C1CC] hover:text-[#202221]"><XGlyph /> Follow @usenullcash</a>
           </div>
         </Reveal>
       </div>

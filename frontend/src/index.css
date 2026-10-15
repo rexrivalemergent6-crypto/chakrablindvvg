@@ -209,10 +209,10 @@ code {
 /* ---------- NullCash landing (original) ---------- */
 .nc-landing{font-family:'Space Grotesk','Inter',system-ui,sans-serif}
 .nc-display{font-family:'Space Grotesk','Inter',system-ui,sans-serif}
-.nc-lime-btn{background:linear-gradient(180deg,#c8f135,#b3e01d);box-shadow:0 8px 24px -8px rgba(170,215,20,.85),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(0,0,0,.08);transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+.nc-lime-btn{background:linear-gradient(180deg,#3a3f46,#23272c);color:#f4f5f7!important;box-shadow:0 8px 24px -8px rgba(20,22,25,.55),inset 0 1px 0 rgba(255,255,255,.12),inset 0 -2px 0 rgba(0,0,0,.08);transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
 .nc-lime-btn:hover{transform:translateY(-1px);box-shadow:0 12px 30px -8px rgba(170,215,20,.95),inset 0 1px 0 rgba(255,255,255,.6)}
 .nc-lime-btn:active{transform:scale(.97)}
-.nc-hl{background:linear-gradient(180deg,transparent 58%,#c8f135 58%,#c8f135 92%,transparent 92%);padding:0 .06em}
+.nc-hl{background:linear-gradient(180deg,transparent 58%,#c5ccd6 58%,#c5ccd6 92%,transparent 92%);padding:0 .06em}
 @keyframes ncSpin{to{transform:rotate(360deg)}}
 .nc-ring{animation:ncSpin linear infinite}
 .nc-spin-slow{animation:ncSpin 40s linear infinite}
@@ -229,19 +229,22 @@ code {
 .nm-landing{font-family:'Poppins','Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 .nm-landing .nm-h{font-family:'Poppins','Inter',system-ui,sans-serif}
 .nm-landing .font-mono{font-family:'Space Mono',ui-monospace,monospace}
-.nm-landing ::selection{background:#CDEF33;color:#202221}
-.nm-lime{background:#CDEF33;border:1px solid #202221;box-shadow:0 3px 0 #202221;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s}
-.nm-lime:hover{transform:translateY(-1px);box-shadow:0 4px 0 #202221}
-.nm-lime:active{transform:translateY(2px);box-shadow:0 1px 0 #202221}
-.nm-live{box-shadow:0 0 0 6px rgba(205,239,51,.12),0 24px 50px -28px rgba(32,34,33,.8)}
-.nm-pulse{width:7px;height:7px;border-radius:50%;background:#CDEF33;box-shadow:0 0 0 0 rgba(205,239,51,.7);animation:nmPulse 1.8s infinite}
-@keyframes nmPulse{0%{box-shadow:0 0 0 0 rgba(205,239,51,.65)}70%{box-shadow:0 0 0 9px rgba(205,239,51,0)}100%{box-shadow:0 0 0 0 rgba(205,239,51,0)}}
+.nm-landing ::selection{background:#2B2F33;color:#F4F5F7}
+.nm-lime{background:#2B2F33;color:#F4F5F7!important;border:1px solid #141517;box-shadow:0 3px 0 #0b0c0d;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .2s,background .2s}
+.nm-lime:hover{background:#363b41}
+[data-nm-theme=dark] .nm-lime,.nm-live .nm-lime{background:#E3E7EC;color:#202221!important;border-color:#E3E7EC;box-shadow:0 3px 0 #7d8590}
+[data-nm-theme=dark] .nm-lime:hover,.nm-live .nm-lime:hover{background:#ffffff}
+.nm-lime:hover{transform:translateY(-1px)}
+.nm-lime:active{transform:translateY(2px);box-shadow:0 1px 0 #0b0c0d}
+.nm-live{box-shadow:0 0 0 6px rgba(43,47,51,.12),0 24px 50px -28px rgba(32,34,33,.8)}
+.nm-pulse{width:7px;height:7px;border-radius:50%;background:#B9C1CC;box-shadow:0 0 0 0 rgba(185,193,204,.7);animation:nmPulse 1.8s infinite}
+@keyframes nmPulse{0%{box-shadow:0 0 0 0 rgba(185,193,204,.65)}70%{box-shadow:0 0 0 9px rgba(185,193,204,0)}100%{box-shadow:0 0 0 0 rgba(185,193,204,0)}}
 .nm-dots{background-image:radial-gradient(#202221 1.3px,transparent 1.4px);background-size:14px 14px;opacity:.35;-webkit-mask-image:radial-gradient(circle,#000 45%,transparent 70%);mask-image:radial-gradient(circle,#000 45%,transparent 70%)}
 .nm-float{animation:nmFloat 6s ease-in-out infinite}
 .nm-float-slow{animation:nmFloat 8s ease-in-out infinite}
 @keyframes nmFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
 .nm-card{transition:transform .35s cubic-bezier(.2,.9,.25,1),box-shadow .35s}
-.nm-card:hover{transform:translateY(-4px);box-shadow:0 0 0 2px #CDEF33}
+.nm-card:hover{transform:translateY(-4px);box-shadow:0 0 0 2px #B9C1CC}
 .nm-chev{display:inline-block;letter-spacing:-.08em;margin-right:.25em;animation:nmChev 1.6s steps(1) infinite}
 @keyframes nmChev{0%{opacity:1}50%{opacity:.55}}
 .nm-drop{animation:nmDrop .25s cubic-bezier(.2,.9,.25,1) both}

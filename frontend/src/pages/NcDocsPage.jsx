@@ -41,14 +41,14 @@ function Block({ b }) {
     case 'steps': return (
       <ol className="space-y-3">{b.items.map(([h, t], i) => (
         <li key={h} className="flex gap-4 rounded-[12px] border border-[#202221]/25 bg-[#e2e2e2] p-4">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[9px] bg-[#202221] font-mono text-[14px] font-bold text-[#CDEF33]">{i + 1}</span>
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[9px] bg-[#202221] font-mono text-[14px] font-bold text-[#B9C1CC]">{i + 1}</span>
           <span><span className="block text-[15.5px] font-semibold text-[#202221]">{h}</span><span className="mt-1 block text-[14.5px] leading-[1.6] text-[#202221]/75">{t}</span></span>
         </li>
       ))}</ol>
     );
-    case 'code': return <pre className="overflow-x-auto rounded-[12px] bg-[#202221] p-4 font-mono text-[12.5px] leading-[1.7] text-[#CDEF33]">{b.t}</pre>;
+    case 'code': return <pre className="overflow-x-auto rounded-[12px] bg-[#202221] p-4 font-mono text-[12.5px] leading-[1.7] text-[#B9C1CC]">{b.t}</pre>;
     case 'note': return (
-      <div className="flex gap-3 rounded-[12px] border-l-4 border-[#CDEF33] bg-[#202221] p-4 text-[14.5px] leading-[1.6] text-[#D9D9D9]"><Info className="mt-0.5 h-4 w-4 shrink-0 text-[#CDEF33]" />{b.t}</div>
+      <div className="flex gap-3 rounded-[12px] border-l-4 border-[#B9C1CC] bg-[#202221] p-4 text-[14.5px] leading-[1.6] text-[#D9D9D9]"><Info className="mt-0.5 h-4 w-4 shrink-0 text-[#B9C1CC]" />{b.t}</div>
     );
     case 'kv': return (
       <dl className="divide-y divide-[#202221]/15 rounded-[12px] border border-[#202221]/40">{b.rows.map(([k, v]) => (
@@ -69,7 +69,7 @@ function Block({ b }) {
     case 'visibility': return (
       <div className="overflow-x-auto rounded-[12px] border border-[#202221]/50" data-testid="docs-visibility">
         <table className="w-full min-w-[600px] text-left text-[14px]">
-          <thead><tr className="bg-[#202221] text-[#D9D9D9]"><th className="px-4 py-2.5 font-medium">Action</th><th className="px-4 py-2.5 font-medium"><span className="inline-flex items-center gap-1.5"><Eye className="h-4 w-4" />Chain sees</span></th><th className="px-4 py-2.5 font-medium"><span className="inline-flex items-center gap-1.5 text-[#CDEF33]"><EyeOff className="h-4 w-4" />Stays sealed</span></th></tr></thead>
+          <thead><tr className="bg-[#202221] text-[#D9D9D9]"><th className="px-4 py-2.5 font-medium">Action</th><th className="px-4 py-2.5 font-medium"><span className="inline-flex items-center gap-1.5"><Eye className="h-4 w-4" />Chain sees</span></th><th className="px-4 py-2.5 font-medium"><span className="inline-flex items-center gap-1.5 text-[#B9C1CC]"><EyeOff className="h-4 w-4" />Stays sealed</span></th></tr></thead>
           <tbody>{SEEN.map((v) => (
             <tr key={v.a} className="border-t border-[#202221]/12"><td className="px-4 py-2.5 font-semibold">{v.a}</td><td className="px-4 py-2.5 text-[#202221]/70">{v.out}</td><td className="px-4 py-2.5">{v.inn}</td></tr>
           ))}</tbody>
