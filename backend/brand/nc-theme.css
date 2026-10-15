@@ -308,3 +308,26 @@ html.nc-onb-open .card.onb>h2::after{content:"Connect wallet";font-size:24px;fon
 html.nc-onb-open .card.onb>.wlist{margin:0!important}
 html.nc-onb-open main.main>.view,html.nc-onb-open main.main,html.nc-onb-open .shell>*:not(header){animation:none!important;transform:none!important;filter:none!important}
 .nav-i.nc-hide{display:none!important}
+
+/* ---------- clean & sleek: no promos, no long explainers ---------- */
+a.inv-promo,.inv-promo,.reveal2,.rv.pub,.rv.priv,main.main .hint,main.main span.hint,main.main .vh>p,main.main .vh p,main.main .card>p.sub,main.main .view>p.sub{display:none!important}
+main.main .mini{min-height:0!important}
+
+/* ---------- splash (NullCash particle loader) ---------- */
+.vl>*:not(#nc-splash){display:none!important}
+.vl::before,.vl::after{display:none!important}
+.vl{display:flex!important;align-items:center!important;justify-content:center!important;background:#f4f5ef!important}
+#nc-splash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;animation:ncFade .3s ease both}
+#nc-splash .sp-card{width:min(560px,100%);border-radius:30px;background:radial-gradient(120% 90% at 50% 0%,#1d1a2b 0%,#0f0f14 60%);border:1px solid rgba(153,69,255,.25);
+ box-shadow:0 30px 80px -30px rgba(60,20,120,.6),0 0 0 6px rgba(20,241,149,.06);padding:22px 24px 24px;overflow:hidden;animation:ncPop .5s var(--nc-spring) both}
+#nc-splash .sp-top{display:flex;align-items:center;gap:10px;font:700 12px/1 var(--f-sans);letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.72)}
+#nc-splash .sp-top i{width:9px;height:9px;border-radius:50%;background:#19fb9b;box-shadow:0 0 12px #19fb9b;animation:ncPulse 1.8s ease-in-out infinite}
+#nc-splash canvas{display:block;width:100%;height:210px;margin:10px 0 6px}
+#nc-splash .sp-bot{display:flex;flex-direction:column;gap:6px}
+#nc-splash .sp-bot b{font:700 22px/1.1 var(--f-sans);letter-spacing:-.02em;color:#fff}
+#nc-splash .sp-msg{font:500 14px var(--f-sans);color:#b9a3ff;min-height:18px}
+#nc-splash .sp-msg.in{animation:ncSlideIn .35s var(--nc-ease) both}
+#nc-splash .sp-bar{margin-top:10px;height:5px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}
+#nc-splash .sp-bar i{display:block;height:100%;width:40%;border-radius:9px;background:linear-gradient(90deg,#9945ff,#568cff,#19fb9b);animation:ncBar 1.6s var(--nc-ease) infinite}
+@keyframes ncBar{0%{transform:translateX(-100%)}100%{transform:translateX(260%)}}
+@media (max-width:520px){#nc-splash canvas{height:150px}#nc-splash .sp-bot b{font-size:19px}}
