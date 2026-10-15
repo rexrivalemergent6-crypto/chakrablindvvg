@@ -959,6 +959,7 @@
       var price = t.price ? '$' + (Number(t.price) >= 1 ? Number(t.price).toLocaleString(undefined, { maximumFractionDigits: 2 }) : Number(t.price).toPrecision(2)) : '';
       var addr = tokenAddr(t), url = addr ? explorerUrl(t, addr) : '';
       var sub = '<span class="nm">' + esc(t.name && t.name !== t.symbol ? t.name : t.symbol) + '</span>';
+      if (addr && M.side === 'destination' && !grouped) sub += '<i class="dot"></i><span class="dk-chn">' + esc(t.chainName || chainLabel(chainKey(t))) + '</span>';
       if (addr) {
         sub += '<i class="dot"></i>' + (url
           ? '<a class="dk-addr" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" title="' + esc(addr) + '" data-testid="dk-token-addr">' + esc(shortAddr(addr)) + ' ↗</a>'

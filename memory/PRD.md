@@ -91,3 +91,12 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - Privacy swap: friendly provider-outage message + "Use Private route" switch (dk-err-switch). Tests skip on NEAR provider outage.
 - Known external limits: NEAR Intents had a provider-wide quoting outage (recovered); upstream swap API rate-limits order creation per server IP (429) — for scale, get an official partner/API key.
 - Declined: scrubbing all upstream (Veil/DarkSwap) traces from proxies/network so inspectors can't see who operates the pool/swaps.
+
+## Session (Oct 2026) — favicons, header, CA, fees, live relay, API page removed
+- Favicons everywhere (incl. /app mirror icons/manifest) = user's NullCash logo (white bg, black ring mark). Upstream icon/manifest paths intercepted in bifrost.proxy via brand_icon_for().
+- CA chip 31GYUbJW5vjF1o7VM5SGP9Emj5WDBHb1cdcR8BM6pump with copy: landing/docs (CaChip.jsx in NmNav) + app header (dk-swap.js ensureCA).
+- App header self-fits (fitNav + ResizeObserver): overflow tabs move into More; wallet button capped/ellipsis; upstream .side-foot hidden.
+- No-wallet swaps show real fees: Private route all-in cost from USD in/out; Privacy swap NullCash fee 0.40%, network withdraw fee, min received, refund fee; fees also in order modal. Friendly 503 fallback keeps asset (canonChain) when switching to Private route.
+- Live: backend live_relay() refreshes indexer stats/feed every 3s (/api/bifrost/v1/_live), landing polls stats every 5s ("synced Ns ago"), Chain 4s, Track 5s, quotes 30s.
+- Branding: extra text rewrites (NEAR Intents, @veilzk, DarkSwap, Houdini…), houdiniId→orderId, opaque _img?o= keys, #veilswap shown as #nullswap, legacy unused React pages deleted.
+- /app/api removed (302/redirect to /docs, links hidden). No hardcoded domains -> custom domain nullcash.fun works via request host.
