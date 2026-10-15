@@ -62,3 +62,9 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - 502/504 -> 503 JSON middleware; relayer quote retries + 3s micro cache.
 - Landing page rewritten (LandingPage.jsx) in NullCash light style.
 - Tests: iteration_13/14 100%, backend pytest 98/98.
+
+## Iteration 11 — Swap verification (iteration_16.json: backend 105/105, frontend 100%)
+- Re-imported new-nullsmsn repo; deps installed, services running.
+- Verified live: Private route (quote -> order -> status), Privacy swap (near quote -> order -> status, 6/6 consecutive OK), Track (valid + bogus id), token picker, address validation, mobile layout.
+- Fix: missing token logos (/indexer/v1/logo/*, /_img) now return a neutral SVG placeholder (200) instead of 404 -> zero console errors on swap pages.
+- Known upstream behaviour: swap provider occasionally shows a Cloudflare "Quick security check" on submit (user taps Verify; client retries).

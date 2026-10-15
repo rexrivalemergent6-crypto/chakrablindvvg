@@ -121,6 +121,16 @@ IMG_HOSTS = ("api.houdiniswap.com", "cdn.jsdelivr.net", "raw.githubusercontent.c
 
 
 _IMG_MISS = {}
+# Neutral placeholder coin served (200) instead of a 404 so missing token logos
+# don't flood the browser console with failed image loads.
+_PLACEHOLDER_SVG = (b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
+                    b'<circle cx="32" cy="32" r="32" fill="#e6e8de"/>'
+                    b'<circle cx="32" cy="32" r="13" fill="none" stroke="#b9bdae" stroke-width="5"/></svg>')
+
+
+def _placeholder():
+    return Response(_PLACEHOLDER_SVG, media_type="image/svg+xml",
+                    headers={"cache-control": "public, max-age=3600", "x-placeholder": "1"})
 _LOGO = {}  # path -> (ctype, bytes) downscaled token logos
 
 
@@ -152,7 +162,7 @@ async def _logo_small(path: str, request: Request):
     except Exception as e:
         return JSONResponse({"error": str(e)[:200]}, status_code=502)
     if r.status_code != 200:
-        return Response(status_code=r.status_code, headers={"cache-control": "public, max-age=600"})
+        return _placeholder()
     body, ctype = r.content, r.headers.get("content-type", "image/png")
     small = await asyncio.get_event_loop().run_in_executor(None, _shrink, body) if ctype.startswith("image/") and "svg" not in ctype else None
     entry = small or (ctype, body)
@@ -174,7 +184,7 @@ async def _image_proxy(u: str):
         return JSONResponse({"error": "host not allowed"}, status_code=400)
     miss = _IMG_MISS.get(u)
     if miss and time.time() - miss < 3600:
-        return Response(status_code=404, headers={"cache-control": "public, max-age=3600"})
+        return _placeholder()
     ckey = ("_img", u)
     hit = _cache_get(ckey)
     if hit:
@@ -187,7 +197,7 @@ async def _image_proxy(u: str):
     ctype = r.headers.get("content-type", "")
     if r.status_code != 200 or not (ctype.startswith("image/") or ctype == "application/octet-stream"):
         _IMG_MISS[u] = time.time()
-        return Response(status_code=404, headers={"cache-control": "public, max-age=3600"})
+        return _placeholder()
     body = r.content
     if ctype == "application/octet-stream":
         ctype = "image/png"
