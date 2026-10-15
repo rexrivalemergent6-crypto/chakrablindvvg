@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600&family=Space+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -205,3 +205,22 @@ code {
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 85%);
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 85%);
 }
+
+/* ---------- NullCash landing (original) ---------- */
+.nc-landing{font-family:'Space Grotesk','Inter',system-ui,sans-serif}
+.nc-display{font-family:'Space Grotesk','Inter',system-ui,sans-serif}
+.nc-lime-btn{background:linear-gradient(180deg,#c8f135,#b3e01d);box-shadow:0 8px 24px -8px rgba(170,215,20,.85),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(0,0,0,.08);transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+.nc-lime-btn:hover{transform:translateY(-1px);box-shadow:0 12px 30px -8px rgba(170,215,20,.95),inset 0 1px 0 rgba(255,255,255,.6)}
+.nc-lime-btn:active{transform:scale(.97)}
+.nc-hl{background:linear-gradient(180deg,transparent 58%,#c8f135 58%,#c8f135 92%,transparent 92%);padding:0 .06em}
+@keyframes ncSpin{to{transform:rotate(360deg)}}
+.nc-ring{animation:ncSpin linear infinite}
+.nc-spin-slow{animation:ncSpin 40s linear infinite}
+@keyframes ncFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.nc-float{animation:ncFloat 6s ease-in-out infinite}
+.nc-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid rgba(20,22,15,.08);box-shadow:0 12px 30px -16px rgba(20,22,15,.4);font-size:12.5px;font-weight:600;color:#14160f;animation:ncFloat 5s ease-in-out infinite}
+@keyframes ncPulseL{0%,100%{box-shadow:0 0 0 0 rgba(154,197,12,.55)}50%{box-shadow:0 0 0 6px rgba(154,197,12,0)}}
+.nc-pulse{animation:ncPulseL 2s ease-in-out infinite}
+@keyframes ncRiseL{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.nc-rise{animation:ncRiseL .45s cubic-bezier(.2,.9,.25,1) both}
+@media (prefers-reduced-motion:reduce){.nc-ring,.nc-spin-slow,.nc-float,.nc-chip,.nc-pulse{animation:none}}

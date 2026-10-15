@@ -1,18 +1,18 @@
 """
-Bifrost v1 — browser shim + Cadabra re-branding layer for the Veil mirror.
+Bifrost v1 — browser shim + NullCash re-branding layer for the Veil mirror.
 
 Veil's own client code still runs unmodified in the browser (wallet creation,
 ZK proofs, RPC, relayer, indexer). This module only:
   * injects a shim that routes every network call through /api/bifrost/v1/*
   * keeps the URL bar on pretty paths (/shield, /shield/about, /shield/docs …)
-  * swaps visible brand text / logos / colours to Cadabra
+  * swaps visible brand text / logos / colours to NullCash
 """
 import base64
 import functools
 from pathlib import Path
 
 BRAND_DIR = Path(__file__).parent / "brand"
-BRAND_NAME = "Cadabra"
+BRAND_NAME = "NullCash"
 
 
 def _b64(name: str) -> str:
@@ -24,13 +24,11 @@ def _b64(name: str) -> str:
 
 @functools.lru_cache(maxsize=4)
 def lockup_svg(light: bool = False) -> str:
-    mark = _b64("mark-256.png")
-    word = "#0b0917" if light else "#ffffff"
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 456 128" width="456" height="128">
-<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
-<stop offset="0" stop-color="#c4b5fd"/><stop offset=".45" stop-color="#a78bfa"/><stop offset="1" stop-color="#7c3aed"/></linearGradient></defs>
-<image href="data:image/png;base64,{mark}" xlink:href="data:image/png;base64,{mark}" x="0" y="4" width="120" height="120"/>
-<text x="134" y="88" font-family="Sora, Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="-2"><tspan fill="{word}">Cada</tspan><tspan fill="url(#g)">bra</tspan></text>
+    mark = _b64("mark-black-256.png" if light else "mark-white-256.png")
+    word = "#12140f" if light else "#f4f6ee"
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 470 128" width="470" height="128">
+<image href="data:image/png;base64,{mark}" xlink:href="data:image/png;base64,{mark}" x="0" y="8" width="112" height="112"/>
+<text x="130" y="86" font-family="'Space Grotesk', Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="64" font-weight="700" letter-spacing="-2.5" fill="{word}">Null<tspan font-weight="500">Cash</tspan></text>
 </svg>"""
 
 
@@ -43,14 +41,6 @@ img[src*="audit-contractwolf"],li:has(> a[href*="contractwolf.io"]),#extension,.
 section#developers,a[href="#developers"],a[href$="docs#developers"],a[href="#extension"]{display:none!important}
 a[href*="contractwolf.io"]{pointer-events:none!important;color:inherit!important;text-decoration:none!important}
 .omark,.tk,.foot-ca,[data-copy="HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump"]{display:none!important}
-html:root{
- --veil:#a78bfa;--veil-hi:#ddd6fe;--veil-deep:#7c3aed;--veil-wash:rgba(167,139,250,.1);
- --veil-rgb:167,139,250;--veil-hi-rgb:221,214,254;--veil-deep-rgb:124,58,237;
- --hero-a:#ffffff;--hero-b:#a78bfa;--hero-c:#22d3ee;
- --ink:#07060c;
-}
-h1,h2,h3,.hero h1,.display,.hb-amt,.big{font-family:'Sora','Inter',ui-sans-serif,system-ui,sans-serif!important;letter-spacing:-.02em}
-::selection{background:rgba(139,92,246,.45)}
 html:not(.bf-ready) body{opacity:0}
 html.bf-ready body{opacity:1;transition:opacity .18s ease}
 img[src*="_brand/lockup"]{object-fit:contain;height:26px!important;filter:none!important;width:auto!important;max-width:none!important}
@@ -60,7 +50,8 @@ _SHIM = r"""
 (function(){
 var P='__P__',R='__R__',T='__T__',PRETTY=T==='site'?'/shield/about':'/shield',BRAND='__BRAND__';
 var ORIGIN=location.origin,BU=R+'_brand/';
-try{if(!localStorage.getItem('cb-theme'))localStorage.setItem('cb-theme','dark');}catch(e){}
+try{localStorage.setItem('cb-theme','light');}catch(e){}
+var FL=function(){var h=document.documentElement;if(h.getAttribute('data-theme')!=='light')h.setAttribute('data-theme','light');};FL();try{new MutationObserver(FL).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}
 function isLight(){var th=document.documentElement.getAttribute('data-theme');if(th==='light')return true;if(th==='dark')return false;
  try{var els=[document.body,document.documentElement];for(var i=0;i<els.length;i++){if(!els[i])continue;var c=getComputedStyle(els[i]).backgroundColor;var m=c&&c.match(/rgba?\(([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:[, /]+([\d.]+))?/);
  if(m&&(m[4]===undefined||parseFloat(m[4])>0.05)){return (0.2126*m[1]+0.7152*m[2]+0.0722*m[3])/255>0.55;}}}catch(e){}return false;}
@@ -166,7 +157,7 @@ var wo=window.open;window.open=function(u){if(typeof u==='string')arguments[0]=f
 document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');
  if(!a)return;var h=a.getAttribute('href');if(!h||SKIP.test(h))return;var n=fx(h);if(n!==h)a.setAttribute('href',n);},true);
 
-/* ---------- Cadabra branding ---------- */
+/* ---------- NullCash branding ---------- */
 var TXT=/veilit\.xyz|Veil|ContractWolf|Jupiter|veil-core|(^|[^$A-Za-z0-9_\/.:@-])veil(?![A-Za-z0-9_-])/;
 function rt(s){
  return s.replace(/app\.veilit\.xyz/g,location.host+'/shield')
@@ -190,7 +181,7 @@ function brandEl(el){
  if(el.tagName==='IMG'){
   var s=el.getAttribute('src')||'';var b=bimg(s);
   if(!b&&el.closest&&el.closest('a.brand,.brand'))b=LK();
-  if(!b&&/^(veil|darkinator|cadabra)$/i.test(el.getAttribute('alt')||''))b=LK();
+  if(!b&&/^(veil|darkinator|nullcash)$/i.test(el.getAttribute('alt')||''))b=LK();
   if(b&&s!==b&&s.indexOf(b)<0){sa.call(el,'src',b);el.removeAttribute('srcset');}
  }
 }
@@ -236,9 +227,9 @@ setTimeout(start,2500);
 
 
 NAV_LABELS = {
-    "Home": "Overview", "Shield": "Vanish", "Trade": "Swap", "CadabraSwap": "Bridge out",
-    "Send": "Pay", "Receive": "Request", "Withdraw": "Cash out", "Earn": "Yield",
-    "Invite": "Referrals", "Addresses": "Burner addresses", "Activity": "History", "Keys": "Vault & keys",
+    "Home": "Home", "Shield": "Shield", "Trade": "Swap", "NullCashSwap": "Bridge",
+    "Send": "Send", "Receive": "Receive", "Withdraw": "Withdraw", "Earn": "Earn",
+    "Invite": "Invite", "Addresses": "Addresses", "Activity": "History", "Keys": "Keys",
     "More": "More",
 }
 
@@ -262,8 +253,12 @@ def head_inject(target: str, prefix: str) -> str:
           .replace("__T__", target)
           .replace("__BRAND__", BRAND_NAME)
           .replace("__PARA__", _para_json()))
+    try:
+        theme_css = (BRAND_DIR / "nc-theme.css").read_text()
+    except Exception:
+        theme_css = ""
     css_boot = ("(function(){var s=document.createElement('style');s.id='cb-style';s.textContent="
-                + _j.dumps(BRAND_CSS) + ";(document.head||document.documentElement).appendChild(s);})();")
+                + _j.dumps(BRAND_CSS + "\n" + theme_css) + ";(document.head||document.documentElement).appendChild(s);})();")
     payload = base64.b64encode((css_boot + js).encode("utf-8")).decode()
     # the shim ships encoded so page source shows no upstream identifiers
     boot = ("(0,eval)(new TextDecoder().decode(Uint8Array.from(atob('" + payload
@@ -272,7 +267,7 @@ def head_inject(target: str, prefix: str) -> str:
         f"<script>{boot}</script>"
         '<link rel="preconnect" href="https://fonts.googleapis.com">'
         '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&display=swap">'
+        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">'
         + (f'<script src="{prefix}/_brand/dk-swap.js" defer></script>' if target == "app" else "")
     )
 
@@ -290,6 +285,10 @@ def brand_asset(name: str):
             return None
     if name == "mark.png":
         p = BRAND_DIR / "mark-256.png"
+    elif name == "mark-black.png":
+        p = BRAND_DIR / "mark-black-256.png"
+    elif name == "mark-white.png":
+        p = BRAND_DIR / "mark-white-256.png"
     elif name == "favicon.png":
         p = BRAND_DIR / "favicon-192.png"
     else:

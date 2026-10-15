@@ -1,4 +1,4 @@
-// Technical content for the Cadabra launch page.
+// Technical content for the NullCash launch page.
 // Sourced from the upstream protocol documentation (ZK shielded pool, multi-hop private routing,
 // intent-based confidential swaps, Solana pool-mixing design). Keep wording factual.
 
@@ -203,7 +203,7 @@ export const VISIBILITY = [
 ];
 
 export const FAQ = [
-  ['Does Cadabra ever hold my keys?', 'No. Your vault is generated and encrypted in your browser, and proofs are built there too. The relayer and indexer never see your keys.'],
+  ['Does NullCash ever hold my keys?', 'No. Your vault is generated and encrypted in your browser, and proofs are built there too. The relayer and indexer never see your keys.'],
   ['Can anyone freeze or take my funds?', 'No instruction lets anyone move notes without the owner’s proof. The multisig can pause deposits, transfers and swaps in an emergency, but withdrawals stay open.'],
   ['Do the cross-chain swaps need a wallet connection?', 'No. Private route and Privacy swap are manual-deposit flows. You create an order, then send the exact amount from any Solana wallet. Creating an order never moves funds.'],
   ['What is the difference between ZK Shield and Privacy swap?', 'ZK Shield hides activity inside a zero-knowledge pool on Solana. Privacy swap uses confidential intent processing to move value cross-chain. Different mechanisms, different trust boundaries, one app.'],
@@ -215,7 +215,7 @@ export const FAQ = [
 export const ZK_SYSTEMS = [
   { k: 'Encryption', q: '“I hid the transaction details so nobody can read them.”', d: 'Protects information, but proves nothing about whether the transaction is valid.', zk: false },
   { k: 'Relayer', q: '“I sent it through another wallet so your address isn’t directly visible.”', d: 'A routing or anonymity technique. Useful, but it isn’t a proof.', zk: false },
-  { k: 'Zero-knowledge', q: '“I can mathematically prove this transaction is authorized and valid without revealing the secret behind it.”', d: 'Cadabra uses all three. Only this one gives the cryptographic proof property.', zk: true },
+  { k: 'Zero-knowledge', q: '“I can mathematically prove this transaction is authorized and valid without revealing the secret behind it.”', d: 'NullCash uses all three. Only this one gives the cryptographic proof property.', zk: true },
 ];
 
 export const ZK_PIPELINE = ['Private information', 'ZK circuit', 'Groth16 proof', 'On-chain verifier', 'Accept or reject'];

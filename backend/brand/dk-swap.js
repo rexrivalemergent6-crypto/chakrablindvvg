@@ -1,4 +1,4 @@
-/* Cadabra in-app swaps: Private route, Privacy swap, Track (design-only reference: square-card swap UI)
+/* NullCash in-app swaps: Private route, Privacy swap, Track (design-only reference: square-card swap UI)
    Live data via /api/ds. */
 (function () {
   if (window.__dkSwap) return;
@@ -157,147 +157,139 @@
 
   /* ---------------- CSS ---------------- */
   var CSS = [
-    "#dk-view,#dk-modal{--dk-bg:#1c1c21;--dk-box:#25252b;--dk-line:#404040;--dk-mut:#8c8c8c;--dk-fg:#fff;--dk-grad:linear-gradient(0deg,rgba(255,255,255,.45),rgba(255,255,255,.45)),linear-gradient(91.31deg,#fff -11.98%,#83f4ff 21.23%,#cfb1f8 50.19%,#faedff 100%)}",
+    "#dk-view,#dk-modal{--dk-bg:var(--nc-card,#fff);--dk-box:var(--s-field,#f3f4ee);--dk-line:var(--line,rgba(0,0,0,.08));--dk-line2:var(--line-2,rgba(0,0,0,.14));--dk-mut:var(--fg-3,#8a8d80);--dk-fg:var(--fg,#14160f);--dk-fg2:var(--fg-2,#4a4d42);--dk-acc:var(--veil-hi,#567300);--dk-grad:linear-gradient(180deg,#c8f135,#b3e01d);--dk-ease:cubic-bezier(.2,.9,.25,1);--dk-spring:cubic-bezier(.34,1.56,.64,1)}",
     "html:not(.dk-on) #dk-view{display:none!important}",
-    "#dk-intro{max-width:760px;margin:22px auto 0;padding:18px 20px;border:1px solid #2e2d36;background:#0f0e14;color:#cfcfd6;font-family:'Space Grotesk',system-ui,sans-serif}",
-    "#dk-intro .dk-intro-k{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#a78bfa;font-weight:600}",
-    "#dk-intro p{margin:8px 0 0;font-size:14px;line-height:1.6;color:#b9b9c3}",
-    ".dk-intro-t{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.dk-intro-t span{font-size:11px;padding:4px 8px;border:1px solid #33323c;color:#9a9aa6;font-family:'Space Mono',monospace}",
-    ".dk-intro-nw{margin-top:14px;padding-top:12px;border-top:1px solid #24232b;font-size:13px;color:#b9b9c3}.dk-intro-nw b{color:#fff}.dk-intro-nw a{color:#c4b5fd;margin-left:8px;text-decoration:none;font-weight:600}",
+    "#dk-intro{max-width:760px;margin:0 auto 18px;padding:16px 20px;border-radius:20px;border:1px solid var(--nc-card-line,rgba(0,0,0,.07));background:var(--nc-card,#fff);box-shadow:var(--nc-shadow,none);color:var(--fg-2);font-family:var(--f-sans);animation:ncRise .4s cubic-bezier(.2,.9,.25,1) both}",
+    "#dk-intro .dk-intro-k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--veil-hi);font-weight:700}",
+    "#dk-intro p{margin:6px 0 0;font-size:14px;line-height:1.6;color:var(--fg-2)}",
+    ".dk-intro-t{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}.dk-intro-t span{font-size:11.5px;padding:4px 10px;border-radius:999px;background:var(--veil-wash);color:var(--veil-hi);font-weight:600}",
+    ".dk-intro-nw{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:13px;color:var(--fg-2)}.dk-intro-nw b{color:var(--fg)}.dk-intro-nw a{color:var(--veil-hi);margin-left:8px;text-decoration:none;font-weight:600}",
     "nav.side .dk-nav span{white-space:nowrap}",
-    ".dk-nw{font-style:normal;margin-left:auto;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:1px 5px;border:1px solid rgba(167,139,250,.45);color:#c4b5fd;border-radius:999px;white-space:nowrap}",
-    ".dk-x{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--line,#2e2d36);border-radius:999px;color:var(--fg,#fff);margin-right:6px;text-decoration:none}.dk-x:hover{background:rgba(255,255,255,.06)}",
-    ".sheet-wrap{position:fixed!important;inset:0!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:16px!important;background:rgba(4,3,8,.62)!important;-webkit-backdrop-filter:blur(14px)!important;backdrop-filter:blur(14px)!important;z-index:1000!important}",
-    ".sheet-scrim{position:absolute!important;inset:0!important;background:transparent!important;cursor:pointer}",
-    ".sheet{position:relative!important;animation:dkPop .18s ease-out}@keyframes dkPop{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}",
-    ".sheet{margin:auto!important;width:min(440px,100%)!important;max-width:440px!important;border-radius:6px!important;background:#111016!important;border:1px solid #2e2d36!important;box-shadow:none!important;bottom:auto!important}",
-    ".sheet .inp{border-radius:3px!important;background:#18171e!important;border-color:#33323c!important}",
-    ".sheet .btn-primary{border-radius:3px!important;background:#fff!important;color:#0b0a10!important}",
-    ".sheet h1,.sheet h2,.sheet h3{font-family:'Space Grotesk',system-ui,sans-serif!important;letter-spacing:-.01em}",
-    "@media (max-width:520px){#dk-intro{margin:14px 10px 0;padding:14px;cursor:pointer}.sheet{border-radius:6px!important}#dk-intro:not(.open) p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}#dk-intro:not(.open) .dk-intro-t{display:none}#dk-intro:not(.open)::after{content:'Tap to read more';display:block;margin-top:6px;font-size:11px;color:#8c8c96}}",
-    "html.dk-on main.main>:not(#dk-view):not(#dk-intro){display:none!important}",
+    ".dk-nw{font-style:normal;margin-left:auto;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:999px;background:var(--veil-wash);color:var(--veil-hi);white-space:nowrap}",
+    ".dk-x{display:inline-flex;align-items:center;justify-content:center;margin-right:6px;text-decoration:none}",
+    "@media (max-width:520px){#dk-intro{margin:0 0 14px;padding:14px;cursor:pointer}#dk-intro:not(.open) p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}#dk-intro:not(.open) .dk-intro-t{display:none}#dk-intro:not(.open)::after{content:'Tap to read more';display:block;margin-top:6px;font-size:11px;color:var(--fg-3)}}",
+    "html.dk-on main.main>:not(#dk-view):not(#dk-intro):not(#nc-foot){display:none!important}",
     "html.dk-on .nav-i.on:not(.dk-nav){background:transparent!important;color:var(--fg-2)!important}",
     "html.dk-on nav.tabbar .nav-i.on:not(.dk-nav),html.dk-on nav.tabbar .nav-i.on:not(.dk-nav) *{color:var(--fg-3)!important;background:transparent!important;box-shadow:none!important}",
     "nav.tabbar:has(.dk-nav){grid-template-columns:repeat(6,minmax(0,1fr))!important}",
     "nav.tabbar .dk-nav span{white-space:nowrap}",
-    "#dk-view{display:block;padding:34px 16px 70px;font-family:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;color:var(--dk-fg)}",
+    "#dk-view{display:block;padding:6px 0 40px;font-family:var(--f-sans);color:var(--dk-fg)}",
     "#dk-view *,#dk-modal *{box-sizing:border-box}",
-    ".dk-wrap{width:min(460px,100%);margin:0 auto}",
-    ".dk-seg{display:flex;justify-content:center;margin:0 0 22px}",
-    ".dk-seg button{all:unset;cursor:pointer;padding:7px 14px;border:1px solid var(--dk-line);color:var(--dk-mut);font-size:15px;display:inline-flex;gap:7px;align-items:center;transition:background .15s,color .15s}",
-    ".dk-seg button+button{border-left:0}",
-    ".dk-seg button:hover{color:#fff}",
-    ".dk-seg button.on{background:#3a3a41;color:#fff}",
-    ".dk-seg button{white-space:nowrap}",
-    ".dk-cl{width:16px;height:16px;border-radius:50%;background:#3a3a41;color:#fff;font-size:10px;display:inline-flex;align-items:center;justify-content:center}",
-    ".dk-card{background:var(--dk-bg);border:1px solid var(--dk-line);padding:20px 20px 28px}",
-    ".dk-lbl{color:var(--dk-mut);font-size:16px;margin:10px 10px 10px 10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}",
-    ".dk-lbl small{font-size:12px;color:#6d6d74;font-family:'Space Mono',monospace}",
-    ".dk-row{display:flex;gap:6px}",
-    ".dk-tok{all:unset;box-sizing:border-box;cursor:pointer;width:140px;height:74px;flex:none;background:var(--dk-box);border:1px solid var(--dk-line);padding:14px 12px;display:flex;align-items:center;gap:10px;transition:border-color .15s}",
-    ".dk-tok:hover{border-color:#6a6a72}",
+    ".dk-wrap{width:min(470px,100%);margin:0 auto}",
+    ".dk-seg{position:relative;display:flex;justify-content:center;gap:4px;margin:0 auto 18px;padding:4px;width:max-content;max-width:100%;border-radius:999px;background:var(--dk-box);border:1px solid var(--dk-line)}",
+    ".dk-seg button{all:unset;cursor:pointer;padding:8px 16px;border-radius:999px;color:var(--dk-mut);font-size:14px;font-weight:500;display:inline-flex;gap:7px;align-items:center;white-space:nowrap;transition:background .25s var(--dk-ease),color .2s,transform .22s var(--dk-spring)}",
+    ".dk-seg button:hover{color:var(--dk-fg)}.dk-seg button:active{transform:scale(.95)}",
+    ".dk-seg button.on{background:var(--dk-bg);color:var(--dk-fg);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px -6px rgba(0,0,0,.18)}",
+    ".dk-cl{width:16px;height:16px;border-radius:50%;background:var(--veil-wash);color:var(--veil-hi);font-size:10px;display:inline-flex;align-items:center;justify-content:center}",
+    ".dk-card{background:var(--dk-bg);border:1px solid var(--nc-card-line,var(--dk-line));border-radius:26px;padding:18px 18px 22px;box-shadow:var(--nc-shadow,none);animation:ncRise .45s var(--dk-ease) both}",
+    ".dk-lbl{color:var(--dk-mut);font-size:13.5px;font-weight:500;margin:8px 6px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}",
+    ".dk-lbl small{font-size:12px;color:var(--dk-mut)}",
+    ".dk-row{display:flex;gap:6px;padding:6px;border-radius:20px;background:var(--dk-box);border:1px solid var(--dk-line);transition:border-color .2s,box-shadow .2s}",
+    ".dk-row:focus-within{border-color:rgba(150,200,0,.55);box-shadow:0 0 0 4px rgba(200,241,53,.2)}",
+    ".dk-tok{all:unset;box-sizing:border-box;cursor:pointer;width:140px;height:62px;flex:none;background:var(--dk-bg);border:1px solid var(--dk-line);border-radius:15px;padding:10px 12px;display:flex;align-items:center;gap:10px;transition:transform .22s var(--dk-spring),border-color .2s,box-shadow .2s}",
+    ".dk-tok:hover{border-color:var(--dk-line2);box-shadow:0 4px 14px -8px rgba(0,0,0,.25)}.dk-tok:active{transform:scale(.97)}",
     ".dk-tok .t{min-width:0;display:flex;flex-direction:column}",
-    ".dk-sym{font-weight:500;font-size:16px;line-height:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px}",
+    ".dk-sym{font-weight:600;font-size:15.5px;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px}",
     ".dk-ch{font-size:12px;color:var(--dk-mut);line-height:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px}",
-    ".dk-sel{font-size:15px;color:#cfcfd4}",
+    ".dk-sel{font-size:15px;color:var(--dk-fg2);font-weight:500}",
     ".dk-ico{position:relative;display:inline-flex;flex:none}",
     ".dk-ico img.m{border-radius:50%;object-fit:cover;display:block}",
-    ".dk-ico .lt{border-radius:50%;background:#3a3a41;color:#e6e6ea;align-items:center;justify-content:center;font-size:12px;font-weight:600;display:flex}",
-    ".dk-ico img.b{position:absolute;right:-3px;bottom:-3px;width:13px;height:13px;border-radius:50%;border:1.5px solid var(--dk-box);background:var(--dk-box)}",
-    ".dk-amt{flex:1;min-width:0;height:74px;background:var(--dk-box);border:1px solid var(--dk-line);padding:10px 16px;display:flex;flex-direction:column;justify-content:center;gap:2px;cursor:text}",
-    ".dk-amt:focus-within{border-color:#6a6a72}",
-    ".dk-amt input{all:unset;font-family:'Space Mono',monospace;font-size:20px;width:100%;color:#fff}",
-    ".dk-amt input::placeholder{color:#5c5c63}",
-    ".dk-amt .u{font-family:'Space Mono',monospace;font-size:12px;color:var(--dk-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
-    ".dk-out{font-family:'Space Mono',monospace;font-size:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
-    ".dk-out.z{color:#5c5c63}",
-    ".dk-flip{all:unset;width:30px;height:30px;margin:14px auto 2px;border:1px solid var(--dk-line);background:var(--dk-box);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#cfcfd4}",
-    ".dk-flip:hover{border-color:#6a6a72;color:#fff}",
+    ".dk-ico .lt{border-radius:50%;background:var(--veil-wash);color:var(--veil-hi);align-items:center;justify-content:center;font-size:12px;font-weight:700;display:flex}",
+    ".dk-ico img.b{position:absolute;right:-3px;bottom:-3px;width:13px;height:13px;border-radius:50%;border:1.5px solid var(--dk-bg);background:var(--dk-bg)}",
+    ".dk-amt{flex:1;min-width:0;height:62px;background:transparent;border:0;padding:6px 10px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:2px;cursor:text;text-align:right}",
+    ".dk-amt input{all:unset;font-family:var(--f-sans);font-weight:600;font-size:24px;width:100%;color:var(--dk-fg);text-align:right;letter-spacing:-.02em}",
+    ".dk-amt input::placeholder{color:var(--dk-mut)}",
+    ".dk-amt .u{font-size:12px;color:var(--dk-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}",
+    ".dk-out{font-weight:600;font-size:24px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}",
+    ".dk-out.z{color:var(--dk-mut)}",
+    ".dk-flip{all:unset;width:38px;height:38px;margin:-8px auto -8px;position:relative;z-index:2;border-radius:13px;border:4px solid var(--dk-bg);background:var(--dk-box);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dk-fg2);transition:transform .35s var(--dk-spring),background .2s}",
+    ".dk-flip:hover{transform:rotate(180deg);background:var(--veil-wash);color:var(--veil-hi)}",
     ".dk-field{margin-top:6px}",
-    ".dk-in{display:flex;align-items:center;gap:8px;background:var(--dk-box);border:1px solid var(--dk-line);padding:13px 14px}",
-    ".dk-in:focus-within{border-color:#6a6a72}",
-    ".dk-in input{all:unset;flex:1;min-width:0;font-family:'Space Mono',monospace;font-size:13px;color:#fff}",
-    ".dk-in input::placeholder{color:#5c5c63}",
-    ".dk-paste{all:unset;cursor:pointer;font-size:12px;color:#cfcfd4;border:1px solid var(--dk-line);padding:4px 9px}",
-    ".dk-paste:hover{color:#fff;border-color:#6a6a72}",
-    ".dk-hint{color:#6d6d74;font-size:12px;margin:8px 10px 0}",
-    ".dk-rates{margin-top:18px}",
-    ".dk-r{all:unset;box-sizing:border-box;width:100%;cursor:pointer;border:1px solid var(--dk-line);background:var(--dk-box);padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px}",
-    ".dk-r.on{border-color:#cfb1f8;box-shadow:inset 0 0 0 1px rgba(207,177,248,.35)}",
+    ".dk-in{display:flex;align-items:center;gap:8px;background:var(--dk-box);border:1px solid var(--dk-line);border-radius:16px;padding:12px 14px;transition:border-color .2s,box-shadow .2s}",
+    ".dk-in:focus-within{border-color:rgba(150,200,0,.55);box-shadow:0 0 0 4px rgba(200,241,53,.2)}",
+    ".dk-in input{all:unset;flex:1;min-width:0;font-family:var(--f-mono,monospace);font-size:13px;color:var(--dk-fg)}",
+    ".dk-in input::placeholder{color:var(--dk-mut);font-family:var(--f-sans)}",
+    ".dk-paste{all:unset;cursor:pointer;font-size:12px;font-weight:600;color:var(--dk-fg2);background:var(--dk-bg);border:1px solid var(--dk-line);border-radius:999px;padding:5px 11px;transition:transform .2s var(--dk-spring)}",
+    ".dk-paste:hover{color:var(--dk-fg);border-color:var(--dk-line2)}.dk-paste:active{transform:scale(.94)}",
+    ".dk-hint{color:var(--dk-mut);font-size:12px;margin:8px 8px 0}",
+    ".dk-rates{margin-top:16px}",
+    ".dk-r{all:unset;box-sizing:border-box;width:100%;cursor:pointer;border:1px solid var(--dk-line);background:var(--dk-box);border-radius:16px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:6px;transition:border-color .2s,background .2s,transform .22s var(--dk-spring);animation:ncRise .35s var(--dk-ease) both}",
+    ".dk-r:hover{border-color:var(--dk-line2)}.dk-r:active{transform:scale(.985)}",
+    ".dk-r.on{border-color:rgba(150,200,0,.7);background:var(--veil-wash);box-shadow:0 0 0 3px rgba(200,241,53,.18)}",
     ".dk-r .k{font-size:12px;color:var(--dk-mut)}",
-    ".dk-r .v{font-family:'Space Mono',monospace;font-size:14px}",
-    ".dk-r .best{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#0d0d0d;background:var(--dk-grad);padding:2px 7px;border-radius:999px;margin-left:8px}",
+    ".dk-r .v{font-weight:600;font-size:14px}",
+    ".dk-r .best{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#1a2200;background:var(--dk-grad);padding:2px 8px;border-radius:999px;margin-left:8px}",
     ".dk-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}",
-    ".dk-meta div{border:1px solid var(--dk-line);background:var(--dk-box);padding:9px 11px}",
-    ".dk-meta b{display:block;font-weight:400;font-size:11px;color:var(--dk-mut)}",
-    ".dk-meta span{font-family:'Space Mono',monospace;font-size:12px}",
-    ".dk-lim{font-size:12px;color:#6d6d74;margin:8px 10px 0;font-family:'Space Mono',monospace}",
-    ".dk-cta{all:unset;box-sizing:border-box;width:100%;margin-top:22px;height:49px;border-radius:25px;font-size:18px;color:#0d0d0d;cursor:pointer;background:var(--dk-grad);display:flex;align-items:center;justify-content:center;gap:10px;transition:filter .15s,opacity .15s}",
-    ".dk-cta:hover{filter:brightness(1.05)}",
-    ".dk-cta[disabled]{opacity:.42;cursor:not-allowed;filter:none}",
-    ".dk-err{margin-top:14px;border:1px solid #5b2a2f;background:#2a1b1f;color:#ff9fa6;padding:10px 12px;font-size:13px}",
-    ".dk-note{text-align:center;color:#6d6d74;font-size:12px;margin-top:14px}",
-    ".dk-live{display:inline-flex;align-items:center;gap:6px;color:#cfcfd4;font-size:12px}",
-    ".dk-live i{width:6px;height:6px;border-radius:50%;background:#83f4ff;box-shadow:0 0 8px #83f4ff;animation:dkp 1.4s infinite}",
-    "@keyframes dkp{50%{opacity:.35}}",
+    ".dk-meta div{border:1px solid var(--dk-line);background:var(--dk-box);border-radius:14px;padding:9px 11px}",
+    ".dk-meta b{display:block;font-weight:500;font-size:11px;color:var(--dk-mut)}",
+    ".dk-meta span{font-weight:600;font-size:12.5px}",
+    ".dk-lim{font-size:12px;color:var(--dk-mut);margin:8px 8px 0}",
+    ".dk-cta{all:unset;box-sizing:border-box;width:100%;margin-top:20px;height:52px;border-radius:999px;font-size:16px;font-weight:600;color:#1a2200;cursor:pointer;background:var(--dk-grad);box-shadow:0 8px 24px -8px rgba(170,215,20,.85),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .22s var(--dk-spring),box-shadow .25s,opacity .2s,filter .2s}",
+    ".dk-cta:hover{transform:translateY(-1px);box-shadow:0 12px 30px -8px rgba(170,215,20,.95),inset 0 1px 0 rgba(255,255,255,.6)}",
+    ".dk-cta:active{transform:scale(.975)}",
+    ".dk-cta[disabled]{opacity:.45;cursor:not-allowed;filter:grayscale(.35);transform:none;box-shadow:none}",
+    ".dk-err{margin-top:14px;border-radius:14px;border:1px solid rgba(200,48,74,.25);background:rgba(200,48,74,.07);color:var(--bad,#c8304a);padding:10px 12px;font-size:13px;animation:ncRise .3s var(--dk-ease) both}",
+    ".dk-note{text-align:center;color:var(--dk-mut);font-size:12px;margin-top:14px}",
+    ".dk-live{display:inline-flex;align-items:center;gap:6px;color:var(--dk-fg2);font-size:12px}",
+    ".dk-live i{width:7px;height:7px;border-radius:50%;background:#9ac50c}",
     ".dk-spin{width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:dks .8s linear infinite;display:inline-block}",
     "@keyframes dks{to{transform:rotate(360deg)}}",
-    "#dk-modal{position:fixed;inset:0;z-index:90;background:rgba(10,10,12,.62);display:grid;place-items:center;font-family:'Space Grotesk',ui-sans-serif,system-ui,sans-serif;color:#fff;animation:dkf .15s ease}",
-    "@keyframes dkf{from{opacity:0}}",
-    ".dk-mb{width:min(440px,calc(100% - 24px));max-height:calc(100vh - 52px);background:#1a1a1f;border:1px solid var(--dk-line);padding:20px;display:flex;flex-direction:column}",
+    "#dk-modal{position:fixed;inset:0;z-index:90;background:rgba(18,20,12,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:grid;place-items:center;font-family:var(--f-sans);color:var(--dk-fg);animation:ncFade .2s ease both}",
+    ".dk-mb{width:min(440px,calc(100% - 24px));max-height:calc(100vh - 52px);background:var(--dk-bg);border:1px solid var(--nc-card-line,var(--dk-line));border-radius:26px;padding:20px;display:flex;flex-direction:column;box-shadow:0 30px 80px -24px rgba(20,24,10,.45);animation:ncPop .32s var(--dk-spring) both}",
     ".dk-mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}",
-    ".dk-mh h3{margin:0;font-size:18px;font-weight:500}",
-    ".dk-x{all:unset;cursor:pointer;color:#e6e6ea;display:flex}",
-    ".dk-x:hover{color:#fff}",
+    ".dk-mh h3{margin:0;font-size:18px;font-weight:600}",
+    ".dk-mb .dk-x{all:unset;cursor:pointer;color:var(--dk-fg2);display:flex;width:32px;height:32px;border-radius:10px;align-items:center;justify-content:center;transition:background .2s,transform .2s var(--dk-spring)}",
+    ".dk-mb .dk-x:hover{background:var(--dk-box);color:var(--dk-fg)}.dk-mb .dk-x:active{transform:scale(.9)}",
     ".dk-chains{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}",
-    ".dk-chain{all:unset;box-sizing:border-box;cursor:pointer;height:45px;border:1px solid var(--dk-line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;color:#e6e6ea;text-align:center;padding:0 4px;overflow:hidden}",
+    ".dk-chain{all:unset;box-sizing:border-box;cursor:pointer;height:46px;border:1px solid var(--dk-line);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;color:var(--dk-fg2);text-align:center;padding:0 4px;overflow:hidden;transition:background .2s,border-color .2s,transform .2s var(--dk-spring)}",
     ".dk-chain span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}",
-    ".dk-chain:hover{background:#25252b}",
-    ".dk-chain.on{background:#3a3a41;border-color:#8c8c8c}",
+    ".dk-chain:hover{background:var(--dk-box)}.dk-chain:active{transform:scale(.96)}",
+    ".dk-chain.on{background:var(--veil-wash);border-color:rgba(150,200,0,.6);color:var(--dk-fg);font-weight:600}",
     ".dk-chain img{width:16px;height:16px;border-radius:50%}",
-    ".dk-srch{display:flex;align-items:center;gap:10px;border:1px solid var(--dk-line);background:#25252b;padding:8px 12px;color:#8c8c8c}",
-    ".dk-srch input{all:unset;flex:1;font-size:15px;color:#fff}",
-    ".dk-srch input::placeholder{color:#8c8c8c}",
+    ".dk-srch{display:flex;align-items:center;gap:10px;border:1px solid var(--dk-line);background:var(--dk-box);border-radius:14px;padding:10px 12px;color:var(--dk-mut)}",
+    ".dk-srch:focus-within{border-color:rgba(150,200,0,.55);box-shadow:0 0 0 4px rgba(200,241,53,.2)}",
+    ".dk-srch input{all:unset;flex:1;font-size:15px;color:var(--dk-fg)}",
+    ".dk-srch input::placeholder{color:var(--dk-mut)}",
     ".dk-chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 6px}",
-    ".dk-chip{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:#25252b;padding:4px 8px;border-radius:999px;font-family:'Space Mono',monospace;font-size:12px;font-weight:700}",
-    ".dk-chip:hover{background:#303037}",
+    ".dk-chip{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:var(--dk-box);border:1px solid var(--dk-line);padding:4px 10px 4px 5px;border-radius:999px;font-size:12.5px;font-weight:600;transition:background .2s,transform .2s var(--dk-spring)}",
+    ".dk-chip:hover{background:var(--veil-wash)}.dk-chip:active{transform:scale(.95)}",
     ".dk-list{overflow-y:auto;margin:4px -8px 0;padding:0 8px;min-height:120px}",
-    ".dk-it{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:13px;padding:9px 6px}",
-    ".dk-it:hover{background:#232329}",
-    ".dk-it .n{font-size:16px;line-height:21px}",
-    ".dk-it .s{font-size:12px;color:var(--dk-mut);font-family:'Space Mono',monospace}",
-    ".dk-it .p{margin-left:auto;text-align:right;font-size:12px;color:var(--dk-mut);font-family:'Space Mono',monospace;flex:none}",
+    ".dk-it{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:13px;padding:9px 8px;border-radius:14px;transition:background .15s}",
+    ".dk-it:hover{background:var(--dk-box)}",
+    ".dk-it .n{font-size:15px;font-weight:500;line-height:20px}",
+    ".dk-it .s{font-size:12px;color:var(--dk-mut)}",
+    ".dk-it .p{margin-left:auto;text-align:right;font-size:12px;color:var(--dk-mut);flex:none}",
     ".dk-empty{padding:36px 0;text-align:center;color:var(--dk-mut);font-size:14px;display:flex;gap:8px;align-items:center;justify-content:center}",
-    ".dk-sec{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#6d6d74;padding:10px 6px 2px;font-family:'Space Mono',monospace}",
-    ".dk-pair{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--dk-line);background:#25252b;padding:12px 14px;gap:8px}",
+    ".dk-sec{font-size:11px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;color:var(--dk-mut);padding:10px 8px 2px}",
+    ".dk-pair{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--dk-line);background:var(--dk-box);border-radius:18px;padding:12px 14px;gap:8px}",
     ".dk-pair .a{display:flex;align-items:center;gap:10px;min-width:0}",
-    ".dk-pair .a div{font-size:14px} .dk-pair .a small{display:block;font-size:11px;color:var(--dk-mut)}",
+    ".dk-pair .a div{font-size:14px;font-weight:600} .dk-pair .a small{display:block;font-size:11px;color:var(--dk-mut);font-weight:400}",
     ".dk-cf{margin-top:12px}",
-    ".dk-cf .k{font-size:12px;color:var(--dk-mut);margin:0 0 6px 2px}",
-    ".dk-cf .v{display:flex;align-items:center;gap:8px;border:1px solid var(--dk-line);background:#25252b;padding:10px 12px}",
-    ".dk-cf code{font-family:'Space Mono',monospace;font-size:12.5px;word-break:break-all;color:#fff;flex:1}",
-    ".dk-cp{all:unset;cursor:pointer;color:#cfcfd4;display:flex}",
-    ".dk-cp:hover{color:#fff}",
-    ".dk-timer{margin-top:12px;border:1px solid var(--dk-line);padding:9px 12px;font-size:13px;color:#cfcfd4}",
-    ".dk-timer b{font-family:'Space Mono',monospace;color:#fff}",
+    ".dk-cf .k{font-size:12px;color:var(--dk-mut);margin:0 0 6px 4px}",
+    ".dk-cf .v{display:flex;align-items:center;gap:8px;border:1px solid var(--dk-line);background:var(--dk-box);border-radius:14px;padding:10px 12px}",
+    ".dk-cf code{font-family:var(--f-mono,monospace);font-size:12.5px;word-break:break-all;color:var(--dk-fg);flex:1}",
+    ".dk-cp{all:unset;cursor:pointer;color:var(--dk-fg2);display:flex;padding:4px;border-radius:8px;transition:background .2s,transform .2s var(--dk-spring)}",
+    ".dk-cp:hover{color:var(--dk-fg);background:var(--dk-bg)}.dk-cp:active{transform:scale(.88)}",
+    ".dk-timer{margin-top:12px;border-radius:14px;background:var(--veil-wash);padding:9px 12px;font-size:13px;color:var(--dk-fg2)}",
+    ".dk-timer b{font-family:var(--f-mono,monospace);color:var(--dk-fg)}",
     ".dk-steps{margin-top:18px;display:grid;gap:10px}",
-    ".dk-step{display:flex;align-items:center;gap:12px;font-size:14px;color:#6d6d74}",
-    ".dk-step i{width:24px;height:24px;border:1px solid var(--dk-line);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-family:'Space Mono',monospace}",
-    ".dk-step.done{color:#fff} .dk-step.done i{background:#3a3a41;border-color:#8c8c8c}",
-    ".dk-step.act{color:#fff} .dk-step.act i{border-color:#cfb1f8;box-shadow:0 0 10px rgba(207,177,248,.45)}",
-    ".dk-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--dk-line);padding:3px 9px;font-size:12px;font-family:'Space Mono',monospace;color:#cfcfd4;margin-top:10px}",
-    ".dk-recent{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:10px;border:1px solid var(--dk-line);background:#25252b;padding:11px 12px;margin-top:6px;font-size:13px}",
-    ".dk-recent:hover{border-color:#6a6a72}",
-    ".dk-recent code{margin-left:auto;font-family:'Space Mono',monospace;font-size:11px;color:var(--dk-mut);max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
-    "@media (max-width:520px){.dk-tok{width:122px}#dk-view{padding:20px 10px 170px}.dk-card{padding:16px 14px 22px}"
-    + ".dk-seg{width:100%}.dk-seg button{flex:1;justify-content:center;padding:9px 6px;font-size:13px;gap:5px}.dk-seg button svg{display:none}}"
+    ".dk-step{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--dk-mut);transition:color .3s}",
+    ".dk-step i{width:26px;height:26px;border-radius:50%;border:1px solid var(--dk-line2);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:600;transition:background .3s,border-color .3s}",
+    ".dk-step.done{color:var(--dk-fg)} .dk-step.done i{background:var(--dk-grad);border-color:transparent;color:#1a2200}",
+    ".dk-step.act{color:var(--dk-fg)} .dk-step.act i{border-color:#9ac50c;animation:ncPulse 1.8s ease-in-out infinite}",
+    ".dk-badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:var(--veil-wash);padding:4px 10px;font-size:12px;font-weight:600;color:var(--veil-hi);margin-top:10px}",
+    ".dk-recent{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:10px;border:1px solid var(--dk-line);background:var(--dk-box);border-radius:16px;padding:11px 12px;margin-top:6px;font-size:13px;transition:border-color .2s,transform .2s var(--dk-spring)}",
+    ".dk-recent:hover{border-color:var(--dk-line2)}.dk-recent:active{transform:scale(.985)}",
+    ".dk-recent code{margin-left:auto;font-family:var(--f-mono,monospace);font-size:11px;color:var(--dk-mut);max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
+    "@media (max-width:520px){.dk-tok{width:122px}#dk-view{padding:4px 0 150px}.dk-card{padding:14px 12px 18px;border-radius:22px}"
+    + ".dk-seg{width:100%}.dk-seg button{flex:1;justify-content:center;padding:8px 6px;font-size:13px;gap:5px}.dk-seg button svg{display:none}}"
   ].join('\n');
 
   function injectCSS() {
     if (document.getElementById('dk-swap-css')) return;
     var l = document.createElement('link');
     l.rel = 'stylesheet';
-    l.href = 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap';
+    l.href = 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap';
     document.head.appendChild(l);
     var s = document.createElement('style');
     s.id = 'dk-swap-css';
@@ -835,7 +827,7 @@
     if (o.depositMemo) h += copyField('Deposit memo / tag (required)', o.depositMemo);
     h += '<div class="dk-cf"><div class="k">Receiving address</div><div class="v"><code>' + esc(o.addressTo || '') + '</code></div></div>';
     h += '<button class="dk-cta" data-act="trackorder" data-id="' + esc(o.id) + '" data-testid="dk-order-track">Track this order</button>';
-    h += '<div class="dk-note">Live order via Cadabra. Only deposit from your own Solana wallet.</div></div>';
+    h += '<div class="dk-note">Live order via NullCash. Only deposit from your own Solana wallet.</div></div>';
     m.innerHTML = h;
     clearInterval(orderTimer);
     if (o.expires) {
@@ -978,7 +970,7 @@
   var NAV_ITEMS = [
     { k: 'private', label: 'Private route', hash: 'private-route', icon: IC.route, nw: true },
     { k: 'privacy', label: 'Privacy swap', hash: 'privacy-swap', icon: IC.shield, nw: true },
-    { k: 'track', label: 'Track order', hash: 'track', icon: IC.track }
+    { k: 'track', label: 'Track', hash: 'track', icon: IC.track }
   ];
   function ensure() {
     injectCSS();
@@ -995,7 +987,7 @@
       var compact = nav.classList.contains('tabbar');
       var btns = Array.prototype.slice.call(nav.querySelectorAll('.nav-i'));
       if (!btns.length) return;
-      var anchor = btns.find(function (b) { return /(Cadabra)Swap|Bridge out|^Swap$/.test(b.textContent); }) ||
+      var anchor = btns.find(function (b) { return /(NullCash)Swap|^Bridge$|Bridge out|^Swap$/.test(b.textContent.trim()); }) ||
                    btns.find(function (b) { return /Trade/.test(b.textContent); }) || btns[btns.length - 1];
       var frag = document.createDocumentFragment();
       (compact ? [{ k: 'any', label: 'Swaps', hash: 'private-route', icon: IC.route }] : NAV_ITEMS).forEach(function (it) {
@@ -1031,15 +1023,15 @@
   }, 400);
 
   // visual-only ordering of the sidebar / bottom bar (CSS order; React keeps its DOM untouched)
-  var SIDE_ORDER = ['overview|home', 'vanish|shield', 'dk:private', 'dk:privacy', 'swap|trade', 'bridge out|cadabraswap',
-    'pay|send', 'request|receive', 'cash out|withdraw', 'yield|earn', 'dk:track', 'history|activity',
-    'burner addresses|addresses', 'referrals|invite', 'vault & keys|keys'];
-  var TAB_ORDER = ['overview|home', 'dk:any', 'vanish|shield', 'swap|trade', 'pay|send', 'more'];
+  var SIDE_ORDER = ['home|overview', 'shield|vanish', 'send|pay', 'swap|trade', 'bridge|bridge out|nullcashswap',
+    'dk:private', 'dk:privacy', 'dk:track', 'history|activity', 'nc:more',
+    'receive|request', 'withdraw|cash out', 'earn|yield', 'addresses|burner addresses', 'invite|referrals', 'keys|vault & keys'];
+  var TAB_ORDER = ['home|overview', 'dk:any', 'shield|vanish', 'swap|trade', 'send|pay', 'more'];
   function orderNav() {
     [['nav.side', SIDE_ORDER], ['nav.tabbar', TAB_ORDER]].forEach(function (cfg) {
       var nav = document.querySelector(cfg[0]); if (!nav) return;
       Array.prototype.forEach.call(nav.children, function (el) {
-        var key = el.getAttribute('data-dk') ? 'dk:' + el.getAttribute('data-dk') : (el.textContent || '').trim().toLowerCase();
+        var key = el.getAttribute('data-dk') ? 'dk:' + el.getAttribute('data-dk') : (el.classList.contains('nc-more-btn') ? 'nc:more' : (el.textContent || '').trim().toLowerCase());
         var idx = 99;
         cfg[1].forEach(function (o, i) { if (o.split('|').indexOf(key) >= 0) idx = i; });
         if (String(el.style.order) !== String(idx)) el.style.order = idx;
@@ -1050,21 +1042,21 @@
   // ---- per-tab explainers (users always know what a tab does) ----
   var X_URL = 'https://x.com/cadabrazk';
   var INTRO = {
-    'dk:private': ['Private route · no wallet needed', 'Swap from Solana to 120+ networks without connecting a wallet. Cadabra compares several multi-hop routes, you pick one and send a single deposit to a one-time address; the route converts and delivers to your destination address. Nothing links your Solana wallet to the receiving address beyond the route itself.', ['No wallet connection', 'Multi-hop routing', 'One deposit']],
+    'dk:private': ['Private route · no wallet needed', 'Swap from Solana to 120+ networks without connecting a wallet. NullCash compares several multi-hop routes, you pick one and send a single deposit to a one-time address; the route converts and delivers to your destination address. Nothing links your Solana wallet to the receiving address beyond the route itself.', ['No wallet connection', 'Multi-hop routing', 'One deposit']],
     'dk:privacy': ['Privacy swap · no wallet needed', 'Intent-based confidential swap. You state what you want (send X, receive at least Y on chain Z); a competitive solver network fills it and settlement runs through confidential processing. Refunds return to your Solana refund address if the intent is not filled.', ['Solver competition', 'Confidential settlement', 'Auto refund']],
     'dk:track': ['Track order', 'Paste an order ID to see its live status, from waiting for deposit through confirmation, exchange and delivery. Orders created on this device are listed below.', ['Live status', 'Local order list']],
-    'overview': ['Overview', 'Your private balance, recent activity and quick actions. Everything shown here is decrypted locally from your notes; nothing about it is readable on-chain.', ['Local decryption', 'Notes', 'No tracking']],
-    'vanish': ['Vanish · ZK shielded deposit', 'Yes, this is real zero-knowledge. Vanish moves public tokens from a Solana wallet into the shielded pool: the program stores a Poseidon commitment to (token, amount, owner key, blinding) as a leaf in a 2^26 Merkle tree. From then on the funds are notes only you can open. Every later spend is a Groth16 proof (BN254) that the note exists in the tree and that you hold its key, checked on-chain without revealing which note.', ['Groth16 / BN254', 'Poseidon Merkle tree', 'Nullifiers block double-spends']],
+    'home': ['Home', 'Your private balance, recent activity and quick actions. Everything shown here is decrypted locally from your notes; nothing about it is readable on-chain.', ['Local decryption', 'Notes', 'No tracking']],
+    'shield': ['Shield · ZK shielded deposit', 'Yes, this is real zero-knowledge. Shield moves public tokens from a Solana wallet into the shielded pool: the program stores a Poseidon commitment to (token, amount, owner key, blinding) as a leaf in a 2^26 Merkle tree. From then on the funds are notes only you can open. Every later spend is a Groth16 proof (BN254) that the note exists in the tree and that you hold its key, checked on-chain without revealing which note.', ['Groth16 / BN254', 'Poseidon Merkle tree', 'Nullifiers block double-spends']],
     'swap': ['Swap · private trade inside the pool', 'Trade one shielded token for another without leaving the pool. A proof spends your input note, the program routes the trade through on-chain liquidity and writes the output as a new note. Outside observers see a pool trade happen, not who made it or how big it was.', ['Proof-bound terms', 'Relayer pays gas', 'Output lands as a note']],
-    'bridge out': ['Bridge out', 'Exit the shielded pool directly to another network. The proof binds the destination chain, address and minimum output, so a relayer cannot change where funds go.', ['Bound destination', 'Cross-chain exit', 'Relayer submitted']],
-    'pay': ['Pay · private transfer', 'Send to any Cadabra address. Your note is spent by proof and a new note is encrypted to the recipient’s viewing key. On-chain: one nullifier and two new commitments. No sender, recipient or amount is revealed.', ['Encrypted to recipient', '0 public amounts', 'No wallet signature']],
-    'request': ['Request · receive privately', 'Share your Cadabra address or a payment link. Incoming notes are found by scanning with your viewing key locally; the address itself never appears on-chain.', ['Viewing key scan', 'Shareable address', 'Unlinkable receipts']],
-    'cash out': ['Cash out · withdraw to Solana', 'Turn notes back into public tokens at any Solana address, ideally a fresh burner one. The amount and destination become public at exit, but the proof does not link them to the deposit that funded them.', ['Public exit', 'Use a burner address', 'Unlinkable to deposit']],
-    'yield': ['Yield · earn while shielded', 'Lend shielded balances into allow-listed on-chain vaults from inside the pool. Positions are held by the program and accounted to your notes, so your wallet never appears as the depositor.', ['Allow-listed vaults', 'Position as notes', 'Withdraw any time']],
+    'bridge': ['Bridge', 'Exit the shielded pool directly to another network. The proof binds the destination chain, address and minimum output, so a relayer cannot change where funds go.', ['Bound destination', 'Cross-chain exit', 'Relayer submitted']],
+    'send': ['Send · private transfer', 'Send to any NullCash address. Your note is spent by proof and a new note is encrypted to the recipient’s viewing key. On-chain: one nullifier and two new commitments. No sender, recipient or amount is revealed.', ['Encrypted to recipient', '0 public amounts', 'No wallet signature']],
+    'receive': ['Receive privately', 'Share your NullCash address or a payment link. Incoming notes are found by scanning with your viewing key locally; the address itself never appears on-chain.', ['Viewing key scan', 'Shareable address', 'Unlinkable receipts']],
+    'withdraw': ['Withdraw to Solana', 'Turn notes back into public tokens at any Solana address, ideally a fresh burner one. The amount and destination become public at exit, but the proof does not link them to the deposit that funded them.', ['Public exit', 'Use a burner address', 'Unlinkable to deposit']],
+    'earn': ['Earn while shielded', 'Lend shielded balances into allow-listed on-chain vaults from inside the pool. Positions are held by the program and accounted to your notes, so your wallet never appears as the depositor.', ['Allow-listed vaults', 'Position as notes', 'Withdraw any time']],
     'history': ['History', 'Your own decrypted activity log. Only your device can read it; the chain only ever sees nullifiers and commitments.', ['Local only', 'Decrypted with your keys']],
-    'burner addresses': ['Burner addresses', 'One-time Solana addresses derived from your vault, used once for a cash out or a payment so exits do not cluster on one public address.', ['Derived from vault', 'Single use', 'Breaks clustering']],
-    'referrals': ['Referrals', 'Invite friends with your personal link and track rewards earned from their activity.', ['Personal link', 'Rewards']],
-    'vault & keys': ['Vault & keys', 'Your spending key, viewing key and recovery key, all derived from one 32-byte root encrypted on this device (PBKDF2 · AES-GCM). Back up the recovery key offline; nobody can reset it.', ['Never leaves device', 'Recovery key', 'Viewing key export']]
+    'addresses': ['Burner addresses', 'One-time Solana addresses derived from your vault, used once for a cash out or a payment so exits do not cluster on one public address.', ['Derived from vault', 'Single use', 'Breaks clustering']],
+    'invite': ['Invite', 'Invite friends with your personal link and track rewards earned from their activity.', ['Personal link', 'Rewards']],
+    'keys': ['Keys & vault', 'Your spending key, viewing key and recovery key, all derived from one 32-byte root encrypted on this device (PBKDF2 · AES-GCM). Back up the recovery key offline; nobody can reset it.', ['Never leaves device', 'Recovery key', 'Viewing key export']]
   };
   function activeLabel() {
     var on = document.querySelector('nav.side .nav-i.on:not(.dk-nav)') || document.querySelector('nav.tabbar .nav-i.on:not(.dk-nav)');
@@ -1074,7 +1066,7 @@
     var it = INTRO[k]; if (!it) return '';
     return '<div class="dk-intro-k">' + esc(it[0]) + '</div><p>' + esc(it[1]) + '</p><div class="dk-intro-t">' +
       it[2].map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('') + '</div>' +
-      (k === 'overview' ? '<div class="dk-intro-nw"><b>No wallet? No problem.</b> Private route and Privacy swap work without connecting or creating a wallet: pick tokens, paste an address, send one deposit. <a href="#private-route" data-testid="dk-intro-private">Private route →</a> <a href="#privacy-swap" data-testid="dk-intro-privacy">Privacy swap →</a></div>' : '');
+      (k === 'home' ? '<div class="dk-intro-nw"><b>No wallet? No problem.</b> Private route and Privacy swap work without connecting or creating a wallet: pick tokens, paste an address, send one deposit. <a href="#private-route" data-testid="dk-intro-private">Private route →</a> <a href="#privacy-swap" data-testid="dk-intro-privacy">Privacy swap →</a></div>' : '');
   }
   var lastIntro = null;
   function syncIntro() {
@@ -1097,12 +1089,293 @@
     if (tr && !tr.querySelector('.dk-x')) {
       var a = document.createElement('a');
       a.className = 'dk-x'; a.href = X_URL; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      a.setAttribute('aria-label', 'Cadabra on X'); a.setAttribute('data-testid', 'dk-x-link');
+      a.setAttribute('aria-label', 'NullCash on X'); a.setAttribute('data-testid', 'dk-x-link');
       a.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
       tr.insertBefore(a, tr.firstChild);
     }
   }
-  function tick() { orderNav(); ensureX(); syncIntro(); }
+  /* ---- NullCash: top-tab "More" menu (desktop) ---- */
+  var MORE = { 'receive': 'Get paid to a private address', 'withdraw': 'Exit to any Solana address',
+    'addresses': 'One-time burner addresses', 'keys': 'Vault, viewing & recovery keys' };
+  var MORE_ICO = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
+  function closeMore() {
+    var p = document.getElementById('nc-more-pop'); if (p) p.remove();
+    var b = document.querySelector('.nc-more-btn'); if (b) b.classList.remove('open');
+  }
+  function openMore(btn) {
+    closeMore();
+    var nav = document.querySelector('nav.side'); if (!nav) return;
+    var pop = document.createElement('div'); pop.id = 'nc-more-pop'; pop.setAttribute('data-testid', 'nc-more-menu');
+    Array.prototype.forEach.call(nav.querySelectorAll('.nav-i.nc-more-item'), function (orig) {
+      var label = (orig.textContent || '').trim(), k = label.toLowerCase();
+      var it = document.createElement('button'); it.type = 'button';
+      it.setAttribute('data-testid', 'nc-more-' + k.replace(/[^a-z]+/g, '-'));
+      if (orig.classList.contains('on')) it.className = 'on';
+      var ico = orig.querySelector('i'); 
+      it.innerHTML = '<i>' + (ico ? ico.innerHTML : '') + '</i><span>' + esc(label) + '<small>' + esc(MORE[k] || '') + '</small></span>';
+      it.addEventListener('click', function () { closeMore(); orig.click(); });
+      pop.appendChild(it);
+    });
+    document.body.appendChild(pop);
+    var r = btn.getBoundingClientRect();
+    pop.style.top = (r.bottom + 8) + 'px';
+    pop.style.left = Math.min(r.left, window.innerWidth - pop.offsetWidth - 12) + 'px';
+    btn.classList.add('open');
+  }
+  document.addEventListener('click', function (e) {
+    if (!document.getElementById('nc-more-pop')) return;
+    if (e.target.closest && (e.target.closest('#nc-more-pop') || e.target.closest('.nc-more-btn'))) return;
+    closeMore();
+  }, true);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMore(); });
+  window.addEventListener('resize', closeMore);
+  function ensureMore() {
+    var nav = document.querySelector('nav.side'); if (!nav) return;
+    var anyOn = false;
+    Array.prototype.forEach.call(nav.querySelectorAll('.nav-i:not(.dk-nav)'), function (b) {
+      var k = (b.textContent || '').trim().toLowerCase();
+      var gone = k === 'earn' || k === 'invite';
+      if (gone !== b.classList.contains('nc-hide')) b.classList.toggle('nc-hide', gone);
+      var isMore = MORE.hasOwnProperty(k);
+      if (isMore !== b.classList.contains('nc-more-item')) b.classList.toggle('nc-more-item', isMore);
+      if (isMore && b.classList.contains('on') && !document.documentElement.classList.contains('dk-on')) anyOn = true;
+    });
+    var mb = nav.querySelector('.nc-more-btn');
+    if (!mb) {
+      mb = document.createElement('button'); mb.type = 'button'; mb.className = 'nc-more-btn';
+      mb.setAttribute('data-testid', 'nc-more-btn'); mb.setAttribute('aria-haspopup', 'menu');
+      mb.innerHTML = '<span>More</span>' + MORE_ICO;
+      mb.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); if (mb.classList.contains('open')) closeMore(); else openMore(mb); });
+      nav.appendChild(mb);
+    }
+    mb.classList.toggle('on', anyOn);
+  }
+
+  /* ---- NullCash: welcome tour (first visit) ---- */
+  var TOUR_KEY = 'nc-tour-v1';
+  var TOUR = [
+    ['Welcome to NullCash', 'Private money on Solana.', 'Shield your tokens into a zero-knowledge pool. Your balance and history become notes only you can read.', 'mark'],
+    ['Shield, send, swap', 'Everything happens inside the pool.', 'Pay anyone, trade tokens and earn yield with proofs instead of public transfers. Nobody sees who, what or how much.', '<path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>'],
+    ['No wallet? No problem', 'Private route & Privacy swap.', 'Swap from Solana to 120+ networks with one deposit to a one-time address. Track every order live.', '<path d="M7 7h11l-3-3M17 17H6l3 3"/>'],
+    ['Your keys, your device', 'Nothing to reset, nothing to leak.', 'Keys are derived and encrypted locally. Back up your recovery key and you are in control.', '<circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M16 7l2 2M14 9l2 2"/>']
+  ];
+  function showTour(force) {
+    try { if (!force && localStorage.getItem(TOUR_KEY)) return; } catch (e) {}
+    if (document.getElementById('nc-tour')) return;
+    var i = 0, box = document.createElement('div'); box.id = 'nc-tour'; box.setAttribute('data-testid', 'nc-tour');
+    function done() { try { localStorage.setItem(TOUR_KEY, '1'); } catch (e) {} box.classList.add('out'); setTimeout(function () { box.remove(); }, 200); document.removeEventListener('keydown', kd, true); }
+    function kd(e) { if (e.key === 'Escape') done(); }
+    function draw() {
+      var t = TOUR[i];
+      var ico = t[3] === 'mark' ? '<img src="/api/bifrost/v1/_brand/mark-black.png" alt="" class="nt-mk">' : '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + t[3] + '</svg>';
+      box.innerHTML = '<div class="nt-card" role="dialog" aria-modal="true" aria-label="' + esc(t[0]) + '"><div class="nt-dots">' +
+        TOUR.map(function (_, j) { return '<i class="' + (j === i ? 'on' : '') + '"></i>'; }).join('') + '</div>' +
+        '<div class="nt-body" key="' + i + '"><div class="nt-ico">' + ico + '</div><h3>' + esc(t[0]) + '</h3><div class="nt-sub">' + esc(t[1]) + '</div><p>' + esc(t[2]) + '</p></div>' +
+        '<button class="nt-go" data-testid="nc-tour-next">' + (i === TOUR.length - 1 ? 'Get started' : 'Next') + '</button>' +
+        '<button class="nt-skip" data-testid="nc-tour-skip">' + (i === TOUR.length - 1 ? 'Close' : 'Skip intro') + '</button></div>';
+      if (document.documentElement.getAttribute('data-theme') === 'dark') { var mk = box.querySelector('.nt-mk'); if (mk) mk.src = '/api/bifrost/v1/_brand/mark-white.png'; }
+      box.querySelector('.nt-go').onclick = function () { if (i < TOUR.length - 1) { i++; draw(); } else done(); };
+      box.querySelector('.nt-skip').onclick = done;
+    }
+    box.addEventListener('click', function (e) { if (e.target === box) done(); });
+    document.addEventListener('keydown', kd, true);
+    draw(); document.body.appendChild(box);
+  }
+  window.__ncTour = function () { showTour(true); };
+
+  /* ---- NullCash: footer ---- */
+  function ensureFoot() {
+    var main = document.querySelector('main.main'); if (!main) return;
+    var f = document.getElementById('nc-foot');
+    if (f && f.parentNode === main && main.lastElementChild === f) return;
+    if (!f) {
+      f = document.createElement('footer'); f.id = 'nc-foot'; f.setAttribute('data-testid', 'nc-footer');
+      f.innerHTML = '<span>© ' + new Date().getFullYear() + ' NullCash</span><nav>' +
+        '<a href="/#flow">How it works</a><a href="/#zk">Privacy model</a><a href="/#tech">Docs</a><a href="/#fees">Fees</a>' +
+        '<a href="#" data-nc-tour="1">Take the tour</a><a href="' + X_URL + '" target="_blank" rel="noopener noreferrer">X</a></nav>';
+      f.querySelector('[data-nc-tour]').addEventListener('click', function (e) { e.preventDefault(); showTour(true); });
+    }
+    main.appendChild(f);
+  }
+
+  function ensureWalletBtn() {
+    var wb = document.querySelector('header .wallet-btn'); if (!wb) return;
+    var off = /^connect$/i.test((wb.textContent || '').trim());
+    if (off !== wb.classList.contains('nc-off')) wb.classList.toggle('nc-off', off);
+    if (wb.getAttribute('data-testid') !== 'nc-connect-btn') wb.setAttribute('data-testid', 'nc-connect-btn');
+  }
+  /* ---- NullCash: mobile dock + Menu sheet ---- */
+  var DI = {
+    wallet: '<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 13h2"/><path d="M3 10h18"/><path d="M7 6V5a2 2 0 0 1 2-2h8"/>',
+    hide: '<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c5 0 9 4.5 10 7a13 13 0 0 1-3 4.2M6.3 6.3A13 13 0 0 0 2 12c1 2.5 5 7 10 7a9.6 9.6 0 0 0 4.4-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
+    pay: '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/>',
+    trade: '<path d="M4 9h13l-3-3"/><path d="M20 15H7l3 3"/>',
+    menu: '<rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/>',
+    bridge: '<path d="M3 17h18"/><path d="M5 17V9a7 7 0 0 1 14 0v8"/><path d="M9 17v-5M15 17v-5"/>',
+    route: '<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/>',
+    lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+    track: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    inbox: '<path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/>',
+    exit: '<path d="M14 4h5a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-5"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/>',
+    grow: '<path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/>',
+    pin: '<path d="M12 22s7-6.1 7-12a7 7 0 0 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="10" r="2.5"/>',
+    gift: '<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18"/><path d="M12 8c-2-4-6-4-6-1.5S9 8 12 8c3 0 6-.5 6-1.5S14 4 12 8Z"/>',
+    key: '<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.3-9.3M17 6l2.5 2.5M14.5 8.5 17 11"/>',
+    spark: '<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>',
+    eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+    coin: '<circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.9 0-3 .9-3 2s1 1.7 3 2 3 .9 3 2-1.1 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6v2M12 16v2"/>',
+    book: '<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5v-17Z"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>',
+    out: '<path d="M7 17 17 7M8 7h9v9"/>', chev: '<path d="m9 6 6 6-6 6"/>'
+  };
+  var DOCK = [
+    { k: 'home', label: 'Wallet', ico: 'wallet' }, { k: 'shield', label: 'Hide', ico: 'hide' },
+    { k: 'send', label: 'Pay', ico: 'pay' }, { k: 'swap', label: 'Trade', ico: 'trade' }, { k: 'menu', label: 'Menu', ico: 'menu' }
+  ];
+  var TILES = [
+    { k: 'bridge', label: 'Bridge', ico: 'bridge' }, { k: 'dk:private-route', label: 'Private route', ico: 'route' },
+    { k: 'dk:privacy-swap', label: 'Privacy swap', ico: 'lock' }, { k: 'dk:track', label: 'Track', ico: 'track' },
+    { k: 'history', label: 'History', ico: 'clock' }, { k: 'receive', label: 'Receive', ico: 'inbox' },
+    { k: 'withdraw', label: 'Withdraw', ico: 'exit' }, { k: 'addresses', label: 'Addresses', ico: 'pin' },
+    { k: 'keys', label: 'Keys', ico: 'key' }
+  ];
+  var LEARN = [
+    { label: 'How NullCash works', ico: 'spark', act: 'tour' }, { label: 'Privacy model', ico: 'eye', href: '/#zk' },
+    { label: 'Fees', ico: 'coin', href: '/#fees' }, { label: 'Docs', ico: 'book', href: '/#tech', ext: true }
+  ];
+  function dsv(n, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 22) + '" height="' + (w || 22) + '" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + DI[n] + '</svg>'; }
+  function nativeNav(k) {
+    var btns = document.querySelectorAll('nav.side .nav-i:not(.dk-nav)');
+    for (var i = 0; i < btns.length; i++) if ((btns[i].textContent || '').trim().toLowerCase() === k) return btns[i];
+    return null;
+  }
+  function openFeature(k) {
+    closeSheet();
+    if (k.indexOf('dk:') === 0) { go(k.slice(3)); return; }
+    var b = nativeNav(k); if (b) b.click();
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+  function currentKey() {
+    var r = document.documentElement.classList.contains('dk-on') ? parse() : null;
+    if (r) return r.view === 'track' ? 'dk:track' : (r.method === 'privacy' ? 'dk:privacy-swap' : 'dk:private-route');
+    var on = document.querySelector('nav.side .nav-i.on:not(.dk-nav)');
+    return on ? (on.textContent || '').trim().toLowerCase() : 'home';
+  }
+  function closeSheet() {
+    var s = document.getElementById('nc-sheet'); if (!s) return;
+    s.classList.add('out'); setTimeout(function () { s.remove(); }, 260);
+    var m = document.querySelector('#nc-dock [data-k="menu"]'); if (m) m.classList.remove('open');
+  }
+  function openSheet() {
+    if (document.getElementById('nc-sheet')) { closeSheet(); return; }
+    var cur = currentKey();
+    var s = document.createElement('div'); s.id = 'nc-sheet'; s.setAttribute('data-testid', 'nc-menu-sheet');
+    s.innerHTML = '<div class="ns-panel" role="dialog" aria-modal="true" aria-label="Menu"><i class="ns-grab"></i>' +
+      '<div class="ns-h"><b>Menu</b><button class="ns-x" data-testid="nc-menu-close" aria-label="Close">' + '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>' +
+      '<div class="ns-scroll"><div class="ns-grid">' + TILES.map(function (t, i) {
+        return '<button class="ns-tile' + (cur === t.k ? ' on' : '') + '" style="animation-delay:' + (i * 22) + 'ms" data-k="' + t.k + '" data-testid="nc-menu-' + t.k.replace(/[^a-z]+/g, '-') + '"><i>' + dsv(t.ico, 20) + '</i><span>' + t.label + '</span></button>';
+      }).join('') + '</div><div class="ns-sec">Learn</div><div class="ns-list">' + LEARN.map(function (l, i) {
+        return (l.href ? '<a href="' + l.href + '"' : '<button data-act="' + l.act + '"') + ' class="ns-row" data-testid="nc-learn-' + i + '"><i>' + dsv(l.ico, 18) + '</i><span>' + l.label + '</span><em>' + dsv(l.ext ? 'out' : 'chev', 16) + '</em>' + (l.href ? '</a>' : '</button>');
+      }).join('') + '</div><div class="ns-foot"><span>© ' + new Date().getFullYear() + ' NullCash</span><a href="' + X_URL + '" target="_blank" rel="noopener noreferrer">X</a><a href="/">Home page</a></div></div></div>';
+    s.addEventListener('click', function (e) {
+      if (e.target === s || e.target.closest('.ns-x')) { closeSheet(); return; }
+      var t = e.target.closest('.ns-tile'); if (t) { openFeature(t.getAttribute('data-k')); return; }
+      var a = e.target.closest('[data-act="tour"]'); if (a) { closeSheet(); showTour(true); }
+    });
+    document.body.appendChild(s);
+    var m = document.querySelector('#nc-dock [data-k="menu"]'); if (m) m.classList.add('open');
+  }
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSheet(); });
+  function ensureDock() {
+    if (!document.querySelector('main.main')) return;
+    var d = document.getElementById('nc-dock');
+    if (!d) {
+      d = document.createElement('nav'); d.id = 'nc-dock'; d.setAttribute('data-testid', 'nc-dock');
+      d.innerHTML = DOCK.map(function (t) { return '<button type="button" data-k="' + t.k + '" data-testid="nc-dock-' + t.k + '"><i>' + dsv(t.ico) + '</i><span>' + t.label + '</span></button>'; }).join('');
+      d.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        var k = b.getAttribute('data-k');
+        if (k === 'menu') openSheet(); else openFeature(k);
+        setTimeout(ensureDock, 80);
+      });
+      document.body.appendChild(d);
+    }
+    var cur = currentKey(), inDock = DOCK.some(function (t) { return t.k === cur; });
+    Array.prototype.forEach.call(d.children, function (b) {
+      var k = b.getAttribute('data-k');
+      var on = k === cur || (k === 'menu' && !inDock);
+      if (on !== b.classList.contains('on')) b.classList.toggle('on', on);
+    });
+  }
+
+  /* ---- NullCash: explain first, connect last ---- */
+  var SHORT = {
+    home: ['Wallet', 'Your money, out of sight.'], shield: ['Hide', 'Make your tokens private.'],
+    send: ['Pay', 'Send without a trace.'], swap: ['Trade', 'Swap inside the pool.'],
+    bridge: ['Bridge', 'Exit privately to any chain.'], receive: ['Receive', 'Get paid privately.'],
+    withdraw: ['Withdraw', 'Cash out, unlinked.'], earn: ['Earn', 'Yield while hidden.'],
+    history: ['History', 'Only you can read it.'], addresses: ['Addresses', 'Single-use exits.'],
+    invite: ['Invite', 'Share and earn.'], keys: ['Keys', 'Your vault, your control.']
+  };
+  var GET = {
+    home: ['Private balance', 'Local history', 'All tools unlocked'], shield: ['Sealed notes', 'Hidden amounts', 'Unlinked wallet'],
+    send: ['Hidden sender', 'Hidden amount', 'Gas covered'], swap: ['Private trades', 'New notes out', 'No public trail'],
+    bridge: ['Any network', 'Proof-locked', 'No signature'], receive: ['Private address', 'QR code', 'Auto-detected'],
+    withdraw: ['Any address', 'Burner ready', 'Gas covered'], earn: ['Vetted vaults', 'Private positions', 'Exit anytime'],
+    history: ['Full log', 'Device-only', 'Encrypted'], addresses: ['One-time', 'Unclustered', 'Vault-derived'],
+    invite: ['Personal link', 'Fee share', 'Live rewards'], keys: ['Recovery key', 'View-only key', 'Local encryption']
+  };
+  var PITCH_ICO = { home: 'wallet', shield: 'hide', send: 'pay', swap: 'trade', bridge: 'bridge', receive: 'inbox', withdraw: 'exit', earn: 'grow', history: 'clock', addresses: 'pin', invite: 'gift', keys: 'key' };
+  function closeOnb() {
+    document.documentElement.classList.remove('nc-onb-open');
+    var bg = document.getElementById('nc-onb-bg'); if (bg) bg.remove();
+  }
+  function openOnb() {
+    if (!document.querySelector('main.main .card.onb')) return;
+    document.documentElement.classList.add('nc-onb-open');
+    if (!document.getElementById('nc-onb-bg')) {
+      var bg = document.createElement('div'); bg.id = 'nc-onb-bg'; bg.setAttribute('data-testid', 'nc-connect-backdrop');
+      bg.innerHTML = '<button class="nc-onb-x" data-testid="nc-connect-close" aria-label="Close"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
+      bg.addEventListener('click', closeOnb);
+      var host = document.querySelector('main.main'); host = (host && host.parentNode) || document.body;
+      host.appendChild(bg);
+    }
+  }
+  window.__ncConnect = openOnb;
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeOnb(); });
+  document.addEventListener('click', function (e) {
+    // opening the native create/restore sheet from the connect box: close our box
+    if (document.documentElement.classList.contains('nc-onb-open') && e.target.closest && e.target.closest('.card.onb .wopt, .card.onb .link')) setTimeout(closeOnb, 60);
+    var wb = e.target.closest && e.target.closest('header .wallet-btn.nc-off');
+    if (wb && document.querySelector('main.main .card.onb')) { e.preventDefault(); e.stopPropagation(); openOnb(); }
+  }, true);
+  var lastPitch = null;
+  function ensurePitch() {
+    var main = document.querySelector('main.main'); if (!main) return;
+    var html = document.documentElement;
+    var gated = !html.classList.contains('dk-on') && !!main.querySelector('.card.onb');
+    if (gated !== html.classList.contains('nc-gated')) html.classList.toggle('nc-gated', gated);
+    var p = document.getElementById('nc-pitch');
+    if (!gated) { if (p) p.remove(); lastPitch = null; closeOnb(); return; }
+    var k = activeLabel() || 'home'; if (!SHORT[k]) k = 'home';
+    if (!p || p.parentNode !== main) {
+      p = document.createElement('section'); p.id = 'nc-pitch'; p.setAttribute('data-testid', 'nc-pitch');
+      var anchor = main.querySelector('.view'); main.insertBefore(p, anchor || null);
+      lastPitch = null;
+    }
+    if (lastPitch === k) return;
+    lastPitch = k;
+    var it = SHORT[k], get = GET[k] || GET.home;
+    p.setAttribute('data-tab', k);
+    p.innerHTML = '<i class="np-ico">' + dsv(PITCH_ICO[k] || 'wallet', 28) + '</i><span class="np-k">' + esc(it[0]) + '</span><h2>' + esc(it[1]) + '</h2>' +
+      '<div class="np-get">' + get.map(function (g, i) { return '<span style="animation-delay:' + (120 + i * 70) + 'ms">' + dsv('chev', 14).replace('m9 6 6 6-6 6', 'M5 12l5 5 9-10') + esc(g) + '</span>'; }).join('') + '</div>' +
+      '<button class="np-cta" data-testid="nc-pitch-connect">Connect wallet</button>' +
+      '<a class="np-alt" href="#private-route" data-testid="nc-pitch-private">No wallet? Swap instantly →</a>';
+    p.querySelector('.np-cta').addEventListener('click', openOnb);
+  }
+
+  function tick() { orderNav(); ensureX(); syncIntro(); ensureMore(); ensureFoot(); ensureWalletBtn(); ensureDock(); ensurePitch(); }
+  setTimeout(function () { if (document.querySelector('main.main')) showTour(false); }, 1400);
   function boot() { ensure(); sync(); tick(); setInterval(tick, 700); document.addEventListener('click', function () { setTimeout(tick, 60); }, true); window.addEventListener('hashchange', function () { setTimeout(tick, 60); }); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

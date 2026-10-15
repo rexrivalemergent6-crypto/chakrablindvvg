@@ -42,7 +42,7 @@ def test_brand_lockup_svg_served():
     assert "image/svg+xml" in r.headers.get("content-type", "")
     # Must contain Cadabra tspans (not Veil)
     txt = r.text
-    assert ("Cada" in txt and "bra" in txt) or "Cadabra" in txt
+    assert ("Null" in txt and "bra" in txt) or "NullCash" in txt
     assert "Veil" not in txt
 
 

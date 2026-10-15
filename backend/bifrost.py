@@ -266,6 +266,30 @@ def strip_project_token_json(text: str) -> str:
         return text
 
 
+def null_prefix_js(text: str) -> str:
+    """Show NullCash prefixes (nullsk2…, nullvk1…, null2…) for keys/addresses.
+    Same length as the upstream prefixes so all slicing/decoding stays intact;
+    checksum domain strings ("veil/recovery", "veil/address") are untouched, and
+    parsers accept BOTH prefixes so older keys/addresses keep working."""
+    if "veil" not in text:
+        return text
+    # generators
+    text = text.replace('"veilsk2"+', '"nullsk2"+').replace('"veilvk1"+', '"nullvk1"+').replace('"veil2"+', '"null2"+')
+    # parsers: normalise null-prefixed input back to the upstream prefix before decoding
+    text = re.sub(r'function\((\w)\)\{try\{let (\w)=\1\.startsWith\("veil2"\)',
+                  r'function(\1){try{\1=String(\1).replace(/^null(?=[12])/,"veil");let \2=\1.startsWith("veil2")', text)
+    text = re.sub(r'let (\w)=(\w)\.trim\(\)\.replace\(/\\s\+/g,""\);try\{if\(\1\.startsWith\("veilsk2"\)',
+                  r'let \1=\2.trim().replace(/\\s+/g,"").replace(/^null(?=sk[12])/,"veil");try{if(\1.startsWith("veilsk2")', text)
+    # validators / extractors
+    text = text.replace(r'/^\s*veilsk[12]/', r'/^\s*(?:veil|null)sk[12]/')
+    text = text.replace('/^veil[12]/', '/^(?:veil|null)[12]/')
+    text = text.replace('/veil[12][1-9A-HJ-NP-Za-km-z]', '/(?:veil|null)[12][1-9A-HJ-NP-Za-km-z]')
+    # human-readable hints / placeholders
+    text = re.sub(r'veil(sk[12]|vk1|[12])…', r'null\1…', text)
+    text = text.replace('starts with veilsk2', 'starts with nullsk2')
+    return text
+
+
 def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
     base = f"{origin}{PREFIX}"
     if target in ("indexer", "relayer") and "json" in ctype:
@@ -291,8 +315,8 @@ def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
             text = text.replace("'veil-theme'", "'cb-theme'").replace('"veil-theme"', '"cb-theme"')
             if "text/html" in ctype:
                 text = text.replace(f"{p}/veil-mark.webp", f"{PREFIX}/_brand/mark.png")
-                text = text.replace("Pulling the veil over", "Pulling the cadabra over")
-                text = re.sub(r"(?<![A-Za-z$])Veil(?![A-Za-z])", "Cadabra", text)
+                text = text.replace("Pulling the veil over", "Pulling the nullcash over")
+                text = re.sub(r"(?<![A-Za-z$])Veil(?![A-Za-z])", "NullCash", text)
                 # document-relative urls (page URL is shown as /shield/... so resolve them here)
                 text = re.sub(r'((?:\s)(?:src|poster|srcset)=["\'])(?![/#?"\']|[a-zA-Z][a-zA-Z0-9+.-]*:)',
                               rf"\1{p}/", text)
@@ -314,6 +338,8 @@ def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
             text = text.replace('"/circuits"', f'"{p}/circuits"')
             text = text.replace("'/circuits'", f"'{p}/circuits'")
             text = text.replace('TURBOPACK_CHUNK_BASE_PATH:"/_next/"', f'TURBOPACK_CHUNK_BASE_PATH:"{p}/_next/"')
+            if target == "app":
+                text = null_prefix_js(text)
         elif "json" in ctype:
             text = re.sub(r'("(?:src|start_url|scope|url|href)"\s*:\s*")/(?!/|api/bifrost/)',
                           rf"\1{p}/", text)
