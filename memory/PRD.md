@@ -53,3 +53,12 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - Source: https://github.com/rexrivalemergent6-crypto/swapcreate---darkpricnow-
 - Created backend/.env + frontend/.env, installed deps, services running. Verified landing (/), app (/app#private-route), Bifrost health, live NEAR quote via proxy.
 - Iter 9 audit (iteration_12.json, 100%): every veilit.xyz indexer/relayer endpoint matches upstream via proxy. Fixed: ingress replaced 502/504 bodies with HTML (GatewayStatusMiddleware -> 503 JSON + x-upstream-status); relayer quote/fee retries w/ backoff on shared Jupiter 429 + 3s micro cache; POSTs not re-sent on 502 unless rate-limited/busy.
+
+## Iteration 10 — NullCash (Oct 2026)
+- Rebrand Cadabra -> NullCash (logo rings, favicons, lockup). Original light-only theme: backend/brand/nc-theme.css (injected via bifrost_brand.head_inject).
+- dk-swap.js additions: desktop top tabs + More menu, mobile dock (Wallet/Hide/Pay/Trade/Menu) + Menu sheet, welcome tour, footer, Connect wallet button, explain-first pitch cards -> compact connect box, Earn/Invite hidden, referral promo + long explainers hidden, particle splash (Solana palette "SOL", "Getting ready").
+- Left cypherpunk terminal rail (live stats + tx feed, polls every ~12s) on >=1381px.
+- Key/address prefixes nullsk2/nullvk1/null2 via bifrost.null_prefix_js (parsers accept veil*/null*).
+- 502/504 -> 503 JSON middleware; relayer quote retries + 3s micro cache.
+- Landing page rewritten (LandingPage.jsx) in NullCash light style.
+- Tests: iteration_13/14 100%, backend pytest 98/98.
