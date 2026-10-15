@@ -1,3 +1,4 @@
+import os
 """
 Bifrost v1 — full mirror / passthrough proxy for Veil (veilit.xyz).
 
@@ -498,6 +499,13 @@ async def meta():
             "cache_items": len(_CACHE), "cache_bytes": _CACHE_BYTES}
 
 
+@router.get("/_live")
+async def live_status():
+    return JSONResponse({"relay": "on", "every_s": LIVE_RELAY_EVERY, "ok": _LIVE["ok"], "errors": _LIVE["err"],
+                         "age_s": round(time.time() - _LIVE["at"], 1) if _LIVE["at"] else None},
+                        headers={"cache-control": "no-store"})
+
+
 @router.get("/_health")
 async def health():
     out = {}
@@ -536,7 +544,10 @@ async def proxy(target: str, path: str, request: Request):
     if target == "_img":
         u = request.query_params.get("u", "")
         k = request.query_params.get("k", "")
-        if k:
+        o = request.query_params.get("o", "")
+        if o:
+            u = img_key_decode(o)
+        elif k:
             try:
                 import base64 as _b
                 u = _b.urlsafe_b64decode(k + "=" * (-len(k) % 4)).decode()
@@ -728,6 +739,33 @@ MICRO_PATHS = ("v1/stats", "v1/root", "v1/feed", "v1/assets", "v1/info", "v1/hea
                "v1/bridge/routes", "v1/positions", "v1/flows", "v1/nullifiers")
 
 
+LIVE_RELAY_PATHS = ("v1/stats", "v1/feed?limit=60", "v1/feed?limit=20")
+LIVE_RELAY_EVERY = 3.0
+_LIVE = {"ok": 0, "err": 0, "at": 0.0}
+
+
+async def live_relay():
+    """Constant relay: keep the shared indexer snapshot (pool stats + activity feed) fresh every few
+    seconds so every visitor always reads the newest on-chain state instantly, even under load."""
+    await asyncio.sleep(2)
+    up = TARGETS["indexer"]
+    while True:
+        for path in LIVE_RELAY_PATHS:
+            url = f"{up}/{path}"
+            try:
+                r = await get_client().get(url, headers={"user-agent": UA, "accept": "application/json",
+                                                         "origin": TARGETS["app"], "referer": TARGETS["app"] + "/"})
+                if r.status_code == 200 and "json" in r.headers.get("content-type", ""):
+                    _MICRO[url] = (time.time(), 200, dict(r.headers), r.content)
+                    _LIVE["ok"] += 1
+                    _LIVE["at"] = time.time()
+                else:
+                    _LIVE["err"] += 1
+            except Exception:
+                _LIVE["err"] += 1
+        await asyncio.sleep(LIVE_RELAY_EVERY)
+
+
 def _micro_ok(target, path, method):
     return method == "GET" and target in ("indexer", "relayer") and path.startswith(MICRO_PATHS)
 
@@ -838,12 +876,35 @@ async def ws_proxy(ws: WebSocket, target: str, path: str):
 _IMG_URL_RE = re.compile(r'https://(?:api\.houdiniswap\.com|cdn\.jsdelivr\.net|raw\.githubusercontent\.com|assets\.coingecko\.com|coin-images\.coingecko\.com)/[^"\\<>]+')
 
 
+def _img_stream(n: int) -> bytes:
+    import hashlib
+    seed = (os.environ.get("IMG_RELAY_SALT") or "nullcash-img").encode()
+    out, i = b"", 0
+    while len(out) < n:
+        out += hashlib.sha256(seed + i.to_bytes(4, "big")).digest()
+        i += 1
+    return out[:n]
+
+
+def img_key_encode(u: str) -> str:
+    import base64 as _b
+    raw = u.encode()
+    x = bytes(a ^ b for a, b in zip(raw, _img_stream(len(raw))))
+    return _b.urlsafe_b64encode(x).decode().rstrip("=")
+
+
+def img_key_decode(k: str) -> str:
+    import base64 as _b
+    try:
+        x = _b.urlsafe_b64decode(k + "=" * (-len(k) % 4))
+        return bytes(a ^ b for a, b in zip(x, _img_stream(len(x)))).decode()
+    except Exception:
+        return ""
+
+
 def opaque_image_urls(text: str) -> str:
     """Replace third-party image URLs with opaque same-origin relay keys (no upstream host visible)."""
-    import base64 as _b
-
     def _sub(m):
         u = m.group(0).rstrip().replace(" ", "%20")  # some upstream icon names contain spaces
-        k = _b.urlsafe_b64encode(u.encode()).decode().rstrip("=")
-        return f"{PREFIX}/_img?k={k}"
+        return f"{PREFIX}/_img?o={img_key_encode(u)}"
     return _IMG_URL_RE.sub(_sub, text)

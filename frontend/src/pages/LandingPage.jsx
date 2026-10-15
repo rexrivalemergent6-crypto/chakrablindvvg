@@ -14,13 +14,28 @@ const LINKS = [['Features', '#features'], ['How it works', '#flow'], ['Real ZK',
 
 /* ---------------- data ---------------- */
 function useLiveStats() {
-  const [s, setS] = useState({ leaves: null, nullifiers: null, assets: null });
+  const [s, setS] = useState({ leaves: null, nullifiers: null, assets: null, at: 0, live: false });
   useEffect(() => {
     let dead = false;
-    const j = (u) => fetch(u).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
-    j(`${BF}/indexer/v1/stats`).then((d) => !dead && setS((p) => ({ ...p, leaves: d.leaves, nullifiers: d.nullifiers }))).catch(() => {});
-    j(`${BF}/indexer/v1/assets`).then((d) => !dead && setS((p) => ({ ...p, assets: (d.assets || []).length }))).catch(() => {});
-    return () => { dead = true; };
+    const j = (u) => fetch(u, { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
+    // constant live relay: pool stats every 5s, asset list every 60s (pauses while the tab is hidden)
+    const stats = () => {
+      if (document.hidden) return;
+      j(`${BF}/indexer/v1/stats`)
+        .then((d) => !dead && setS((p) => ({ ...p, leaves: d.leaves, nullifiers: d.nullifiers, at: Date.now(), live: true })))
+        .catch(() => !dead && setS((p) => ({ ...p, live: false })));
+    };
+    const assets = () => {
+      if (document.hidden) return;
+      j(`${BF}/indexer/v1/assets`).then((d) => !dead && setS((p) => ({ ...p, assets: (d.assets || []).length }))).catch(() => {});
+    };
+    stats(); assets();
+    const t1 = setInterval(stats, 5000);
+    const t2 = setInterval(assets, 60000);
+    const vis = () => { if (!document.hidden) { stats(); } };
+    document.addEventListener('visibilitychange', vis);
+    return () => { dead = true; clearInterval(t1); clearInterval(t2); document.removeEventListener('visibilitychange', vis); };
   }, []);
   return s;
 }
@@ -113,6 +128,17 @@ function DotCounter({ value, label }) {
   return <canvas ref={ref} aria-label={`${label}: ${value}`} className="block h-[74px] w-full" />;
 }
 
+function LiveAgo({ at, live }) {
+  const [, tick] = useState(0);
+  useEffect(() => { const t = setInterval(() => tick((n) => n + 1), 1000); return () => clearInterval(t); }, []);
+  const secs = at ? Math.max(0, Math.floor((Date.now() - at) / 1000)) : null;
+  return (
+    <span className="text-white/45" data-testid="hero-live-ago">
+      {live ? `live · synced ${secs}s ago` : (at ? 'reconnecting…' : 'connecting…')}
+    </span>
+  );
+}
+
 /* ---------------- sections ---------------- */
 function Hero({ stats }) {
   return (
@@ -135,7 +161,7 @@ function Hero({ stats }) {
             <div className="nm-live mt-8 w-full max-w-[520px] overflow-hidden rounded-[12px] border border-[#202221] bg-[#202221] text-[#D9D9D9]" data-testid="hero-live">
               <div className="flex items-center justify-between px-4 pt-3 font-mono text-[11px] uppercase tracking-[.18em]">
                 <span className="flex items-center gap-2 text-[#B9C1CC]"><span className="nm-pulse" />Sealed notes in the pool</span>
-                <span className="text-white/45">live · indexer</span>
+                <LiveAgo at={stats.at} live={stats.live} />
               </div>
               <div className="px-3"><DotCounter value={fmt(stats.leaves)} label="Sealed notes" /></div>
               <div className="flex items-center justify-between gap-3 px-4 pb-4">

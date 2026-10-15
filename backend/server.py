@@ -12,7 +12,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid
-from bifrost import router as bifrost_router, close_client as bifrost_close, opaque_image_urls, warm_logos
+from bifrost import router as bifrost_router, close_client as bifrost_close, opaque_image_urls, warm_logos, live_relay
 from datetime import datetime, timezone
 
 
@@ -267,6 +267,7 @@ async def _ds_warm_loop():
 async def _start_warm():
     asyncio.create_task(_ds_warm_loop())
     asyncio.create_task(warm_logos())
+    asyncio.create_task(live_relay())
 
 
 def _scrub(body: bytes) -> bytes:
@@ -277,6 +278,7 @@ def _scrub(body: bytes) -> bytes:
         return body
     t = opaque_image_urls(t)
     t = t.replace("DarkSwap", "NullCash").replace("darkswap.app", "nullcash")
+    t = t.replace('"houdiniId"', '"orderId"').replace("HoudiniSwap", "NullCash").replace("houdiniswap", "nullcash")
     return t.encode("utf-8")
 
 
@@ -346,6 +348,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+logging.getLogger("httpx").setLevel(logging.WARNING)  # live relay polls every 3s; keep logs readable
 
 @app.on_event("shutdown")
 async def shutdown_db_client():

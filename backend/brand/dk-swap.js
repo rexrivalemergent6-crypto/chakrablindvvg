@@ -7,7 +7,7 @@
   var F = window.__bfFetch || window.fetch.bind(window);
   var API = '/api/ds';
   var LS_KEY = 'cadabra_orders_v1';
-  var REFRESH_SECS = 60;
+  var REFRESH_SECS = 30;
   var SOL_ICON = 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/sol.png';
 
   /* ---------------- helpers ---------------- */
@@ -219,6 +219,11 @@
     ".dk-r .k{font-size:12px;color:var(--dk-mut)}",
     ".dk-r .v{font-weight:600;font-size:14px}",
     ".dk-r .best{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#1a2200;background:var(--dk-grad);padding:2px 8px;border-radius:999px;margin-left:8px}",
+    ".dk-fees{margin-top:8px;border:1px solid var(--dk-line);background:var(--dk-box);border-radius:14px;padding:6px 12px}",
+    ".dk-fees>div{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:12.5px;border-top:1px dashed var(--dk-line)}",
+    ".dk-fees>div:first-child{border-top:0}",
+    ".dk-fees span{color:var(--dk-mut)}.dk-fees b{font-weight:600;text-align:right;font-variant-numeric:tabular-nums}",
+    ".dk-fees-m{margin:12px 0}.dk-fees .dk-fees-h span{color:inherit;font-weight:600}",
     ".dk-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}",
     ".dk-meta div{border:1px solid var(--dk-line);background:var(--dk-box);border-radius:14px;padding:9px 11px}",
     ".dk-meta b{display:block;font-weight:500;font-size:11px;color:var(--dk-mut)}",
@@ -388,7 +393,11 @@
       ? api.nQuote({ from: S.send.id, to: S.recv.id, amount: S.amount, recipient: S.dest.trim(), refundTo: S.refund.trim() }).then(function (q) {
           var out = parseFloat(q.amountOut);
           S.routes = [{ quoteId: q.quoteId, out: out, usdIn: amt * (S.send.price || 0), usdOut: out * (S.recv.price || 0),
-            etaMin: q.estimatedSeconds ? Math.max(1, Math.round(q.estimatedSeconds / 60)) : null, min: q.min, max: q.max }];
+            etaMin: q.estimatedSeconds ? Math.max(1, Math.round(q.estimatedSeconds / 60)) : null, min: q.min, max: q.max,
+            appFeeBps: q.appFeeBps != null ? Number(q.appFeeBps) : null, withdrawFee: q.withdrawFee != null ? parseFloat(q.withdrawFee) : null,
+            refundFee: q.refundFee != null ? parseFloat(q.refundFee) : null, minOut: q.minAmountOut != null ? parseFloat(q.minAmountOut) : null,
+            pIn: (q.from && q.from.price) || S.send.price || 0, pOut: (q.to && q.to.price) || S.recv.price || 0 }];
+          var R0 = S.routes[0]; R0.usdIn = amt * R0.pIn; R0.usdOut = out * R0.pOut;
           S.ri = 0;
           S.validUntil = q.validUntil ? new Date(q.validUntil).getTime() : Date.now() + REFRESH_SECS * 1000;
         })
@@ -412,6 +421,26 @@
         } else { S.qerr = m; }
       })
       .then(function () { if (id === S.reqId) { S.quoting = false; if (!S.submitting) render(); } });
+  }
+
+  function feeInfo(sel, amt, near) {
+    var rows = [], sIn = (S.send && S.send.symbol) || '', sOut = (S.recv && S.recv.symbol) || '';
+    var usdIn = Number(sel.usdIn) || 0, usdOut = Number(sel.usdOut) || 0;
+    var cost = usdIn > 0 && usdOut > 0 ? Math.max(0, usdIn - usdOut) : null;
+    var pct = cost != null && usdIn > 0 ? cost / usdIn * 100 : null;
+    var total = cost != null ? usd(cost) + ' (' + pct.toFixed(2) + '%)' : '—';
+    if (near) {
+      if (sel.appFeeBps != null) rows.push(['NullCash fee (' + (sel.appFeeBps / 100).toFixed(2) + '%)', fmt(amt * sel.appFeeBps / 10000) + ' ' + sIn + (S.send && S.send.price ? ' · ' + usd(amt * sel.appFeeBps / 10000 * S.send.price) : '')]);
+      if (sel.withdrawFee != null) rows.push(['Network fee (' + ((S.recv && S.recv.chainName) || 'destination') + ')', fmt(sel.withdrawFee) + ' ' + sOut + (sel.pOut ? ' · ' + usd(sel.withdrawFee * sel.pOut) : '')]);
+      if (sel.minOut != null) rows.push(['Minimum received', fmt(sel.minOut) + ' ' + sOut]);
+      if (sel.refundFee != null) rows.push(['Refund fee (only if it fails)', fmt(sel.refundFee) + ' ' + sIn]);
+    } else {
+      rows.push(['Route fee + spread (all-in)', cost != null ? usd(cost) + ' · ' + pct.toFixed(2) + '%' : 'Included in quote']);
+      rows.push(['You send', fmt(amt) + ' ' + sIn + (usdIn ? ' · ' + usd(usdIn) : '')]);
+      rows.push(['You receive', fmt(sel.out) + ' ' + sOut + (usdOut ? ' · ' + usd(usdOut) : '')]);
+    }
+    rows.push(['Network gas', 'Included']);
+    return { total: total, rows: rows, cost: cost, pct: pct };
   }
 
   function cta() {
@@ -450,8 +479,17 @@
         if (!s2) throw new Error(S.qerr || 'Quote expired. Please try again.');
         return create(s2, near);
       });
-    }).then(function (rec) { saveOrder(rec); openOrder(rec); })
-      .catch(function (e) { S.serr = friendlyErr(e.message); })
+    }).then(function (rec) {
+      try { var fz = feeInfo(sel, parseFloat(S.amount), near); rec.feeTotal = fz.total; rec.feeRows = fz.rows; } catch (x) {}
+      saveOrder(rec); openOrder(rec); })
+      .catch(function (e) {
+        var m = String((e && e.message) || '');
+        if (near && (/incident|paused|unavailable|503|502|not available|try again later|busy/i.test(m) || (e && e.status >= 500))) {
+          S.serr = ''; S.qerr = 'Privacy swap is temporarily paused by the network for new orders. Nothing was charged. Try again shortly, or use Private route now.'; S.qerrSwitch = true;
+        } else if (/too many|rate limit|429/i.test(m)) {
+          S.serr = 'Lots of swaps right now. Wait a few seconds and tap again; nothing was charged.';
+        } else { S.serr = friendlyErr(m); }
+      })
       .then(function () { S.submitting = false; render(); });
   }
 
@@ -474,7 +512,7 @@
       });
     } else {
       p = api.order({ quoteId: sel.quoteId, addressTo: S.dest.trim() }).then(function (o) {
-        return { id: o[['hou', 'diniId'].join('')], method: 'private', depositAddress: o.depositAddress, depositMemo: null,
+        return { id: o.orderId || o.id, method: 'private', depositAddress: o.depositAddress, depositMemo: null,
           addressTo: o.receiverAddress || S.dest.trim(), amount: o.inAmount, sendSymbol: o.inSymbol || S.send.symbol,
           outAmount: o.outAmount, recvSymbol: S.recv.symbol, networkName: S.recv.chainName,
           sendIcon: S.send.icon, recvIcon: S.recv.icon, expires: o.expires, eta: o.eta, createdAt: Date.now() };
@@ -521,8 +559,10 @@
           '<span><span class="k">' + (near ? 'Privacy swap · shielded' : 'Route ' + (i + 1)) + '</span>' + (i === 0 ? '<span class="best">Best</span>' : '') + '</span>' +
           '<span class="v">' + esc(fmt(r.out)) + ' ' + esc(S.recv.symbol) + '</span></button>';
       });
-      h += '<div class="dk-meta"><div><b>Route fee</b><span>In quote</span></div><div><b>Expected time</b><span>' + (sel.etaMin ? '~' + sel.etaMin + ' min' : '—') + '</span></div>' +
+      var fz = feeInfo(sel, amt, near);
+      h += '<div class="dk-meta"><div data-testid="dk-fee-total"><b>Total fees</b><span>' + esc(fz.total) + '</span></div><div><b>Expected time</b><span>' + (sel.etaMin ? '~' + sel.etaMin + ' min' : '—') + '</span></div>' +
         '<div><b>Rate</b><span>' + (amt > 0 ? esc(fmt(sel.out / amt)) : '—') + '</span></div></div>';
+      h += '<div class="dk-fees" data-testid="dk-fees">' + fz.rows.map(function (r) { return '<div><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>'; }).join('') + '</div>';
       if (sel.min != null && sel.max != null && Number(sel.max) < 1e9) h += '<div class="dk-lim">Limits ' + esc(fmt(sel.min)) + '–' + esc(fmt(sel.max)) + ' ' + esc(S.send.symbol) + '</div>';
       h += '</div>';
     }
@@ -621,7 +661,7 @@
         .then(function () { T.loading = false; if (S.view === 'track') render(); });
     };
     once();
-    T.poll = setInterval(function () { if (S.view === 'track' && T.q === id) once(); else { clearInterval(T.poll); T.poll = null; } }, 8000);
+    T.poll = setInterval(function () { if (S.view === "track" && T.q === id) once(); else { clearInterval(T.poll); T.poll = null; } }, 5000);
   }
 
   function copyField(label, value) {
@@ -938,6 +978,7 @@
     h += copyField('Send exactly', fmt(o.amount) + ' ' + o.sendSymbol);
     h += copyField('To this Solana deposit address', o.depositAddress || '');
     if (o.depositMemo) h += copyField('Deposit memo / tag (required)', o.depositMemo);
+    if (o.feeRows && o.feeRows.length) h += '<div class="dk-fees dk-fees-m" data-testid="dk-order-fees"><div class="dk-fees-h"><span>Total fees</span><b>' + esc(o.feeTotal || '—') + '</b></div>' + o.feeRows.map(function (r) { return '<div><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>'; }).join('') + '</div>';
     h += '<div class="dk-cf"><div class="k">Receiving address</div><div class="v"><code>' + esc(o.addressTo || '') + '</code></div></div>';
     h += '<button class="dk-cta" data-act="trackorder" data-id="' + esc(o.id) + '" data-testid="dk-order-track">Track this order</button>';
     h += '<div class="dk-note">Live order via NullCash. Only deposit from your own Solana wallet.</div></div>';
@@ -1043,10 +1084,10 @@
   function startChain() {
     if (CH.timer) return;
     chLoad();
-    CH.timer = setInterval(function () { if (S.view !== 'chain') { clearInterval(CH.timer); clearInterval(CH.clock); CH.timer = CH.clock = null; return; } chLoad(); }, 10000);
+    CH.timer = setInterval(function () { if (S.view !== 'chain') { clearInterval(CH.timer); clearInterval(CH.clock); CH.timer = CH.clock = null; return; } chLoad(); }, 4000);
     CH.clock = setInterval(function () {
       if (S.view !== 'chain') return;
-      var n = document.querySelector('#dk-view .ch-next'); if (n) n.textContent = Math.max(0, 10 - Math.floor((Date.now() - CH.at) / 1000)) + 's';
+      var n = document.querySelector('#dk-view .ch-next'); if (n) n.textContent = Math.max(0, 4 - Math.floor((Date.now() - CH.at) / 1000)) + 's';
       document.querySelectorAll('#dk-view [data-ts]').forEach(function (e) { e.textContent = chAgo(+e.getAttribute('data-ts')); });
     }, 1000);
   }
@@ -1284,7 +1325,8 @@
   var CA_COPY = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>';
   var CA_OK = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>';
   function ensureCA() {
-    var tr = document.querySelector('header .top-right'); if (!tr || tr.querySelector('.nc-ca')) return;
+    var tr = document.querySelector('header .top-right') || document.querySelector('header.site-top');
+    if (!tr || tr.querySelector('.nc-ca')) return;
     var b = document.createElement('button'); b.type = 'button'; b.className = 'nc-ca';
     b.setAttribute('data-testid', 'nc-ca-chip'); b.title = 'Copy contract address ' + NC_CA;
     b.setAttribute('aria-label', 'Copy contract address ' + NC_CA);
@@ -1295,6 +1337,12 @@
       try { navigator.clipboard.writeText(NC_CA).then(done, function () { fallback(); done(); }); } catch (_) { fallback(); done(); }
       function fallback() { var t = document.createElement('textarea'); t.value = NC_CA; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (x) {} t.remove(); }
     });
+    if (tr.classList.contains('site-top')) {
+      b.classList.add('nc-ca-site');
+      var cta = tr.querySelector('a.btn-primary, .btn-primary');
+      tr.insertBefore(b, cta || null);
+      return;
+    }
     var x = tr.querySelector('.dk-x');
     tr.insertBefore(b, x || tr.firstChild);
   }

@@ -94,6 +94,11 @@ var hr=history.replaceState,hp=history.pushState;
 if(!DBG.nopretty)try{hr.call(history,history.state,'',pretty(location.href));}catch(e){}
 function hpatch(f){return function(s,t,u){if(u!=null){var pu=pretty(String(u));try{VBASE=vbaseFrom(new URL(pu,location.href).pathname);}catch(e){}u=pu;}return f.call(this,s,t,u);};}
 if(!DBG.nopretty){history.pushState=hpatch(hp);history.replaceState=hpatch(hr);}
+/* address bar shows NullCash names for in-app hash routes (the app still sees its own on load) */
+try{if(/^#nullswap\b/i.test(location.hash))hr.call(history,history.state,'',location.pathname+location.search+location.hash.replace(/^#nullswap/i,'#veilswap'));}catch(e){}
+function hashBrand(){try{var h=location.hash||'';if(/veil/i.test(h))hr.call(history,history.state,'',location.pathname+location.search+h.replace(/veil/ig,'null'));}catch(e){}}
+window.addEventListener('hashchange',function(){setTimeout(hashBrand,0);});
+setTimeout(hashBrand,1500);
 var of=window.fetch;
 var HEAL=null,DISM=0;
 function probe(){return of.call(window,R+'_health?_h='+Date.now(),{cache:'no-store',credentials:'same-origin'}).then(function(r){return r.ok&&(r.headers.get('content-type')||'').indexOf('json')>=0;},function(){return false;});}
@@ -202,7 +207,7 @@ function walk(root){
 var started=false;
 function start(){
  if(started)return;started=true;
- if(DBG.nobrand){document.documentElement.classList.add('bf-ready');return;}
+ if(DBG.nobrand){document.documentElement.classList.add('bf-ready');setInterval(function(){document.documentElement.classList.add('bf-ready');},300);return;}
  walk(document.documentElement);
  try{var fl=document.createElement('link');sa.call(fl,'rel','icon');sa.call(fl,'href',BU+'favicon.png?v=4');sa.call(fl,'id','bf-icon');document.head.appendChild(fl);}catch(e){}
  var syncTitle=function(){var t=document.title;if(t&&TXT.test(t)){var nt=rt(t);if(nt!==t)document.title=nt;}};
@@ -217,6 +222,8 @@ function start(){
   else for(var j=0;j<m.addedNodes.length;j++)walk(m.addedNodes[j]);}}
  mo.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['src','href','title','aria-label','placeholder','alt','content','data-theme']});
  document.documentElement.classList.add('bf-ready');
+ // React may re-render <html> after a hydration mismatch and drop our class: keep the page revealed
+ setInterval(function(){var de=document.documentElement;if(!de.classList.contains('bf-ready'))de.classList.add('bf-ready');},200);
 }
 if(T==='site'){
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();

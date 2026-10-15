@@ -17,7 +17,7 @@ export default function CaChip({ line = 'border-[#202221]/70' }) {
   return (
     <button type="button" onClick={copy} title={`Copy contract address ${CA}`} aria-label={`Copy contract address ${CA}`}
       data-testid="nav-ca-chip"
-      className={`group flex h-10 min-w-0 items-center gap-2 rounded-[10px] border px-2.5 font-mono text-[12px] transition hover:-translate-y-0.5 sm:px-3 ${line}`}>
+      className={`group flex h-10 min-w-0 shrink-0 items-center gap-2 whitespace-nowrap rounded-[10px] border px-2.5 font-mono text-[12px] transition hover:-translate-y-0.5 sm:px-3 ${line}`}>
       <span className="rounded-[6px] bg-[#202221] px-1.5 py-0.5 text-[10px] font-semibold tracking-wider text-[#D9D9D9]">CA</span>
       <span className="hidden lg:inline" data-testid="nav-ca-full">{CA}</span>
       <span className="lg:hidden" data-testid="nav-ca-short">{SHORT}</span>

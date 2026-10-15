@@ -48,7 +48,7 @@ export default function NmNav() {
           <div className="flex min-w-0 items-center gap-2">
             <CaChip line={line} />
             <a href={X_URL} target="_blank" rel="noopener noreferrer" aria-label="NullCash on X" data-testid="nav-x"
-              className={`grid h-10 w-10 place-items-center rounded-[10px] border transition hover:-translate-y-0.5 ${line}`}><XGlyph /></a>
+              className={`hidden h-10 w-10 place-items-center rounded-[10px] border transition hover:-translate-y-0.5 sm:grid ${line}`}><XGlyph /></a>
             <button type="button" onClick={() => setOpen((v) => !v)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} data-testid="nav-menu"
               className={`nm-burger relative grid h-10 w-10 place-items-center rounded-[10px] border ${line}`}>
               <span className={`nm-bl ${open ? 'o1' : ''}`} /><span className={`nm-bl ${open ? 'o2' : ''}`} /><span className={`nm-bl ${open ? 'o3' : ''}`} />

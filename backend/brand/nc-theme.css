@@ -456,3 +456,10 @@ header .nc-ca .nc-ca-f{display:none}
 @media (min-width:1600px){header .nc-ca .nc-ca-f{display:inline}header .nc-ca .nc-ca-s{display:none}}
 @media (max-width:520px){header .nc-ca{height:34px;gap:6px;padding:0 8px 0 4px;font-size:11px}header .nc-ca b{height:22px;padding:0 5px;font-size:9px}header .top-right .dk-x{display:none!important}}
 @media (max-width:360px){header .nc-ca i{display:none}}
+/* 1024-1080: upstream collapses the rail to icon-only (label hidden) while we hide icons -> force labels */
+@media (min-width:1024px){
+ nav.side .nav-i>span:not(.dk-nw),nav.side .nav-i .lbl,nav.side .nav-i .nav-l{display:inline!important;opacity:1!important;visibility:visible!important;width:auto!important;position:static!important;clip:auto!important;white-space:nowrap!important}
+ nav.side .nav-i{min-width:max-content!important;justify-content:center!important}
+}
+header.site-top .nc-ca-site{margin-right:10px}
+@media (max-width:720px){header.site-top .nc-ca-site .nc-ca-f{display:none}header.site-top .nc-ca-site .nc-ca-s{display:inline}}
