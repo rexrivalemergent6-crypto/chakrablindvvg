@@ -80,3 +80,7 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - /docs (NcDocsPage.jsx + docsContent.js): new structure, sidebar groups Start here / Concepts / Cross-chain / Reference / Staying safe, scroll-spy, mobile select.
 - Fees collapsible everywhere, closed by default: landing Fees, docs Fees box, and in-app `.sum` fee boxes behind a "Fees & details" toggle (dk-swap.js ensureFees, resets closed on tab change).
 - X link everywhere -> https://x.com/usenullcash. In-app Docs links -> /docs.
+
+## Iteration 14 — Lime accent removed (iteration_19.json: frontend 100%, 0 lime hits)
+- Landing/docs/nav: graphite buttons (#2B2F33, white text) on light sections, light-steel buttons (#E3E7EC) on dark sections, steel accent #B9C1CC; illustrations recoloured to steel.
+- App theme (nc-theme.css, dk-swap.js): lime vars -> steel (#c5ccd6), primary buttons graphite gradient, --veil/--veil-rgb greens -> graphite, Chain terminal neutral. NOTE: theme CSS is lru_cached in bifrost_brand.py -> restart backend after editing nc-theme.css.
