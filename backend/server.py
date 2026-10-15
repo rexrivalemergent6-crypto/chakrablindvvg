@@ -256,6 +256,35 @@ async def ds_proxy_post(path: str, request: Request):
 app.include_router(api_router)
 app.include_router(bifrost_router)
 
+class GatewayStatusMiddleware:
+    """The public ingress replaces any 502/504 body with its own HTML error page,
+    which destroys the upstream JSON error (e.g. relayer "jupiter 429", order
+    validation errors) and breaks JSON parsing in the browser. Re-map those two
+    statuses to 503 (passed through untouched) and keep the original code in a header."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        async def _send(msg):
+            if msg["type"] == "http.response.start" and msg.get("status") in (502, 504):
+                orig = msg["status"]
+                msg = dict(msg)
+                msg["status"] = 503
+                msg["headers"] = list(msg.get("headers", [])) + [
+                    (b"x-upstream-status", str(orig).encode()),
+                    (b"retry-after", b"2"),
+                ]
+            await send(msg)
+
+        return await self.app(scope, receive, _send)
+
+
+app.add_middleware(GatewayStatusMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,

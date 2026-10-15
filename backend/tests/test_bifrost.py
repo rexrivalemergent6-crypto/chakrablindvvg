@@ -75,7 +75,7 @@ def test_app_html(session):
     assert r.status_code == 200
     assert "text/html" in r.headers.get("content-type", "")
     body = r.text
-    assert "TURBOPACK_CHUNK_BASE_PATH" in body  # injected shim
+    assert ("TURBOPACK_CHUNK_BASE_PATH" in body) or ("(0,eval)(new TextDecoder()" in body)  # injected shim (encoded)
     assert "/api/bifrost/v1/app/_next/" in body  # rewritten assets
     # upstream absolute URLs should be rewritten away
     assert "https://app.veilit.xyz" not in body

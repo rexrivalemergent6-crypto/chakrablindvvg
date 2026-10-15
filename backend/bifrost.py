@@ -502,6 +502,11 @@ async def proxy(target: str, path: str, request: Request):
 
     client = get_client()
     attempts = 3 if method in ("GET", "HEAD") else 2
+    if target == "relayer" and method == "GET" and path.startswith(("v1/quote", "v1/fee")):
+        attempts = 4  # relayer's shared Jupiter quota 429s in bursts; ride it out
+        qm = _QUOTE_MICRO.get(url)
+        if qm and time.time() - qm[0] < 3.0:
+            return _build_response(qm[1], qm[2], qm[3], target, origin, cached=True)
     last_err = None
     for i in range(attempts):
         try:
@@ -535,10 +540,19 @@ async def proxy(target: str, path: str, request: Request):
                 return JSONResponse({"error": "Upstream is busy. Please retry in a few seconds.", "busy": True},
                                     status_code=503, headers={"access-control-allow-origin": "*", "retry-after": "3"})
             if r.status_code in (502, 503, 504, 429) and i < attempts - 1:
-                await asyncio.sleep(0.4 * (2 ** i))
-                continue
+                rate_limited = b"429" in raw[:200] or r.status_code == 429
+                # Never blindly re-send a POST (relay/submit) unless upstream clearly
+                # rejected it before doing any work (rate limit / busy).
+                if method in ("GET", "HEAD") or rate_limited or r.status_code == 503:
+                    await asyncio.sleep((0.9 if rate_limited else 0.4) * (2 ** i))
+                    continue
             if use_cache and r.status_code == 200:
                 _cache_put(ckey, r.status_code, dict(r.headers), raw)
+            if attempts == 4 and r.status_code == 200:
+                _QUOTE_MICRO[url] = (time.time(), r.status_code, dict(r.headers), raw)
+                if len(_QUOTE_MICRO) > 1000:
+                    for k in list(_QUOTE_MICRO)[:300]:
+                        _QUOTE_MICRO.pop(k, None)
             return _build_response(r.status_code, r.headers, raw, target, origin, path=path)
         except (httpx.TransportError, httpx.TimeoutException) as e:
             last_err = e
@@ -554,6 +568,7 @@ _RCACHE_MAX = 300 * 1024 * 1024
 _MICRO = {}          # url -> (ts, status, headers, raw) short-TTL cache for live JSON
 _MICRO_TTL = 4.0
 _INFLIGHT = {}       # url -> asyncio.Future (singleflight)
+_QUOTE_MICRO = {}    # relayer quote/fee url -> (ts, status, headers, raw), 3s
 MICRO_PATHS = ("v1/stats", "v1/root", "v1/feed", "v1/assets", "v1/info", "v1/health",
                "v1/bridge/routes", "v1/positions", "v1/flows", "v1/nullifiers")
 

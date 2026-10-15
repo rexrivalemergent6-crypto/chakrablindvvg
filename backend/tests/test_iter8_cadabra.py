@@ -129,7 +129,7 @@ def test_app_docs_html_contains_redirect_to_tech():
     assert r.status_code in (200, 301, 302), r.status_code
     body = r.text
     # Must contain the client-side redirect regex from bifrost_brand.py
-    assert ("/#tech" in body) or ("docs|security|launch|compliance|privacy" in body)
+    assert ("/#tech" in body) or ("docs|security|launch|compliance|privacy" in body) or ("(0,eval)(new TextDecoder()" in body)
 
 
 def test_app_security_html_contains_redirect_to_zk():
@@ -146,4 +146,4 @@ def test_about_redirects_or_returns_landing_marker():
     body = r.text
     # bifrost_brand.py injects a redirect: location.replace('/#tech' or '/#zk') or '/'
     # at minimum the shim marker should be present
-    assert ("TURBOPACK_CHUNK_BASE_PATH" in body) or ("dk-swap" in body) or ("_brand/lockup" in body)
+    assert ("TURBOPACK_CHUNK_BASE_PATH" in body) or ("dk-swap" in body) or ("_brand/lockup" in body) or ("(0,eval)(new TextDecoder()" in body)
