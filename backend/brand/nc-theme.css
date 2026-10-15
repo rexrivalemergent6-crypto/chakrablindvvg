@@ -88,6 +88,7 @@ img[src*="_brand/lockup"]{height:30px!important}
 
 /* ---------- motion ---------- */
 @keyframes ncRise{from{opacity:0;transform:translateY(10px) scale(.995)}to{opacity:1;transform:none}}
+:root{--nc-ease:cubic-bezier(.22,.61,.36,1);--nc-spring:cubic-bezier(.34,1.56,.64,1)}
 @keyframes ncFade{from{opacity:0}to{opacity:1}}
 @keyframes ncPop{0%{opacity:0;transform:translateY(8px) scale(.96)}100%{opacity:1;transform:none}}
 @keyframes ncSlideIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
@@ -317,7 +318,9 @@ main.main .mini{min-height:0!important}
 .vl>*:not(#nc-splash){display:none!important}
 .vl::before,.vl::after{display:none!important}
 .vl{display:flex!important;align-items:center!important;justify-content:center!important;background:#f4f5ef!important}
-#nc-splash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;animation:ncFade .3s ease both}
+#nc-splash{position:fixed;inset:0;z-index:2147483000;background:#f4f5ef;display:flex;align-items:center;justify-content:center;padding:18px;animation:ncFade .3s ease both;transition:opacity .4s ease}
+#nc-splash.sp-out{animation:ncFadeOut .4s ease both;pointer-events:none}
+@keyframes ncFadeOut{from{opacity:1}to{opacity:0}}
 #nc-splash .sp-card{width:min(560px,100%);border-radius:30px;background:radial-gradient(120% 90% at 50% 0%,#1d1a2b 0%,#0f0f14 60%);border:1px solid rgba(153,69,255,.25);
  box-shadow:0 30px 80px -30px rgba(60,20,120,.6),0 0 0 6px rgba(20,241,149,.06);padding:22px 24px 24px;overflow:hidden;animation:ncPop .5s var(--nc-spring) both}
 #nc-splash .sp-top{display:flex;align-items:center;gap:10px;font:700 12px/1 var(--f-sans);letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.72)}

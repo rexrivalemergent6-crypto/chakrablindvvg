@@ -1563,12 +1563,27 @@
 
   /* ---- NullCash: particle splash (original canvas animation, Solana palette) ---- */
   function ensureSplash() {
+    if (window.__ncSplashDone || document.getElementById('nc-splash')) return;
     var vl = document.querySelector('.vl');
-    if (!vl || vl.querySelector('#nc-splash')) return;
+    if (!vl) return;
+    window.__ncSplashDone = true;
     var box = document.createElement('div'); box.id = 'nc-splash'; box.setAttribute('data-testid', 'nc-splash');
+    var shownAt = performance.now(), MIN_MS = 1900, leaving = false;
     box.innerHTML = '<div class="sp-card"><div class="sp-top"><i></i><span>Solana mainnet</span></div><canvas></canvas>' +
       '<div class="sp-bot"><b>Getting ready</b><span class="sp-msg">Syncing the pool</span><div class="sp-bar"><i></i></div></div></div>';
-    vl.appendChild(box);
+    // lives on <body> (not inside the app's own loader) so it stays up for a minimum
+    // time even when the app boots instantly from cache, then fades out
+    document.body.appendChild(box);
+    var boot = document.getElementById('nc-boot'); if (boot) boot.remove();
+    var gone = setInterval(function () {
+      var v = document.querySelector('.vl');
+      var ready = (!v || v.classList.contains('out')) && document.querySelector('main.main');
+      if (!leaving && ready && performance.now() - shownAt >= MIN_MS) {
+        leaving = true; clearInterval(gone); box.classList.add('sp-out');
+        setTimeout(function () { box.remove(); }, 420);
+      }
+    }, 100);
+    setTimeout(function () { if (!leaving) { leaving = true; clearInterval(gone); box.classList.add('sp-out'); setTimeout(function () { box.remove(); }, 420); } }, 20000);
     var cv = box.querySelector('canvas'), ctx = cv.getContext('2d'), msg = box.querySelector('.sp-msg');
     var MSGS = ['Syncing the pool', 'Loading your notes', 'Warming up proofs', 'Almost there'], mi = 0;
     var mt = setInterval(function () { mi = (mi + 1) % MSGS.length; msg.classList.remove('in'); void msg.offsetWidth; msg.textContent = MSGS[mi]; msg.classList.add('in'); }, 1400);
@@ -1577,7 +1592,7 @@
     function lerp(a, b, k) { return a + (b - a) * k; }
     function col(k) { var s = k < .5 ? 0 : 1, kk = k < .5 ? k * 2 : (k - .5) * 2; return [lerp(C[s][0], C[s + 1][0], kk) | 0, lerp(C[s][1], C[s + 1][1], kk) | 0, lerp(C[s][2], C[s + 1][2], kk) | 0]; }
     function build() {
-      var r = cv.getBoundingClientRect(); W = r.width; H = r.height; if (!W || !H) return;
+      W = Math.round(cv.offsetWidth); H = Math.round(cv.offsetHeight); if (!W || !H) return;
       cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       var off = document.createElement('canvas'), oc = off.getContext('2d'); off.width = W; off.height = H;
       var fs = Math.min(H * .78, W / 2.6);
@@ -1614,7 +1629,7 @@
     window.addEventListener('resize', function () { if (box.isConnected) build(); });
     (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () { build(); raf = requestAnimationFrame(frame); });
   }
-  var spT = setInterval(function () { ensureSplash(); if (document.querySelector('main.main') && !document.querySelector('.vl')) clearInterval(spT); }, 60);
+  var spT = setInterval(function () { ensureSplash(); if (window.__ncSplashDone || (document.querySelector('main.main') && !document.querySelector('.vl'))) clearInterval(spT); }, 30);
 
   /* ---- collapsible fee summaries on every in-app page (Send, Shield, Swap, Bridge...) ---- */
   // every fee box starts closed; state lives on its own toggle and resets on page change
