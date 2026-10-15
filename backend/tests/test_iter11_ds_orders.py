@@ -5,7 +5,7 @@ import uuid
 import pytest
 import requests
 
-BASE = os.environ.get("REACT_APP_BACKEND_URL", "https://darkpricnow.preview.emergentagent.com").rstrip("/")
+BASE = os.environ.get("REACT_APP_BACKEND_URL", "https://new-nullsmsn.preview.emergentagent.com").rstrip("/")
 
 # Fixed test addresses
 EVM_DEST = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
