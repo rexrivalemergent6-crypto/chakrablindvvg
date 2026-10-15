@@ -566,6 +566,9 @@ async def proxy(target: str, path: str, request: Request):
     if not upstream:
         return JSONResponse({"error": "unknown bifrost target", "targets": list(TARGETS)},
                             status_code=404)
+    if target == "app" and request.method in ("GET", "HEAD") and path.strip("/") == "api":
+        from fastapi.responses import RedirectResponse
+        return RedirectResponse("/docs", status_code=302)
     if target in ("site", "app") and request.method in ("GET", "HEAD"):
         icon = brand_icon_for(path)
         if icon:

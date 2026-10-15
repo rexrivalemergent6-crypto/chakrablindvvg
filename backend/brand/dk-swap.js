@@ -1118,7 +1118,7 @@
     function stat(k, v, t) { return '<div class="ch-stat"><span>$ ' + k + '</span><b' + (t ? ' title="' + esc(t) + '"' : '') + '>' + v + '</b></div>'; }
     return '<div class="ch-page" data-testid="chain-page"><div class="ch-term">' +
       '<div class="ch-bar"><i></i><i></i><i></i><span>root@nullcash:~$ watch --chain solana-mainnet<em>_</em></span>' +
-      '<span class="ch-live ' + (live ? 'on' : 'off') + '" data-testid="chain-live">' + (live ? '\u25cf LIVE \u00b7 sync <b class="ch-next">10s</b>' : (CH.err ? '\u25cb RECONNECTING' : '\u25cb CONNECTING')) + '</span></div>' +
+      '<span class="ch-live ' + (live ? 'on' : 'off') + '" data-testid="chain-live">' + (live ? '\u25cf LIVE \u00b7 sync <b class="ch-next">4s</b>' : (CH.err ? '\u25cb RECONNECTING' : '\u25cb CONNECTING')) + '</span></div>' +
       '<div class="ch-stats" data-testid="chain-stats">' +
         stat('merkle_root', st.root ? esc(chShort(st.root, 6)) : '\u2026', st.root) +
         stat('commitments', st.leaves != null ? Number(st.leaves).toLocaleString() : '\u2026') +
@@ -1159,7 +1159,18 @@
     if (key === lastKey && viewEl() && viewEl().firstChild) return;
     lastKey = key;
     if (r.view === 'swap') {
-      if (S.method !== r.method) { S.method = r.method; resetPair(); }
+      if (S.method !== r.method) {
+        var carry = S.recv ? { sym: S.recv.symbol, chain: (S.recv.chainName || '').toLowerCase(), dest: S.dest } : null;
+        S.method = r.method; resetPair();
+        if (carry) {
+          var m1 = S.method;
+          (m1 === 'privacy' ? api.nTokens('destination', carry.sym) : api.tokens('destination', carry.sym)).then(function (l) {
+            if (S.method !== m1 || S.recv) return;
+            var hit = (l || []).find(function (t) { return t.symbol === carry.sym && (t.chainName || '').toLowerCase() === carry.chain; });
+            if (hit) { S.recv = hit; if (carry.dest && !S.dest) S.dest = carry.dest; render(); if (S.send) scheduleQuote(); }
+          }).catch(function () {});
+        }
+      }
       S.view = 'swap';
       render();
       if (S.send && S.recv) scheduleQuote();
@@ -1168,7 +1179,7 @@
         (m0 === 'privacy' ? api.nTokens('source', '') : api.tokens('source', '')).then(function (l) {
           if (S.method !== m0 || S.send) return;
           var sol = (l || []).find(function (t) { return t.symbol === 'SOL'; }) || (l || [])[0];
-          if (sol) { S.send = sol; render(); }
+          if (sol) { S.send = sol; render(); if (S.recv) scheduleQuote(); }
         }).catch(function () {});
       }
     } else if (r.view === 'chain') {
@@ -1347,8 +1358,24 @@
     tr.insertBefore(b, x || tr.firstChild);
   }
   /* ---- NullCash: keep desktop top tabs clear of the header controls ---- */
-  var OVF_ORDER = ['chain', 'history', 'bridge', 'track'];
+  var OVF_ORDER = ['chain', 'history', 'bridge', 'track', 'send', 'privacy swap', 'shield', 'private route', 'swap'];
+  function navKey(b) {
+    var t = '';
+    Array.prototype.forEach.call(b.childNodes, function (n) {
+      if (n.nodeType === 3) t += n.nodeValue;
+      else if (n.nodeType === 1 && !(n.classList && n.classList.contains('dk-nw')) && n.tagName !== 'I' && n.tagName !== 'svg') t += n.textContent;
+    });
+    return t.trim().toLowerCase();
+  }
+  var fitRO = null;
   function fitNav() {
+    if (!fitRO && window.ResizeObserver) {
+      var trx = document.querySelector('header .top-right');
+      if (trx) { fitRO = new ResizeObserver(function () { try { fitNavNow(); } catch (e) {} }); fitRO.observe(trx); }
+    }
+    fitNavNow();
+  }
+  function fitNavNow() {
     var nav = document.querySelector('nav.side'), tr = document.querySelector('header .top-right');
     if (!nav || !tr) return;
     var items = nav.querySelectorAll('.nav-i');
@@ -1364,19 +1391,25 @@
     var byKey = {};
     Array.prototype.forEach.call(items, function (b) {
       if (b.classList.contains('nc-more-item') || b.classList.contains('nc-hide')) return;
-      byKey[(b.textContent || '').trim().toLowerCase()] = b;
+      byKey[navKey(b)] = b;
     });
     var was = Array.prototype.filter.call(items, function (b) { return b.classList.contains('nc-ovf'); });
     was.forEach(function (b) { b.classList.remove('nc-ovf'); });
-    for (var i = 0; i < OVF_ORDER.length && nav.scrollWidth > nav.clientWidth + 1; i++) {
+    var over = function () {
+      if (nav.scrollWidth > nav.clientWidth + 1) return true;
+      var mbx = nav.querySelector('.nc-more-btn');
+      return !!(mbx && mbx.offsetWidth && mbx.getBoundingClientRect().right > nav.getBoundingClientRect().right + 0.5);
+    };
+    for (var i = 0; i < OVF_ORDER.length && over(); i++) {
       var it = byKey[OVF_ORDER[i]]; if (it) it.classList.add('nc-ovf');
     }
     var now = Array.prototype.filter.call(items, function (b) { return b.classList.contains('nc-ovf'); });
-    nav.classList.toggle('nc-tight', nav.scrollWidth > nav.clientWidth + 1);
+    nav.classList.toggle('nc-tight', over());
     if (now.length !== was.length && document.getElementById('nc-more-pop')) closeMore();
   }
   /* ---- NullCash: top-tab "More" menu (desktop) ---- */
-  var MORE_OVF = { 'chain': 'Live pool terminal', 'history': 'Your local activity', 'bridge': 'Move funds across chains', 'track': 'Follow a swap order live' };
+  var MORE_OVF = { 'chain': 'Live pool terminal', 'history': 'Your local activity', 'bridge': 'Move funds across chains', 'track': 'Follow a swap order live',
+    'send': 'Pay anyone privately', 'privacy swap': 'No wallet · shielded cross-chain', 'shield': 'Move tokens into the pool', 'private route': 'No wallet · best-rate cross-chain', 'swap': 'Trade inside the pool' };
   var MORE = { 'receive': 'Get paid to a private address', 'withdraw': 'Exit to any Solana address',
     'addresses': 'One-time burner addresses', 'keys': 'Vault, viewing & recovery keys' };
   var MORE_ICO = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>';
@@ -1391,7 +1424,7 @@
     var ovf = Array.prototype.slice.call(nav.querySelectorAll('.nav-i.nc-ovf'));
     var more = Array.prototype.slice.call(nav.querySelectorAll('.nav-i.nc-more-item'));
     ovf.concat(more).forEach(function (orig) {
-      var label = (orig.textContent || '').trim(), k = label.toLowerCase();
+      var k = navKey(orig), label = k.replace(/\b\w/g, function (c) { return c.toUpperCase(); }).replace(/^(Private|Privacy) (Route|Swap)$/, function (m, a, b2) { return a + ' ' + b2.toLowerCase(); });
       var it = document.createElement('button'); it.type = 'button';
       it.setAttribute('data-testid', 'nc-more-' + k.replace(/[^a-z]+/g, '-'));
       if (orig.classList.contains('on')) it.className = 'on';

@@ -463,3 +463,4 @@ header .nc-ca .nc-ca-f{display:none}
 }
 header.site-top .nc-ca-site{margin-right:10px}
 @media (max-width:720px){header.site-top .nc-ca-site .nc-ca-f{display:none}header.site-top .nc-ca-site .nc-ca-s{display:inline}}
+@media (min-width:1024px){nav.side .side-foot{display:none!important}}

@@ -38,7 +38,7 @@ BRAND_CSS = """
 a.xc,.xc,a[href*="chromewebstore.google.com"],
 a[href*="t.me/veil"],a[href*="github.com/veil"],a[href*="@veilit.xyz"],.foot-audit,.batch-tag[href*="contractwolf.io"],
 img[src*="audit-contractwolf"],li:has(> a[href*="contractwolf.io"]),#extension,.ext-soon,.ext-get,
-section#developers,a[href="#developers"],a[href$="docs#developers"],a[href="#extension"]{display:none!important}
+section#developers,a[href="#developers"],a[href$="/v1/app/api"],a[href*="/v1/app/api#"],a[href*="/v1/app/api?"],a[href="/app/api"],a[href^="/app/api#"],a[href$="docs#developers"],a[href="#extension"]{display:none!important}
 a[href*="contractwolf.io"]{pointer-events:none!important;color:inherit!important;text-decoration:none!important}
 .omark,.tk,.foot-ca,[data-copy="HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump"]{display:none!important}
 html:not(.bf-ready) body{opacity:0}
@@ -88,17 +88,19 @@ function pretty(u){
   return q+x.search+x.hash;
 }
 try{if(T==='site'){location.replace('/');}
- else{var sub=(function(){var lp=location.pathname;if(lp.indexOf(P)===0)return lp.slice(P.length)||'/';if(lp.indexOf('/app')===0)return lp.slice(4)||'/';return lp;})();if(/^\/(docs|security|launch|compliance|privacy|terms)(\/|$)/.test(sub)){location.replace(/^\/security/.test(sub)?'/#zk':'/#tech');}}}catch(e){}
+ else{var sub=(function(){var lp=location.pathname;if(lp.indexOf(P)===0)return lp.slice(P.length)||'/';if(lp.indexOf('/app')===0)return lp.slice(4)||'/';return lp;})();if(/^\/api(\/|$)/.test(sub)){location.replace('/docs');}else if(/^\/(docs|security|launch|compliance|privacy|terms)(\/|$)/.test(sub)){location.replace(/^\/security/.test(sub)?'/#zk':'/#tech');}}}catch(e){}
 var DBG={};try{DBG=JSON.parse(localStorage.getItem('bf-debug')||'{}')}catch(e){}
 var hr=history.replaceState,hp=history.pushState;
 if(!DBG.nopretty)try{hr.call(history,history.state,'',pretty(location.href));}catch(e){}
-function hpatch(f){return function(s,t,u){if(u!=null){var pu=pretty(String(u));try{VBASE=vbaseFrom(new URL(pu,location.href).pathname);}catch(e){}u=pu;}return f.call(this,s,t,u);};}
+function hpatch(f){return function(s,t,u){if(u!=null){var pu=pretty(String(u));try{VBASE=vbaseFrom(new URL(pu,location.href).pathname);}catch(e){}u=pu;}var rv=f.call(this,s,t,u);if(u!=null&&/veil/i.test(String(u)))setTimeout(function(){try{hashBrand();}catch(e){}},0);return rv;};}
 if(!DBG.nopretty){history.pushState=hpatch(hp);history.replaceState=hpatch(hr);}
 /* address bar shows NullCash names for in-app hash routes (the app still sees its own on load) */
 try{if(/^#nullswap\b/i.test(location.hash))hr.call(history,history.state,'',location.pathname+location.search+location.hash.replace(/^#nullswap/i,'#veilswap'));}catch(e){}
 function hashBrand(){try{var h=location.hash||'';if(/veil/i.test(h))hr.call(history,history.state,'',location.pathname+location.search+h.replace(/veil/ig,'null'));}catch(e){}}
 window.addEventListener('hashchange',function(){setTimeout(hashBrand,0);});
-setTimeout(hashBrand,1500);
+window.addEventListener('popstate',function(){setTimeout(hashBrand,0);});
+/* deep link: let the app read its own hash first, then show the NullCash name once the app is up */
+var HB0=Date.now(),HBI=setInterval(function(){if(Date.now()-HB0>30000){clearInterval(HBI);return;}if(document.querySelector('main.main')&&!document.querySelector('.vl:not(.out)')&&Date.now()-HB0>3500){hashBrand();clearInterval(HBI);}},500);
 var of=window.fetch;
 var HEAL=null,DISM=0;
 function probe(){return of.call(window,R+'_health?_h='+Date.now(),{cache:'no-store',credentials:'same-origin'}).then(function(r){return r.ok&&(r.headers.get('content-type')||'').indexOf('json')>=0;},function(){return false;});}
