@@ -73,3 +73,10 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - dk-swap.js picker restyled after portalbridge.com: centred "Select token" + round close, "Choose network" 5-col grid (9 tiles + More/Less, or + All tile when <=9 chains), pill search "Search for a token or paste an address", "All tokens" list (42px icon + chain badge, symbol, name · short contract ↗ explorer link), selected row highlight, bottom sheet w/ grab handle on mobile. NullCash light theme kept.
 - Paste contract address -> exact token match (Privacy swap tokens carry contractAddress). Explorer links never select the row.
 - Fixed: chain icons for Base/Arbitrum/Optimism/TON/NEAR (coingecko via _img relay); icon URLs with spaces were cut by opaque_image_urls regex (400) -> encoded %20; placeholder SVG is 1x1 so client falls back to spothq icon / letter avatar.
+
+## Iteration 13 — nullmask-style landing, /docs, collapsible fees (iteration_18.json: frontend 100%)
+- Landing (LandingPage.jsx) redesigned in a nullmask-inspired style: #D9D9D9 / #202221 / #CDEF33, Poppins, own generated isometric art in /frontend/public/landing/*.webp, dot-matrix live notes counter (canvas), alternating light/dark sections, one-liner copy only (landingCopy.js: PRODUCTS, JOURNEY, METHODS, PIPE, CLAIMS, PRICES, QA, TECH). Old landingContent.js no longer used by landing/docs.
+- NmNav.jsx: top bar = logo + X (https://x.com/usenullcash) + hamburger on all sizes; menu = bordered icon rows (Now live, Docs, Community, How it works, Swap w/o wallet, Fees, Privacy model, FAQ, Open app).
+- /docs (NcDocsPage.jsx + docsContent.js): new structure, sidebar groups Start here / Concepts / Cross-chain / Reference / Staying safe, scroll-spy, mobile select.
+- Fees collapsible everywhere, closed by default: landing Fees, docs Fees box, and in-app `.sum` fee boxes behind a "Fees & details" toggle (dk-swap.js ensureFees, resets closed on tab change).
+- X link everywhere -> https://x.com/usenullcash. In-app Docs links -> /docs.
