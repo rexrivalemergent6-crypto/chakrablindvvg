@@ -92,15 +92,18 @@ try{if(T==='site'){location.replace('/');}
 var DBG={};try{DBG=JSON.parse(localStorage.getItem('bf-debug')||'{}')}catch(e){}
 var hr=history.replaceState,hp=history.pushState;
 if(!DBG.nopretty)try{hr.call(history,history.state,'',pretty(location.href));}catch(e){}
-function hpatch(f){return function(s,t,u){if(u!=null){var pu=pretty(String(u));try{VBASE=vbaseFrom(new URL(pu,location.href).pathname);}catch(e){}u=pu;}var rv=f.call(this,s,t,u);if(u!=null&&/veil/i.test(String(u)))setTimeout(function(){try{hashBrand();}catch(e){}},0);return rv;};}
+function hpatch(f){return function(s,t,u){if(u!=null){var pu=pretty(String(u));try{VBASE=vbaseFrom(new URL(pu,location.href).pathname);}catch(e){}u=pu;}return f.call(this,s,t,u);};}
 if(!DBG.nopretty){history.pushState=hpatch(hp);history.replaceState=hpatch(hr);}
 /* address bar shows NullCash names for in-app hash routes (the app still sees its own on load) */
 try{if(/^#nullswap\b/i.test(location.hash))hr.call(history,history.state,'',location.pathname+location.search+location.hash.replace(/^#nullswap/i,'#veilswap'));}catch(e){}
 function hashBrand(){try{var h=location.hash||'';if(/veil/i.test(h))hr.call(history,history.state,'',location.pathname+location.search+h.replace(/veil/ig,'null'));}catch(e){}}
-window.addEventListener('hashchange',function(){setTimeout(hashBrand,0);});
-window.addEventListener('popstate',function(){setTimeout(hashBrand,0);});
-/* deep link: let the app read its own hash first, then show the NullCash name once the app is up */
-var HB0=Date.now(),HBI=setInterval(function(){if(Date.now()-HB0>30000){clearInterval(HBI);return;}if(document.querySelector('main.main')&&!document.querySelector('.vl:not(.out)')&&Date.now()-HB0>3500){hashBrand();clearInterval(HBI);}},500);
+/* before the app's own handlers run (registered first), give the app its real hash back */
+function hashUnbrand(){try{if(/^#nullswap\b/i.test(location.hash||''))hr.call(history,history.state,'',location.pathname+location.search+location.hash.replace(/^#nullswap/i,'#veilswap'));}catch(e){}}
+window.addEventListener('popstate',hashUnbrand,true);
+window.addEventListener('hashchange',hashUnbrand,true);
+/* show the NullCash name only once the Bridge view is really on screen (app has finished routing) */
+function bridgeOn(){var n=document.querySelectorAll('nav.side .nav-i.on');for(var i=0;i<n.length;i++){if(/^\s*Bridge\s*$/i.test(n[i].textContent||''))return true;}return false;}
+var HBon=0;setInterval(function(){if(!/^#veilswap\b/i.test(location.hash||'')){HBon=0;return;}if(bridgeOn()){HBon++;if(HBon>=2)hashBrand();}else HBon=0;},400);
 var of=window.fetch;
 var HEAL=null,DISM=0;
 function probe(){return of.call(window,R+'_health?_h='+Date.now(),{cache:'no-store',credentials:'same-origin'}).then(function(r){return r.ok&&(r.headers.get('content-type')||'').indexOf('json')>=0;},function(){return false;});}

@@ -373,6 +373,21 @@
   function destOk() { return !!S.recv && addrOk(S.recv.chain, S.dest); }
   function refundOk() { return B58.test(S.refund.trim()); }
 
+  var CHAIN_ALIAS = { eth: 'ethereum', 'ethereum mainnet': 'ethereum', mainnet: 'ethereum', bsc: 'bnb', 'binance smart chain': 'bnb', 'bnb smart chain': 'bnb', 'bnb chain': 'bnb', binance: 'bnb',
+    arb: 'arbitrum', 'arbitrum one': 'arbitrum', op: 'optimism', 'op mainnet': 'optimism', pol: 'polygon', matic: 'polygon', 'polygon pos': 'polygon', avax: 'avalanche', 'avalanche c-chain': 'avalanche',
+    sol: 'solana', btc: 'bitcoin', trx: 'tron', ton: 'ton', 'the open network': 'ton', xrp: 'ripple', 'xrp ledger': 'ripple', doge: 'dogecoin', ltc: 'litecoin', zec: 'zcash', xlm: 'stellar', near: 'near', sui: 'sui', base: 'base' };
+  function canonChain(t) {
+    var cands = [(t && t.chainName) || '', (t && t.chain) || ''];
+    for (var i = 0; i < cands.length; i++) {
+      var c = String(cands[i]).toLowerCase().trim();
+      if (!c) continue;
+      if (CHAIN_ALIAS[c]) return CHAIN_ALIAS[c];
+      var c2 = c.replace(/\s+(mainnet|network|chain)$/, '');
+      if (CHAIN_ALIAS[c2]) return CHAIN_ALIAS[c2];
+      if (i === 0) return c2;
+    }
+    return '';
+  }
   function resetPair() {
     S.send = null; S.recv = null; S.routes = []; S.ri = 0; S.qerr = ''; S.serr = ''; S.validUntil = 0;
   }
@@ -1160,13 +1175,13 @@
     lastKey = key;
     if (r.view === 'swap') {
       if (S.method !== r.method) {
-        var carry = S.recv ? { sym: S.recv.symbol, chain: (S.recv.chainName || '').toLowerCase(), dest: S.dest } : null;
+        var carry = S.recv ? { sym: S.recv.symbol, chain: canonChain(S.recv), dest: S.dest } : null;
         S.method = r.method; resetPair();
         if (carry) {
           var m1 = S.method;
           (m1 === 'privacy' ? api.nTokens('destination', carry.sym) : api.tokens('destination', carry.sym)).then(function (l) {
             if (S.method !== m1 || S.recv) return;
-            var hit = (l || []).find(function (t) { return t.symbol === carry.sym && (t.chainName || '').toLowerCase() === carry.chain; });
+            var hit = (l || []).find(function (t) { return t.symbol === carry.sym && canonChain(t) === carry.chain; });
             if (hit) { S.recv = hit; if (carry.dest && !S.dest) S.dest = carry.dest; render(); if (S.send) scheduleQuote(); }
           }).catch(function () {});
         }
