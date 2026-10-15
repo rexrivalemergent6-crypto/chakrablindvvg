@@ -251,6 +251,7 @@
     ".dk-srch input{all:unset;flex:1;font-size:15px;color:var(--dk-fg)}",
     ".dk-srch input::placeholder{color:var(--dk-mut)}",
     ".dk-chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 6px}",
+    ".dk-err-sw{all:unset;cursor:pointer;display:inline-block;margin-left:6px;font-weight:600;text-decoration:underline;text-underline-offset:3px}",
     ".dk-chip{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:var(--dk-box);border:1px solid var(--dk-line);padding:4px 10px 4px 5px;border-radius:999px;font-size:12.5px;font-weight:600;transition:background .2s,transform .2s var(--dk-spring)}",
     ".dk-chip:hover{background:var(--veil-wash)}.dk-chip:active{transform:scale(.95)}",
     ".dk-list{overflow-y:auto;margin:4px -8px 0;padding:0 8px;min-height:120px}",
@@ -382,7 +383,7 @@
     var ready = S.send && S.recv && amt > 0 && (!near || (destOk() && refundOk()));
     if (!ready) { S.routes = []; S.quoting = false; S.qerr = ''; render(); return Promise.resolve(); }
     var id = ++S.reqId;
-    S.quoting = true; S.qerr = ''; render();
+    S.quoting = true; S.qerr = ''; S.qerrSwitch = false; render();
     var p = near
       ? api.nQuote({ from: S.send.id, to: S.recv.id, amount: S.amount, recipient: S.dest.trim(), refundTo: S.refund.trim() }).then(function (q) {
           var out = parseFloat(q.amountOut);
@@ -400,7 +401,16 @@
           S.ri = 0;
           S.validUntil = Date.now() + REFRESH_SECS * 1000;
         });
-    return p.catch(function (e) { if (id === S.reqId) { S.routes = []; S.qerr = e.message; } })
+    return p.catch(function (e) {
+        if (id !== S.reqId) return;
+        S.routes = [];
+        var m = String(e && e.message || '');
+        if (near && /no privacy swap route|not available|quoting/i.test(m)) {
+          // provider-side outage: say so plainly and offer the other engine
+          S.qerr = 'Privacy swap providers aren\u2019t quoting right now. Try again in a few minutes, or use Private route.';
+          S.qerrSwitch = true;
+        } else { S.qerr = m; }
+      })
       .then(function () { if (id === S.reqId) { S.quoting = false; if (!S.submitting) render(); } });
   }
 
@@ -528,7 +538,8 @@
     } else {
       h += '<div class="dk-hint">Check the chain and address. Transfers cannot be reversed.</div>';
     }
-    if (S.qerr || S.serr) h += '<div class="dk-err" data-testid="dk-error">' + esc(S.serr || S.qerr) + '</div>';
+    if (S.qerr || S.serr) h += '<div class="dk-err" data-testid="dk-error">' + esc(S.serr || S.qerr) +
+      (!S.serr && S.qerrSwitch ? ' <button type="button" class="dk-err-sw" data-act="go" data-v="private-route" data-testid="dk-err-switch">Use Private route \u2192</button>' : '') + '</div>';
     h += '<button class="dk-cta" data-act="submit" data-testid="dk-submit"' + (c.ok ? '' : ' disabled') + '>' + (S.submitting ? '<span class="dk-spin"></span>' : '') + esc(c.text) + '</button>';
     h += '<div class="dk-note">Creating an order moves no funds · live on-chain quotes</div>';
     h += '</div>';

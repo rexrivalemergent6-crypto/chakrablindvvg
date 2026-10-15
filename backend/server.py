@@ -203,6 +203,12 @@ async def ds_proxy_get(path: str, request: Request):
         ts, status, body = _ds_cache[key]
         if now - ts < ttl:
             return Response(content=body, status_code=status, media_type="application/json")
+        # stale-while-revalidate: answer instantly with the last good copy, refresh in background
+        if now - ts < ttl * 20:
+            if key not in _ds_refreshing:
+                _ds_refreshing.add(key)
+                asyncio.create_task(_ds_refresh(path, params, key))
+            return Response(content=body, status_code=status, media_type="application/json")
     url = f"{DS_BASE}/{path}"
     try:
         r = await _ds_request("GET", url, params=params)
@@ -222,6 +228,43 @@ async def ds_proxy_get(path: str, request: Request):
         _ds_cache[key] = (now, r.status_code, body)
     return Response(content=body, status_code=r.status_code,
                     media_type="application/json")
+
+
+_ds_refreshing: set = set()
+
+
+async def _ds_refresh(path: str, params: dict, key: str):
+    """Background refresh of one cached list endpoint."""
+    try:
+        r = await _ds_request("GET", f"{DS_BASE}/{path}", params=params, retries=2)
+        if r.status_code == 200:
+            _ds_cache[key] = (time.time(), 200, _scrub(r.content))
+    except Exception as e:  # keep serving the stale copy
+        logger.warning(f"ds refresh {path} failed: {e}")
+    finally:
+        _ds_refreshing.discard(key)
+
+
+# Lists every visitor needs first: keep them hot so the first load is instant.
+_WARM = [("chains", {}), ("tokens", {"side": "source"}), ("tokens", {"side": "destination"}),
+         ("near/tokens", {"side": "source"}), ("near/tokens", {"side": "destination"})]
+
+
+async def _ds_warm_loop():
+    await asyncio.sleep(2)
+    while True:
+        for path, params in _WARM:
+            key = f"GET {path}?{sorted(params.items())}"
+            ts = _ds_cache.get(key, (0,))[0]
+            if time.time() - ts > _cache_ttl(path) * 0.8 and key not in _ds_refreshing:
+                _ds_refreshing.add(key)
+                await _ds_refresh(path, params, key)
+        await asyncio.sleep(20)
+
+
+@app.on_event("startup")
+async def _start_warm():
+    asyncio.create_task(_ds_warm_loop())
 
 
 def _scrub(body: bytes) -> bytes:
