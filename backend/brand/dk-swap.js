@@ -148,7 +148,7 @@
     src = IMGP(src); badge = IMGP(badge);
     var letter = esc((sym || '?').replace(/[^A-Za-z0-9]/g, '').slice(0, 1).toUpperCase() || '?');
     var img = src
-      ? '<img class="m" src="' + esc(src) + '" data-fb="' + esc(IMGP(JD2 + String(sym || '').toLowerCase().replace(/[^a-z0-9]/g, '') + '.png')) + '" alt="" style="width:' + size + 'px;height:' + size + 'px" onerror="if(this.dataset.fb&&this.src.indexOf(\'spothq\')<0&&this.src!==this.dataset.fb){this.src=this.dataset.fb;}else{this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';}">' +
+      ? '<img class="m" src="' + esc(src) + '" data-fb="' + esc(IMGP(JD2 + String(sym || '').toLowerCase().replace(/[^a-z0-9]/g, '') + '.png')) + '" alt="" style="width:' + size + 'px;height:' + size + 'px" onload="if(this.naturalWidth===1)this.onerror()" onerror="if(this.dataset.fb&&!this.dataset.t){this.dataset.t=1;this.src=this.dataset.fb;}else{this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';}">' +
         '<span class="lt" style="display:none;width:' + size + 'px;height:' + size + 'px">' + letter + '</span>'
       : '<span class="lt" style="width:' + size + 'px;height:' + size + 'px">' + letter + '</span>';
     var b = badge ? '<img class="b" src="' + esc(badge) + '" alt="" onerror="this.remove()">' : '';
@@ -282,7 +282,44 @@
     ".dk-recent:hover{border-color:var(--dk-line2)}.dk-recent:active{transform:scale(.985)}",
     ".dk-recent code{margin-left:auto;font-family:var(--f-mono,monospace);font-size:11px;color:var(--dk-mut);max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
     "@media (max-width:520px){.dk-tok{width:122px}#dk-view{padding:4px 0 150px}.dk-card{padding:14px 12px 18px;border-radius:22px}"
-    + ".dk-seg{width:100%}.dk-seg button{flex:1;justify-content:center;padding:8px 6px;font-size:13px;gap:5px}.dk-seg button svg{display:none}}"
+    + ".dk-seg{width:100%}.dk-seg button{flex:1;justify-content:center;padding:8px 6px;font-size:13px;gap:5px}.dk-seg button svg{display:none}}",
+    /* ---- token picker: Portal-style arrangement (NullCash light) ---- */
+    ".dk-pk{width:min(480px,calc(100% - 24px));padding:14px 20px 0;max-height:calc(100vh - 40px);overflow:hidden}",
+    ".dk-pk .dk-grab{width:44px;height:5px;border-radius:9px;background:var(--dk-line2);margin:0 auto 6px;display:none}",
+    ".dk-pk .dk-mh{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;margin:4px 0 16px}",
+    ".dk-pk .dk-mh h3{grid-column:2;text-align:center;font-size:24px;font-weight:700;letter-spacing:-.02em}",
+    ".dk-pk .dk-mh .dk-x{grid-column:3;width:40px!important;height:40px!important;border-radius:50%!important;margin:0}",
+    ".dk-pk .dk-lbl{font-size:15px;font-weight:600;color:var(--dk-fg);margin:0 0 10px 2px;display:flex;align-items:center;justify-content:space-between;gap:8px}",
+    ".dk-pk .dk-lbl2{font-size:14px;font-weight:500;color:var(--dk-mut);margin:16px 0 4px 2px}",
+    ".dk-pk .dk-lbl2 button{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--dk-acc);padding:2px 6px;border-radius:8px}",
+    ".dk-pk .dk-lbl2 button:hover{background:var(--veil-wash)}",
+    ".dk-pk .dk-chains{grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px}",
+    ".dk-pk .dk-chain{height:76px;border-radius:14px;gap:7px;font-size:12.5px;padding:0 3px;border:1.5px solid var(--dk-line2);color:var(--dk-fg2)}",
+    ".dk-pk .dk-chain img,.dk-pk .dk-chain .dk-cl{width:30px;height:30px;border-radius:50%;flex:none}",
+    ".dk-pk .dk-chain .dk-cl{display:flex;align-items:center;justify-content:center;background:var(--dk-box);font-weight:700;font-size:13px;color:var(--dk-fg2)}",
+    ".dk-pk .dk-chain .dk-more{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--dk-fg2);color:#fff;font-size:20px;line-height:1;font-weight:400}",
+    ".dk-pk .dk-chain.on{background:var(--veil-wash);border-color:rgba(130,180,0,.75);color:var(--dk-fg);font-weight:600;box-shadow:0 0 0 3px rgba(200,241,53,.22)}",
+    ".dk-pk .dk-chain.fixed{cursor:default}",
+    ".dk-pk .dk-srch{border-radius:999px;padding:13px 18px;border:1.5px solid var(--dk-line2);background:transparent;gap:12px}",
+    ".dk-pk .dk-srch input{font-size:16px}",
+    ".dk-pk .dk-chips{display:none}",
+    ".dk-pk .dk-list{margin:0 -20px;padding:0 0 18px;min-height:160px}",
+    ".dk-pk .dk-it{border-radius:0;padding:11px 26px;gap:16px;cursor:pointer}",
+    ".dk-pk .dk-it:hover{background:var(--dk-box)}",
+    ".dk-pk .dk-it.sel{background:var(--veil-wash)}",
+    ".dk-pk .dk-it .n{font-size:17px;font-weight:600;line-height:22px;color:var(--dk-fg)}",
+    ".dk-pk .dk-it .s{font-size:13px;color:var(--dk-mut);display:flex;align-items:center;gap:7px;margin-top:2px;min-width:0;white-space:nowrap}",
+    ".dk-pk .dk-it .s .nm{overflow:hidden;text-overflow:ellipsis;max-width:150px}",
+    ".dk-pk .dk-it .s .dot{width:3px;height:3px;border-radius:50%;background:currentColor;opacity:.7;flex:none}",
+    ".dk-pk .dk-addr{color:var(--dk-fg2);text-decoration:underline;text-underline-offset:3px;font-family:var(--f-mono,monospace);font-size:12px;display:inline-flex;align-items:center;gap:3px}",
+    ".dk-pk .dk-addr:hover{color:var(--dk-acc)}",
+    ".dk-pk .dk-it .tx{min-width:0;flex:1}",
+    ".dk-pk .dk-it .p{font-size:13px;line-height:18px}",
+    ".dk-pk .dk-sec{padding:12px 26px 4px}",
+    "@keyframes dkSheetUp{from{transform:translateY(100%)}to{transform:none}}",
+    "@media (max-width:640px){#dk-modal.pk{place-items:end center}#dk-modal.pk .dk-pk{width:100%;max-height:92vh;border-radius:26px 26px 0 0;border-bottom:0;padding:10px 16px 0;animation:dkSheetUp .34s var(--dk-ease) both}"
+    + ".dk-pk .dk-grab{display:block}.dk-pk .dk-mh h3{font-size:22px}.dk-pk .dk-chains{gap:7px}.dk-pk .dk-chain{height:70px;font-size:11.5px}.dk-pk .dk-chain img,.dk-pk .dk-chain .dk-cl,.dk-pk .dk-chain .dk-more{width:28px;height:28px}"
+    + ".dk-pk .dk-list{margin:0 -16px;padding-bottom:calc(18px + env(safe-area-inset-bottom))}.dk-pk .dk-it{padding:11px 20px}.dk-pk .dk-it .s .nm{max-width:110px}}"
   ].join('\n');
 
   function injectCSS() {
@@ -628,9 +665,10 @@
   }
   function openPicker(side) {
     closeModal();
-    M = { kind: 'pick', side: side, term: '', chain: 'All', tokens: [], loading: true, req: 0, allChains: [] };
+    M = { kind: 'pick', side: side, term: '', chain: 'All', tokens: [], loading: true, req: 0, allChains: [], more: false };
     var m = document.createElement('div');
     m.id = 'dk-modal';
+    m.className = 'pk';
     m.setAttribute('data-testid', 'dk-token-modal');
     document.body.appendChild(m);
     m.addEventListener('mousedown', function (e) { if (e.target === m) closeModal(); });
@@ -640,16 +678,16 @@
   var JD = 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/';
   var H_CHAINS = [
     { id: 'ethereum', name: 'Ethereum', icon: JD + 'eth.png', nat: 'ETH' },
-    { id: 'base', name: 'Base', icon: '', nat: 'ETH' },
-    { id: 'arbitrum', name: 'Arbitrum', icon: '', nat: 'ETH', gov: 'ARB' },
+    { id: 'base', name: 'Base', icon: 'https://assets.coingecko.com/asset_platforms/images/131/large/base.jpeg', nat: 'ETH' },
+    { id: 'arbitrum', name: 'Arbitrum', icon: 'https://assets.coingecko.com/coins/images/16547/large/arb.jpg', nat: 'ETH', gov: 'ARB' },
     { id: 'solana', name: 'Solana', icon: JD + 'sol.png', nat: 'SOL' },
     { id: 'bsc', name: 'BNB Chain', icon: JD + 'bnb.png', nat: 'BNB' },
     { id: 'polygon', name: 'Polygon', icon: JD + 'matic.png', nat: 'POL' },
-    { id: 'optimism', name: 'Optimism', icon: '', nat: 'ETH', gov: 'OP' },
+    { id: 'optimism', name: 'Optimism', icon: 'https://assets.coingecko.com/coins/images/25244/large/Optimism.png', nat: 'ETH', gov: 'OP' },
     { id: 'avalanche', name: 'Avalanche', icon: JD + 'avax.png', nat: 'AVAX' },
     { id: 'bitcoin', name: 'Bitcoin', icon: JD + 'btc.png', nat: 'BTC' },
     { id: 'tron', name: 'Tron', icon: JD + 'trx.png', nat: 'TRX' },
-    { id: 'ton', name: 'TON', icon: '', nat: 'TON' }
+    { id: 'ton', name: 'TON', icon: 'https://assets.coingecko.com/coins/images/17980/large/ton_symbol.png', nat: 'TON' }
   ];
   var H_BY_ID = {}; H_CHAINS.forEach(function (c) { H_BY_ID[c.id] = c; });
   var POPULAR = ['USDC', 'USDT', 'ETH', 'BTC', 'SOL', 'BNB', 'WBTC', 'WETH', 'DAI', 'POL', 'AVAX', 'TRX', 'TON', 'ZEC', 'wNEAR', 'NEAR', 'ARB', 'OP', 'LINK', 'UNI', 'JUP', 'BONK'];
@@ -668,7 +706,7 @@
     if (H_BY_ID[k] && H_BY_ID[k].icon) return H_BY_ID[k].icon;
     var lk = String(k).toLowerCase().replace(' mainnet', '').replace(' c-chain', '').replace('binance smart chain', 'bsc').replace('bnb chain', 'bsc');
     if (H_BY_ID[lk] && H_BY_ID[lk].icon) return H_BY_ID[lk].icon;
-    if (lk === 'near') return JD + 'near.png';
+    if (lk === 'near') return 'https://assets.coingecko.com/coins/images/10365/large/near.jpg';
     if (lk === 'zcash') return JD + 'zec.png';
     if (CHAIN_ICONS[k]) return CHAIN_ICONS[k];
     return t ? chainIcon(t.chainName) : '';
@@ -746,46 +784,98 @@
       .then(function () { if (M && id === M.req) { M.loading = false; renderPicker(false); } });
     if (!near && side === 'destination') learnGov();
   }
+  // Portal-style tile order for the network grid
+  var TILE_PRI = ['ethereum', 'solana', 'arbitrum', 'base', 'bsc', 'polygon', 'optimism', 'avalanche', 'bitcoin', 'tron', 'ton', 'near', 'zcash'];
+  function tileKey(c) {
+    var k = String(c).toLowerCase().replace(' mainnet', '').replace(' c-chain', '');
+    var al = { eth: 'ethereum', sol: 'solana', arb: 'arbitrum', 'binance smart chain': 'bsc', 'bnb chain': 'bsc', bnb: 'bsc', pol: 'polygon', matic: 'polygon', op: 'optimism', avax: 'avalanche', btc: 'bitcoin', trx: 'tron', zec: 'zcash' };
+    return al[k] || k;
+  }
+  function tileSort(list) {
+    return list.map(function (c, i) { return [c, i]; }).sort(function (a, b) {
+      var ia = TILE_PRI.indexOf(tileKey(a[0])), ib = TILE_PRI.indexOf(tileKey(b[0]));
+      return ((ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib)) || (a[1] - b[1]);
+    }).map(function (x) { return x[0]; });
+  }
+  // block-explorer links for token contracts (opens in a new tab, never selects the row)
+  var EXPLORER = {
+    ethereum: 'https://etherscan.io/token/', solana: 'https://solscan.io/token/', base: 'https://basescan.org/token/',
+    arbitrum: 'https://arbiscan.io/token/', bsc: 'https://bscscan.com/token/', polygon: 'https://polygonscan.com/token/',
+    optimism: 'https://optimistic.etherscan.io/token/', avalanche: 'https://snowtrace.io/token/', near: 'https://nearblocks.io/token/',
+    tron: 'https://tronscan.org/#/token20/', gnosis: 'https://gnosisscan.io/token/', sui: 'https://suivision.xyz/coin/',
+    ton: 'https://tonviewer.com/', bera: 'https://berascan.com/token/', berachain: 'https://berascan.com/token/'
+  };
+  function tokenAddr(t) {
+    var a = t && !t.native && (t.contractAddress || t.address || t.mint);
+    return a && typeof a === 'string' && a.length > 3 ? a : '';
+  }
+  function shortAddr(a) { return a.length > 14 ? a.slice(0, 5) + '…' + a.slice(-6) : a; }
+  function explorerUrl(t, a) {
+    var base = EXPLORER[tileKey(t.chain || '')] || EXPLORER[tileKey(t.chainName || '')];
+    return base ? base + encodeURIComponent(a).replace(/%3A/g, ':') : '';
+  }
+  function looksLikeAddr(q) { return q.length >= 24 || /^0x[0-9a-f]{6,}/i.test(q) || /\.(near|tg)$/i.test(q); }
+
   function renderPicker(first) {
     var m = document.getElementById('dk-modal');
     if (!m || !M) return;
     if (first || !m.querySelector('.dk-mb')) {
-      m.innerHTML = '<div class="dk-mb"><div class="dk-mh"><h3>' + (M.side === 'source' ? 'Sell' : 'Buy') + '</h3><button class="dk-x" data-act="close" data-testid="dk-modal-close">' + SV(IC.close, 20) + '</button></div>' +
+      m.innerHTML = '<div class="dk-mb dk-pk" data-side="' + esc(M.side) + '"><div class="dk-grab"></div>' +
+        '<div class="dk-mh"><h3>Select token</h3><button class="dk-x" data-act="close" data-testid="dk-modal-close" aria-label="Close">' + SV(IC.close, 20) + '</button></div>' +
+        '<div class="dk-lbl">Choose network</div>' +
         '<div class="dk-chains" id="dk-chains"></div>' +
-        '<div class="dk-srch">' + SV(IC.search, 18) + '<input id="dk-term" data-testid="dk-token-search" placeholder="Search name or symbol" autocomplete="off"></div>' +
-        '<div class="dk-chips" id="dk-chips"></div><div class="dk-list" id="dk-list"></div></div>';
+        '<div class="dk-srch">' + SV(IC.search, 20) + '<input id="dk-term" data-testid="dk-token-search" placeholder="Search for a token or paste an address" autocomplete="off" spellcheck="false"></div>' +
+        '<div class="dk-chips" id="dk-chips"></div><div class="dk-lbl dk-lbl2" id="dk-lbl2"></div><div class="dk-list" id="dk-list"></div></div>';
       var inp = m.querySelector('#dk-term');
       var t = null;
-      inp.addEventListener('input', function () { M.term = inp.value; clearTimeout(t); t = setTimeout(function () { loadTokens(M.term.trim()); }, 300); });
-      setTimeout(function () { inp.focus(); }, 30);
+      inp.addEventListener('input', function () {
+        M.term = inp.value; clearTimeout(t);
+        t = setTimeout(function () {
+          var q = M.term.trim();
+          // pasted contract address: load the full list once and match locally
+          if (q && looksLikeAddr(q) && isNear()) { if (M.loadedAll) renderPickerList(); else { M.loadedAll = true; loadTokens(''); } }
+          else loadTokens(q);
+        }, 300);
+      });
+      if (window.matchMedia && !window.matchMedia('(max-width:640px)').matches) setTimeout(function () { inp.focus(); }, 30);
     }
-    // chain grid (destination or multi-chain lists)
+    // network grid: 9 tiles + More (Portal arrangement)
     var cg = m.querySelector('#dk-chains');
-    var chains = M.allChains || [];
-    if (M.side === 'destination' && chains.length > 1) {
-      var tiles = ['All'].concat(chains).slice(0, 12);
-      if (M.chain !== 'All' && tiles.indexOf(M.chain) < 0) tiles[11] = M.chain;
+    var chains = tileSort((M.allChains || []).filter(function (c) { return c !== 'All'; }));
+    if (M.side === 'source') {
+      cg.style.display = '';
+      cg.innerHTML = '<button class="dk-chain on fixed" data-testid="dk-chain-solana" title="Deposits are sent on Solana"><img src="' + esc(IMGP(SOL_ICON)) + '" alt="" onerror="this.remove()"><span>Solana</span></button>';
+    } else if (chains.length > 1) {
+      var tiles = M.more ? chains.slice() : chains.slice(0, 9);
+      if (!M.more && M.chain !== 'All' && tiles.indexOf(M.chain) < 0) tiles[tiles.length - 1] = M.chain;
       cg.style.display = '';
       cg.innerHTML = tiles.map(function (c) {
-        var ci = c === 'All' ? '' : chainIconFor(c);
-        var ic = c === 'All' ? '<span style="font-size:15px;line-height:16px">✦</span>' : (ci ? '<img src="' + esc(IMGP(ci)) + '" alt="" onerror="this.remove()">' : '<span class="dk-cl">' + esc(chainLabel(c).charAt(0)) + '</span>');
-        return '<button class="dk-chain' + (M.chain === c ? ' on' : '') + '" data-act="chain" data-c="' + esc(c) + '" data-testid="dk-chain-' + esc(String(c).toLowerCase().replace(/\s+/g, '-')) + '">' + ic + '<span>' + esc(c === 'All' ? 'All chains' : chainLabel(c)) + '</span></button>';
-      }).join('');
+        var ci = chainIconFor(c);
+        var ic = ci ? '<img src="' + esc(IMGP(ci)) + '" alt="" onerror="this.outerHTML=\'<span class=&quot;dk-cl&quot;>' + esc(chainLabel(c).charAt(0)) + '</span>\'">' : '<span class="dk-cl">' + esc(chainLabel(c).charAt(0)) + '</span>';
+        return '<button class="dk-chain' + (M.chain === c ? ' on' : '') + '" data-act="chain" data-c="' + esc(c) + '" title="' + esc(chainLabel(c)) + '" data-testid="dk-chain-' + esc(String(c).toLowerCase().replace(/\s+/g, '-')) + '">' + ic + '<span>' + esc(chainLabel(c)) + '</span></button>';
+      }).join('') + (chains.length > 9
+        ? '<button class="dk-chain" data-act="more" data-testid="dk-chain-more"><span class="dk-more">' + (M.more ? '−' : '+') + '</span><span>' + (M.more ? 'Less' : 'More') + '</span></button>'
+        : '<button class="dk-chain' + (M.chain === 'All' ? ' on' : '') + '" data-act="chain" data-c="All" data-testid="dk-chain-all-tile"><span class="dk-more" style="background:var(--dk-box);color:var(--dk-fg)">✦</span><span>All</span></button>');
     } else {
       cg.style.display = 'none';
       cg.innerHTML = '';
     }
-    // quick chips: first 4 tokens of the current chain
+    var lb = m.querySelector('#dk-lbl2');
+    if (lb) lb.innerHTML = (M.chain === 'All' || M.side === 'source' ? '<span>All tokens</span>' : '<span>' + esc(chainLabel(M.chain)) + ' tokens</span><button data-act="chain" data-c="All" data-testid="dk-chain-all">All networks</button>');
     var chips = m.querySelector('#dk-chips');
-    var pool = filtered().slice(0, 4);
-    chips.innerHTML = M.loading ? '' : pool.map(function (t, i) {
-      return '<button class="dk-chip" data-act="choose" data-i="' + M.tokens.indexOf(t) + '">' + coin(t.icon, t.symbol, 16) + esc(t.symbol) + '</button>';
-    }).join('');
+    if (chips) chips.innerHTML = '';
     renderPickerList();
   }
   function filtered() {
     if (!M) return [];
-    return M.chain === 'All' ? M.tokens : M.tokens.filter(function (t) { return chainKey(t) === M.chain; });
+    var list = M.chain === 'All' ? M.tokens : M.tokens.filter(function (t) { return chainKey(t) === M.chain; });
+    var q = (M.term || '').trim();
+    if (q && looksLikeAddr(q)) {
+      var lq = q.toLowerCase();
+      var hit = list.filter(function (t) { var a = tokenAddr(t).toLowerCase(); return a && (a === lq || a.indexOf(lq) >= 0); });
+      if (hit.length || isNear()) return hit;
+    }
+    return list;
   }
   function renderPickerList() {
     var m = document.getElementById('dk-modal');
@@ -795,15 +885,26 @@
     if (M.loading) { l.innerHTML = '<div class="dk-empty"><span class="dk-spin"></span>Loading tokens…</div>'; return; }
     var list = filtered();
     if (!list.length) { l.innerHTML = '<div class="dk-empty">No tokens found.</div>'; return; }
+    var cur = M.side === 'source' ? S.send : S.recv;
     var h = '', last = null, grouped = isNear() && M.side === 'destination' && M.chain === 'All' && !M.term;
     list.forEach(function (t) {
       var c = t.chainName || 'Other';
       if (grouped && c !== last) { h += '<div class="dk-sec">' + esc(c) + '</div>'; last = c; }
       var price = t.price ? '$' + (Number(t.price) >= 1 ? Number(t.price).toLocaleString(undefined, { maximumFractionDigits: 2 }) : Number(t.price).toPrecision(2)) : '';
-      h += '<button class="dk-it" data-act="choose" data-i="' + M.tokens.indexOf(t) + '" data-testid="dk-token-' + esc(t.symbol) + '">' +
-        coin(t.icon, t.symbol, 30, M.side === 'destination' ? chainIconFor(chainKey(t), t) : SOL_ICON) +
-        '<span><div class="n">' + esc(t.name || t.symbol) + '</div><div class="s">' + esc(t.symbol) + '</div></span>' +
-        '<span class="p">' + esc(price) + '<br>' + esc(c) + '</span></button>';
+      var addr = tokenAddr(t), url = addr ? explorerUrl(t, addr) : '';
+      var sub = '<span class="nm">' + esc(t.name && t.name !== t.symbol ? t.name : t.symbol) + '</span>';
+      if (addr) {
+        sub += '<i class="dot"></i>' + (url
+          ? '<a class="dk-addr" href="' + esc(url) + '" target="_blank" rel="noopener noreferrer" title="' + esc(addr) + '" data-testid="dk-token-addr">' + esc(shortAddr(addr)) + ' ↗</a>'
+          : '<span class="dk-addr" title="' + esc(addr) + '">' + esc(shortAddr(addr)) + '</span>');
+      } else if (M.side === 'destination') {
+        sub += '<i class="dot"></i><span>' + esc(chainLabel(chainKey(t))) + '</span>';
+      }
+      var sel = cur && ((cur.id && cur.id === t.id) || (!cur.id && cur.symbol === t.symbol && cur.chain === t.chain));
+      h += '<div class="dk-it' + (sel ? ' sel' : '') + '" role="button" tabindex="0" data-act="choose" data-i="' + M.tokens.indexOf(t) + '" data-testid="dk-token-' + esc(t.symbol) + '">' +
+        coin(t.icon, t.symbol, 42, M.side === 'destination' ? chainIconFor(chainKey(t), t) : SOL_ICON) +
+        '<span class="tx"><div class="n">' + esc(t.symbol) + '</div><div class="s">' + sub + '</div></span>' +
+        '<span class="p">' + esc(price) + '</span></div>';
     });
     l.innerHTML = h;
   }
@@ -848,6 +949,7 @@
   /* ---------------- events ---------------- */
   document.addEventListener('click', function (e) {
     if (e.target.classList && e.target.classList.contains('sheet-scrim')) { var sx = document.querySelector('.sheet-wrap .sheet-h .x'); if (sx) sx.click(); return; }
+    if (e.target.closest && e.target.closest('a.dk-addr')) return; // explorer link: open, don't select
     var a = e.target.closest && e.target.closest('[data-act]');
     if (!a || !(a.closest('#dk-view') || a.closest('#dk-modal'))) return;
     var act = a.getAttribute('data-act');
@@ -866,7 +968,8 @@
     else if (act === 'track') { var q = document.getElementById('dk-track-q'); doTrack(q ? q.value : S.track.q); }
     else if (act === 'recent') doTrack(a.getAttribute('data-id'));
     else if (act === 'close') closeModal();
-    else if (act === 'chain') { M.chain = a.getAttribute('data-c'); if (isNear()) renderPicker(false); else { renderPicker(false); loadTokens((M.term || '').trim()); } }
+    else if (act === 'more') { if (M) { M.more = !M.more; renderPicker(false); } }
+    else if (act === 'chain') { var nc = a.getAttribute('data-c'); M.chain = (nc === M.chain && nc !== 'All') ? 'All' : nc; if (isNear()) renderPicker(false); else { renderPicker(false); loadTokens((M.term || '').trim()); } }
     else if (act === 'choose') {
       var t = M && M.tokens[+a.getAttribute('data-i')];
       if (t) {

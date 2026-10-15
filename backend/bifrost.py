@@ -123,7 +123,7 @@ IMG_HOSTS = ("api.houdiniswap.com", "cdn.jsdelivr.net", "raw.githubusercontent.c
 _IMG_MISS = {}
 # Neutral placeholder coin served (200) instead of a 404 so missing token logos
 # don't flood the browser console with failed image loads.
-_PLACEHOLDER_SVG = (b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
+_PLACEHOLDER_SVG = (b'<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1" viewBox="0 0 64 64">'
                     b'<circle cx="32" cy="32" r="32" fill="#e6e8de"/>'
                     b'<circle cx="32" cy="32" r="13" fill="none" stroke="#b9bdae" stroke-width="5"/></svg>')
 
@@ -716,7 +716,7 @@ async def ws_proxy(ws: WebSocket, target: str, path: str):
             pass
 
 
-_IMG_URL_RE = re.compile(r'https://(?:api\.houdiniswap\.com|cdn\.jsdelivr\.net|raw\.githubusercontent\.com|assets\.coingecko\.com|coin-images\.coingecko\.com)/[^"\\\s]+')
+_IMG_URL_RE = re.compile(r'https://(?:api\.houdiniswap\.com|cdn\.jsdelivr\.net|raw\.githubusercontent\.com|assets\.coingecko\.com|coin-images\.coingecko\.com)/[^"\\<>]+')
 
 
 def opaque_image_urls(text: str) -> str:
@@ -724,6 +724,7 @@ def opaque_image_urls(text: str) -> str:
     import base64 as _b
 
     def _sub(m):
-        k = _b.urlsafe_b64encode(m.group(0).encode()).decode().rstrip("=")
+        u = m.group(0).rstrip().replace(" ", "%20")  # some upstream icon names contain spaces
+        k = _b.urlsafe_b64encode(u.encode()).decode().rstrip("=")
         return f"{PREFIX}/_img?k={k}"
     return _IMG_URL_RE.sub(_sub, text)
