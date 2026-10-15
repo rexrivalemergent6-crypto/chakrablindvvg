@@ -48,3 +48,7 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - Root cause of swap 400/409s: recipient address didn't match destination chain, and retrying reused an expired/already-claimed quote. Fix in dk-swap.js: per-chain address validation (EVM, Solana, BTC, Tron, LTC, NEAR, ZEC, XLM, XRP, XMR) blocks the button with a clear message; refund must be a valid Solana address; auto re-quote + retry once on a stale/claimed quote; one quiet retry after a connection-check interruption; friendly error text.
 - Wallet creation sheet: centred card, dimmed + 14px blur backdrop, closes with X, Esc or a click outside.
 - Backlog: pay order directly from connected wallet, pinned favourite tokens, order share link.
+
+## Iteration 9 — Re-imported into new workspace (Oct 2026)
+- Source: https://github.com/rexrivalemergent6-crypto/swapcreate---darkpricnow-
+- Created backend/.env + frontend/.env, installed deps, services running. Verified landing (/), app (/app#private-route), Bifrost health, live NEAR quote via proxy.
