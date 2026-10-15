@@ -291,7 +291,7 @@ def head_inject(target: str, prefix: str) -> str:
     )
 
 
-_ICON_V = "4"
+_ICON_V = "5"
 
 
 def nullcash_manifest():
