@@ -12,7 +12,7 @@ import time
 from typing import Dict, Any, Optional
 
 # Base URL from frontend/.env
-BASE_URL = "https://offer-latest-dark.preview.emergentagent.com/api/ds"
+BASE_URL = "https://chakra-build.preview.emergentagent.com/api/ds"
 
 # Test addresses
 EVM_ADDRESS = "0x68b3a9f8940f418e8051ebb659e8ed278fea41f6"

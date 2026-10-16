@@ -100,3 +100,8 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - Live: backend live_relay() refreshes indexer stats/feed every 3s (/api/bifrost/v1/_live), landing polls stats every 5s ("synced Ns ago"), Chain 4s, Track 5s, quotes 30s.
 - Branding: extra text rewrites (NEAR Intents, @veilzk, DarkSwap, Houdini…), houdiniId→orderId, opaque _img?o= keys, #veilswap shown as #nullswap, legacy unused React pages deleted.
 - /app/api removed (302/redirect to /docs, links hidden). No hardcoded domains -> custom domain nullcash.fun works via request host.
+
+## Session — Re-imported new-chakra repo (Oct 2026)
+- Source: https://github.com/rexrivalemergent6-crypto/new-chakra (code already at latest commit 0c16a3d).
+- Created missing backend/.env (MONGO_URL, DB_NAME, CORS_ORIGINS) + frontend/.env (REACT_APP_BACKEND_URL), installed pip + yarn deps, all services running.
+- Verified: landing (/), app (/app#private-route), Bifrost _live relay, live token list + Private route quote via /api/ds proxy.
