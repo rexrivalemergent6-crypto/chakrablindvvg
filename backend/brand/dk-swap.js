@@ -1573,6 +1573,7 @@
     { k: 'send', label: 'Pay', ico: 'pay' }, { k: 'swap', label: 'Trade', ico: 'trade' }, { k: 'menu', label: 'Menu', ico: 'menu' }
   ];
   var TILES = [
+    { k: 'home', label: 'Vault', ico: 'wallet' },
     { k: 'bridge', label: 'Bridge', ico: 'bridge' }, { k: 'dk:private-route', label: 'Private route', ico: 'route' },
     { k: 'dk:privacy-swap', label: 'Privacy swap', ico: 'lock' }, { k: 'dk:track', label: 'Track', ico: 'track' },
     { k: 'history', label: 'History', ico: 'clock' }, { k: 'dk:chain', label: 'Chain', ico: 'term' },
@@ -1707,12 +1708,26 @@
     }
     if (lastPitch === k) return;
     lastPitch = k;
-    var it = SHORT[k], get = GET[k] || GET.home;
+    var FLOW_VERB = { shield: 'depositing', send: 'sending', swap: 'swapping', withdraw: 'withdrawing', bridge: 'bridging', receive: 'receiving' };
+    var it = SHORT[k], get = GET[k] || GET.home, verb = FLOW_VERB[k];
     p.setAttribute('data-tab', k);
-    p.innerHTML = '<i class="np-ico">' + dsv(PITCH_ICO[k] || 'wallet', 28) + '</i><span class="np-k">' + esc(it[0]) + '</span><h2>' + esc(it[1]) + '</h2>' +
-      '<div class="np-get">' + get.map(function (g, i) { return '<span style="animation-delay:' + (120 + i * 70) + 'ms">' + dsv('chev', 14).replace('m9 6 6 6-6 6', 'M5 12l5 5 9-10') + esc(g) + '</span>'; }).join('') + '</div>' +
-      '<button class="np-cta" data-testid="nc-pitch-connect">Connect wallet</button>' +
-      '<a class="np-alt" href="#private-route" data-testid="nc-pitch-private">No wallet? Swap instantly →</a>';
+    var QT = [['SOL', JD + 'sol.png'], ['USDC', 'https://assets.coingecko.com/coins/images/6319/small/usdc.png'], ['USDT', 'https://assets.coingecko.com/coins/images/325/small/Tether.png']];
+    p.innerHTML = verb ?
+      ('<div class="up-field"><div class="up-lbl">You\u2019re ' + verb + '</div>' +
+        '<div class="up-main"><input class="up-amt" inputmode="decimal" placeholder="0" aria-label="Amount" data-testid="nc-pitch-amount"/>' +
+        '<button type="button" class="up-tok" data-testid="nc-pitch-token"><span>Select Token</span><svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><circle cx="7" cy="7" r=".9"/><circle cx="10" cy="4.5" r=".9"/><circle cx="13" cy="7" r=".9"/><circle cx="7" cy="13" r=".9"/><circle cx="10" cy="15.5" r=".9"/><circle cx="13" cy="13" r=".9"/></svg></button></div>' +
+        '<div class="up-foot"><span class="up-fiat">$0.00</span><span class="up-quick">' + QT.map(function (q) { return '<button type="button" title="' + q[0] + '" aria-label="Select ' + q[0] + '"><img src="' + IMGP(q[1]) + '" alt="" width="20" height="20"/></button>'; }).join('') + '</span></div></div>' +
+       '<dl class="up-fees"><div><dt>Total fee</dt><dd><span class="up-tag">' + (k === 'send' ? 'Free' : 'Shown before you confirm') + '</span></dd></div>' +
+        '<div><dt>' + (k === 'withdraw' ? 'Sent to' : 'Receiving address') + '</dt><dd><span class="up-tag">' + (k === 'withdraw' ? 'Any Solana address' : 'Private Account') + '</span></dd></div>' +
+        '<div><dt>You get</dt><dd>' + get.map(esc).join(' \u00b7 ') + '</dd></div></dl>' +
+       '<button class="np-cta" data-testid="nc-pitch-connect">Create an account</button>' +
+       '<a class="np-alt" href="#private-route" data-testid="nc-pitch-private">No account? Swap to any chain without one \u2192</a>')
+      :
+      ('<i class="np-ico">' + dsv(PITCH_ICO[k] || 'wallet', 28) + '</i><span class="np-k">' + esc(it[0] === 'Wallet' ? 'Vault' : it[0]) + '</span><h2>' + esc(it[1]) + '</h2>' +
+       '<div class="np-get">' + get.map(function (g, i) { return '<span style="animation-delay:' + (120 + i * 70) + 'ms">' + dsv('chev', 14).replace('m9 6 6 6-6 6', 'M5 12l5 5 9-10') + esc(g) + '</span>'; }).join('') + '</div>' +
+       '<button class="np-cta" data-testid="nc-pitch-connect">Create an account</button>' +
+       '<a class="np-alt" href="#private-route" data-testid="nc-pitch-private">No account? Swap to any chain without one \u2192</a>');
+    Array.prototype.forEach.call(p.querySelectorAll('.up-tok,.up-quick button,.up-amt'), function (el) { el.addEventListener(el.tagName === 'INPUT' ? 'focus' : 'click', function (e) { e.preventDefault(); if (el.tagName === 'INPUT') el.blur(); openOnb(); }); });
     p.querySelector('.np-cta').addEventListener('click', openOnb);
   }
 
@@ -1842,46 +1857,50 @@
   document.addEventListener('input', function () { setTimeout(ensureFees, 120); }, true);
   window.addEventListener('hashchange', function () { Array.prototype.forEach.call(document.querySelectorAll('.nc-fee-tog'), function (b) { b.setAttribute('data-open', '0'); }); ensureFees(); });
 
-  /* ---- Vaulz zk: tool stage (eyebrow / big title / tool tabs) ---- */
-  var VZ_TOOLS = [
-    { k: 'shield', label: 'Shield', ico: 'vzshield', d: 'Your funds. A little further from view.' },
-    { k: 'send', label: 'Send', ico: 'pay', d: 'Pay or get paid. Privately.' },
-    { k: 'swap', label: 'Swap', ico: 'trade', d: 'Trade inside the pool. Not from your wallet.' },
-    { k: 'bridge', label: 'Bridge', ico: 'bridge', d: 'Out to any chain. Not from your wallet.' },
-    { k: 'dk:private-route', label: 'Private route', ico: 'route', d: 'Solana to any chain. No wallet needed.' },
-    { k: 'dk:privacy-swap', label: 'Privacy swap', ico: 'lock', d: 'Say what you want. Solvers fill it.' },
-    { k: 'dk:track', label: 'Track', ico: 'track', d: 'Every order, step by step.' },
-    { k: 'receive', label: 'Receive', ico: 'inbox', d: 'Get paid without showing your wallet.' },
-    { k: 'withdraw', label: 'Withdraw', ico: 'exit', d: 'Cash out. Come back unlinked.' },
-    { k: 'history', label: 'History', ico: 'clock', d: 'Only you can read it.' },
-    { k: 'addresses', label: 'Addresses', ico: 'pin', d: 'Single-use exits. No clusters.' },
-    { k: 'keys', label: 'Keys', ico: 'key', d: 'Your vault. Your control.' },
-    { k: 'dk:chain', label: 'Chain', ico: 'term', d: 'What the chain sees. Live.' },
-    { k: '/vault', label: 'Vault', ico: 'lock', href: '/vault', d: 'Quantum-safe SOL.' },
-    { k: '/docs', label: 'Docs', ico: 'book', href: '/docs', d: 'How it works, and how to check it.' }
+  /* ---- Vaulz zk: Umbra-style workspace (hero + Deposit/Send/Swap/Withdraw + Vault / Create account) ---- */
+  var VZ_FLOWS = [
+    { k: 'shield', label: 'Deposit', verb: 'depositing' },
+    { k: 'send', label: 'Send', verb: 'sending' },
+    { k: 'swap', label: 'Swap', verb: 'swapping' },
+    { k: 'withdraw', label: 'Withdraw', verb: 'withdrawing' }
   ];
-  DI.vzshield = '<path d="M12 3 4.5 6v5.5c0 4.2 3.5 7.4 7.5 9.5 4-2.1 7.5-5.3 7.5-9.5V6Z"/><path d="m8.5 11.5 2.5 2.5 4.5-5"/>';
-  function vzTool(k) {
-    for (var i = 0; i < VZ_TOOLS.length; i++) if (VZ_TOOLS[i].k === k) return { t: VZ_TOOLS[i], n: i + 1 };
-    return null;
+  var VZ_NAMES = { 'dk:private-route': 'Private route', 'dk:privacy-swap': 'Privacy swap', 'dk:track': 'Track', 'dk:chain': 'Chain',
+    home: 'Vault', bridge: 'Bridge', receive: 'Receive', history: 'History', addresses: 'Addresses', keys: 'Keys' };
+  function vzFlow(k) { for (var i = 0; i < VZ_FLOWS.length; i++) if (VZ_FLOWS[i].k === k) return VZ_FLOWS[i]; return null; }
+  function ensureHeaderBtns() {
+    var tr = document.querySelector('header .top-right'); if (!tr) return;
+    var wb = tr.querySelector('.wallet-btn');
+    if (!tr.querySelector('#vz-vault-btn')) {
+      var v = document.createElement('button'); v.type = 'button'; v.id = 'vz-vault-btn'; v.setAttribute('data-testid', 'vz-vault-btn');
+      v.innerHTML = dsv('vault', 16) + '<span>Vault</span>';
+      v.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); openFeature('home'); setTimeout(ensureStage, 60); });
+      tr.insertBefore(v, wb || null);
+    }
+    if (!tr.querySelector('#vz-menu-btn')) {
+      var m = document.createElement('button'); m.type = 'button'; m.id = 'vz-menu-btn'; m.setAttribute('data-testid', 'vz-menu-btn'); m.setAttribute('aria-label', 'More tools');
+      m.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>';
+      m.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); openSheet(); });
+      tr.appendChild(m);
+    }
+    var on = currentKey() === 'home';
+    var vb = tr.querySelector('#vz-vault-btn'); if (vb && vb.classList.contains('on') !== on) vb.classList.toggle('on', on);
   }
   var vzLast = null;
   function ensureStage() {
     var main = document.querySelector('main.main'); if (!main) return;
+    ensureHeaderBtns();
     var k = currentKey() || 'home';
-    var hit = vzTool(k);
     var head = document.getElementById('vz-head');
     if (!head || head.parentNode !== main) {
-      head = document.createElement('section'); head.id = 'vz-head'; head.setAttribute('data-testid', 'vz-stage-head');
+      head = document.createElement('section'); head.id = 'vz-head'; head.setAttribute('data-testid', 'vz-hero');
+      head.innerHTML = '<h1 class="vz-hero" aria-label="The privacy layer for your money"><span class="l1">The privacy <b>layer</b></span><span class="l2">for your money.</span></h1>';
       main.insertBefore(head, main.firstChild); vzLast = null;
     } else if (main.firstChild !== head) { main.insertBefore(head, main.firstChild); }
     var tabs = document.getElementById('vz-tabs');
     if (!tabs || tabs.parentNode !== main) {
-      tabs = document.createElement('nav'); tabs.id = 'vz-tabs'; tabs.setAttribute('aria-label', 'Tools'); tabs.setAttribute('data-testid', 'vz-tool-tabs');
-      tabs.innerHTML = VZ_TOOLS.map(function (t) {
-        var id = t.k.replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
-        return t.href ? '<a href="' + t.href + '" data-k="' + t.k + '" data-testid="vz-tab-' + id + '">' + dsv(t.ico, 13) + t.label + '</a>'
-          : '<button type="button" data-k="' + t.k + '" data-testid="vz-tab-' + id + '">' + dsv(t.ico, 13) + t.label + '</button>';
+      tabs = document.createElement('nav'); tabs.id = 'vz-tabs'; tabs.setAttribute('role', 'tablist'); tabs.setAttribute('aria-label', 'Transaction flows'); tabs.setAttribute('data-testid', 'vz-flow-tabs');
+      tabs.innerHTML = '<span class="vz-ind" aria-hidden="true"></span>' + VZ_FLOWS.map(function (t) {
+        return '<button type="button" role="tab" data-k="' + t.k + '" data-testid="vz-flow-' + t.label.toLowerCase() + '">' + t.label + '</button>';
       }).join('');
       tabs.addEventListener('click', function (e) {
         var b = e.target.closest('button[data-k]'); if (!b) return;
@@ -1889,28 +1908,35 @@
       });
       head.nextSibling ? main.insertBefore(tabs, head.nextSibling) : main.appendChild(tabs);
     } else if (head.nextSibling !== tabs) { main.insertBefore(tabs, head.nextSibling); }
-    Array.prototype.forEach.call(tabs.children, function (b) {
+    var onBtn = null;
+    Array.prototype.forEach.call(tabs.querySelectorAll('button'), function (b) {
       var on = b.getAttribute('data-k') === k;
-      if (on !== b.classList.contains('on')) { b.classList.toggle('on', on); if (on) try { b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (x) {} }
+      if (on) onBtn = b;
+      if (on !== (b.getAttribute('aria-selected') === 'true')) b.setAttribute('aria-selected', on ? 'true' : 'false');
     });
-    var key = k;
-    if (vzLast === key) return;
-    vzLast = key;
-    var title, eyebrow, desc;
-    if (hit) { title = hit.t.label; eyebrow = 'Your private toolkit / ' + (hit.n < 10 ? '0' : '') + hit.n; desc = hit.t.d; }
-    else if (SHORT[k]) { title = k === 'home' ? 'Wallet' : SHORT[k][0]; eyebrow = k === 'home' ? 'Your private balance' : 'Your private toolkit'; desc = SHORT[k][1]; }
-    else { title = 'Wallet'; eyebrow = 'Your private balance'; desc = 'Your money, out of sight.'; }
-    head.setAttribute('data-tool', k);
-    head.innerHTML = '<a class="vz-back" href="/" data-testid="vz-all-tools"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>All tools</a>' +
-      '<p class="vz-eyebrow" data-testid="vz-eyebrow">' + esc(eyebrow) + '</p>' +
-      '<h1 class="vz-title" data-testid="vz-title">' + esc(title) + '<em>.</em></h1>' +
-      '<p class="vz-desc">' + esc(desc) + '</p>' +
-      '<div class="vz-meta"><i></i><span>Live on Solana mainnet</span></div>';
-    try { document.title = title + ' · Vaulz zk'; } catch (x) {}
+    var ind = tabs.querySelector('.vz-ind');
+    if (ind) {
+      if (onBtn) { ind.style.opacity = '1'; ind.style.width = onBtn.offsetWidth + 'px'; ind.style.transform = 'translateX(' + onBtn.offsetLeft + 'px)'; }
+      else ind.style.opacity = '0';
+    }
+    // secondary tools: small caption under the tabs so people always know where they are
+    var cap = document.getElementById('vz-where');
+    var name = vzFlow(k) ? '' : (VZ_NAMES[k] || '');
+    if (!cap) { cap = document.createElement('div'); cap.id = 'vz-where'; cap.setAttribute('data-testid', 'vz-where'); tabs.parentNode.insertBefore(cap, tabs.nextSibling); }
+    else if (tabs.nextSibling !== cap) tabs.parentNode.insertBefore(cap, tabs.nextSibling);
+    if (cap.getAttribute('data-k') !== k) {
+      cap.setAttribute('data-k', k);
+      cap.innerHTML = name ? '<span>' + esc(name) + '</span><button type="button" data-testid="vz-where-back">Back to Deposit</button>' : '';
+      cap.style.display = name ? '' : 'none';
+      var bk = cap.querySelector('button'); if (bk) bk.addEventListener('click', function () { openFeature('shield'); setTimeout(ensureStage, 60); });
+    }
+    if (vzLast === k) return;
+    vzLast = k;
+    try { document.title = ((vzFlow(k) || {}).label || VZ_NAMES[k] || 'Vault') + ' · Vaulz zk'; } catch (x) {}
   }
-
+  DI.vault = '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="12" cy="12" r="3.5"/><path d="M12 8.5V7m0 10v-1.5M15.5 12H17M7 12h1.5"/>';
   /* ---- Vaulz zk: ?do=<tool> deep links (from the landing launcher / docs) ---- */
-  var vzDo = (function () { try { return (new URLSearchParams(location.search).get('do') || '').toLowerCase(); } catch (e) { return ''; } })();
+  var vzDo = (function () { try { var d = (new URLSearchParams(location.search).get('do') || '').toLowerCase(); if (!d && !location.hash && /^\/(app|shield)\/?$/.test(location.pathname)) d = 'shield'; if (d === 'deposit') d = 'shield'; if (d === 'vault' || d === 'wallet') d = 'home'; return d; } catch (e) { return ''; } })();
   var vzDoTries = 0;
   function runDo() {
     if (!vzDo) return;

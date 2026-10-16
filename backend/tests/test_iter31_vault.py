@@ -20,7 +20,7 @@ def vault_html():
 # Vault entry HTML: branding + asset rewriting
 class TestVaultHtml:
     def test_title_branded(self, vault_html):
-        assert "<title>NullCash Vault · quantum-safe SOL</title>" in vault_html
+        assert "<title>Vaulz zk Vault · quantum-safe SOL</title>" in vault_html
 
     def test_skin_injected(self, vault_html):
         assert 'id="nc-vault-skin"' in vault_html
@@ -87,4 +87,4 @@ class TestRegression:
         r = requests.get(f"{BASE_URL}/api/bifrost/v1/app/", timeout=30)
         assert r.status_code == 200
         assert "text/html" in r.headers.get("content-type", "")
-        assert "NullCash" in r.text
+        assert "Vaulz zk" in r.text

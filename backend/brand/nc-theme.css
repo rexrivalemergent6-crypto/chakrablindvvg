@@ -179,7 +179,7 @@ header .wallet-btn:hover{background:var(--vz-fg)!important;color:var(--vz-bg)!im
 header .wallet-btn:active{transform:scale(.98)!important}
 header .wallet-btn .wb-dot{display:none!important}
 header .wallet-btn.nc-off>span:not(.wb-dot){font-size:0!important}
-header .wallet-btn.nc-off>span:not(.wb-dot)::after{content:"Connect";font-size:12px;font-weight:500}
+header .wallet-btn.nc-off>span:not(.wb-dot)::after{content:"Create account";font-size:12px;font-weight:500}
 header .wallet-btn{max-width:240px!important;min-width:0;overflow:hidden}
 header .wallet-btn>span:not(.wb-dot){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:520px){header .wallet-btn{height:36px!important;padding:0 16px!important}}
@@ -306,7 +306,7 @@ html.nc-onb-open .card.onb{position:fixed!important;z-index:2147480500!important
 @keyframes ncPopC{from{opacity:0;transform:translate(-50%,-47%) scale(.98)}to{opacity:1;transform:translate(-50%,-50%)}}
 html.nc-onb-open .card.onb::before,html.nc-onb-open .card.onb::after,html.nc-onb-open .card.onb>.lbl,html.nc-onb-open .card.onb>p:not(.hint),html.nc-onb-open .card.onb>p.hint,html.nc-onb-open .card.onb>.wlist::before{display:none!important}
 html.nc-onb-open .card.onb>h2{font-size:0!important;margin:0 0 18px!important}
-html.nc-onb-open .card.onb>h2::after{content:"Connect.";font-size:34px;font-weight:400;letter-spacing:-.055em}
+html.nc-onb-open .card.onb>h2::after{content:"Create account.";font-size:34px;font-weight:400;letter-spacing:-.055em}
 html.nc-onb-open .card.onb>.wlist{margin:0!important}
 html.nc-onb-open main.main>.view,html.nc-onb-open main.main,html.nc-onb-open .shell>*:not(header){animation:none!important;transform:none!important;filter:none!important}
 
@@ -392,44 +392,72 @@ header .top-right>*{flex:none}
 .nc-ca,.dk-x,a[href*="x.com/"],a[href*="twitter.com/"]{display:none!important}
 
 /* ==========================================================================
-   Tool stage: "YOUR PRIVATE TOOLKIT / 03" + big title + tool tabs
+   Umbra-style workspace: centred hero, Deposit / Send / Swap / Withdraw,
+   one rounded transaction frame. Vault button = wallet, Create account.
    ========================================================================== */
-#vz-head{font-family:var(--f-sans);color:var(--vz-fg)}
-#vz-head .vz-back{display:inline-flex;align-items:center;gap:8px;font-size:11px;color:var(--vz-dim);text-decoration:none;transition:color .2s}
-#vz-head .vz-back:hover{color:var(--vz-strong)}
-#vz-head .vz-eyebrow{margin:26px 0 18px;font:500 9px/1.5 var(--f-sans);letter-spacing:.26em;text-transform:uppercase;color:var(--vz-muted)}
-#vz-head h1.vz-title{margin:0;font:400 clamp(56px,6.2vw,104px)/.96 var(--f-sans)!important;letter-spacing:-.072em!important;color:var(--vz-strong);word-break:break-word}
-#vz-head h1.vz-title em{font-style:normal;color:var(--vz-muted)}
-#vz-head .vz-desc{margin:26px 0 0;max-width:420px;font:italic 400 26px/1.15 var(--f-serif);letter-spacing:-.01em;color:var(--vz-dim)}
-#vz-head .vz-meta{display:flex;align-items:center;gap:10px;margin-top:34px;font-size:11px;color:var(--vz-faint)}
-#vz-head .vz-meta i{width:6px;height:6px;border-radius:50%;background:var(--vz-ok);box-shadow:0 0 0 0 rgba(111,191,142,.45);animation:ncPulse 2.4s ease-in-out infinite}
-#vz-tabs{display:flex;flex-wrap:nowrap;gap:4px;margin:0 0 26px;padding:4px 0 10px;border-bottom:1px solid var(--vz-line);overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;
- -webkit-mask-image:linear-gradient(90deg,transparent,#000 14px calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,#000 14px calc(100% - 40px),transparent);font-family:var(--f-sans)}
-#vz-tabs::-webkit-scrollbar{display:none}
-#vz-tabs button,#vz-tabs a{all:unset;box-sizing:border-box;flex:none;cursor:pointer;display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;border-radius:30px;font-size:12px;color:var(--vz-dim);transition:background .2s,color .2s;white-space:nowrap}
-#vz-tabs button svg,#vz-tabs a svg{width:13px;height:13px;stroke-width:1.6;opacity:.85}
-#vz-tabs button:hover,#vz-tabs a:hover{color:var(--vz-strong)}
-#vz-tabs button.on{background:rgba(255,255,255,.08);color:var(--vz-strong);box-shadow:inset 0 0 0 1px var(--vz-line)}
-#vz-tabs:first-child{margin-left:0}
-/* desktop: left column = title, right column = tool */
-@media (min-width:1180px){
- #vz-head{position:fixed;left:4.2vw;top:calc(var(--top) + 24px);width:40vw;max-width:640px;z-index:1;pointer-events:none}
- #vz-head a,#vz-head button{pointer-events:auto}
- main.main{padding:30px 4.2vw 90px 51.5vw!important}
- main.main>.view,main.main>#dk-view,main.main>#nc-pitch,main.main>section,main.main>div:not(#vz-head):not(#nc-onb-bg){max-width:100%!important;margin-left:0!important;margin-right:0!important}
- main.main .view.narrow,main.main .view.wide,main.main .view{width:100%!important;max-width:100%!important}
- html.nc-onb-open #vz-head{z-index:0}
-}
-@media (min-width:1180px) and (max-height:700px){#vz-head h1.vz-title{font-size:clamp(48px,5vw,80px)!important}#vz-head .vz-desc{font-size:22px}}
-@media (max-width:1179px){
- #vz-head{margin:4px 0 22px}
- #vz-head .vz-eyebrow{margin:18px 0 12px}
- #vz-head h1.vz-title{font-size:clamp(46px,11vw,84px)!important}
- #vz-head .vz-desc{font-size:21px;margin-top:16px}
- #vz-head .vz-meta{display:none}
-}
-@media (max-width:1023px){#vz-tabs{display:none}}
-/* our swap views fill the tool column */
-.dk-wrap{width:100%!important;max-width:none!important;margin:0!important}
-#dk-view .dk-seg{margin:0 0 18px!important}
-@media (max-width:520px){#dk-view .dk-seg{width:100%!important}}
+/* top nav replaced by Vault + Create account + ••• menu */
+nav.side,.nc-more-btn,#nc-more-pop{display:none!important}
+#nc-dock{display:none!important}
+main.main{padding:20px 5vw 110px!important}
+main.main>.view,main.main>#dk-view,main.main>#nc-pitch,main.main>#nc-foot{width:min(560px,100%)!important;max-width:560px!important;margin-left:auto!important;margin-right:auto!important}
+main.main .view.narrow,main.main .view.wide,main.main .view{width:min(560px,100%)!important;max-width:560px!important}
+main.main>.view:has(.ch-page),#dk-view:has(.ch-page){width:min(1100px,100%)!important;max-width:1100px!important}
+#vz-vault-btn,#vz-menu-btn{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 16px;border-radius:30px;
+ background:var(--vz-frost);border:1px solid var(--vz-edge);color:var(--vz-fg);font:500 12px var(--f-sans);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:background .2s,border-color .2s,color .2s}
+#vz-vault-btn svg{width:16px;height:16px;stroke-width:1.6;opacity:.9}
+#vz-vault-btn:hover,#vz-menu-btn:hover{background:var(--vz-frost-hi);border-color:var(--vz-edge-hi)}
+#vz-vault-btn.on{background:rgba(255,255,255,.1);border-color:var(--vz-edge-hi);color:var(--vz-strong)}
+#vz-menu-btn{width:38px;padding:0}
+header .wallet-btn.nc-off{background:var(--vz-fg)!important;color:var(--vz-bg)!important;border-color:var(--vz-fg)!important}
+header .wallet-btn.nc-off:hover{background:var(--vz-strong)!important}
+header .top-right{gap:8px!important}
+@media (max-width:520px){#vz-vault-btn span{display:none}#vz-vault-btn{width:38px;padding:0}header .wallet-btn.nc-off>span:not(.wb-dot)::after{content:"Create account"}header .wallet-btn{padding:0 14px!important}}
+/* hero */
+#vz-head{text-align:center;margin:clamp(8px,4vh,48px) auto 28px;font-family:var(--f-sans);pointer-events:none}
+#vz-head .vz-hero{margin:0;display:flex;flex-direction:column;align-items:center;gap:2px;font:400 clamp(40px,5.4vw,76px)/.98 var(--f-sans)!important;letter-spacing:-.06em!important;color:var(--vz-strong)}
+#vz-head .vz-hero b{font-weight:400;background:linear-gradient(180deg,#f2f5f5 0%,#9fb4c2 55%,#e3e8e8 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+#vz-head .vz-hero .l2{font:italic 400 1.1em/.95 var(--f-serif);letter-spacing:-.03em;color:var(--vz-dim)}
+html.dk-on #vz-head{margin-bottom:22px}
+@media (max-width:1023px){#vz-head{margin:6px auto 20px}}
+/* flow tabs with sliding indicator */
+#vz-tabs{position:relative;display:flex;gap:2px;width:max-content;max-width:100%;margin:0 auto 18px;padding:4px;border-radius:30px;background:rgba(16,23,28,.72);border:1px solid var(--vz-line);
+ -webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);font-family:var(--f-sans)}
+#vz-tabs .vz-ind{position:absolute;left:0;top:4px;bottom:4px;border-radius:30px;background:var(--vz-fg);transition:transform .38s cubic-bezier(.2,.8,.2,1),width .38s cubic-bezier(.2,.8,.2,1),opacity .2s;pointer-events:none}
+#vz-tabs button{all:unset;position:relative;z-index:1;cursor:pointer;height:36px;padding:0 20px;border-radius:30px;display:inline-flex;align-items:center;font-size:13px;font-weight:500;color:var(--vz-dim);transition:color .25s}
+#vz-tabs button:hover{color:var(--vz-strong)}
+#vz-tabs button[aria-selected="true"]{color:var(--vz-bg)}
+@media (max-width:520px){#vz-tabs{width:100%}#vz-tabs button{flex:1;justify-content:center;padding:0 6px;font-size:12.5px}}
+#vz-where{display:flex;align-items:center;justify-content:center;gap:12px;margin:-6px auto 16px;font:400 12px var(--f-sans);color:var(--vz-dim)}
+#vz-where span{color:var(--vz-strong);font-weight:500}
+#vz-where button{all:unset;cursor:pointer;color:var(--vz-faint);text-decoration:underline;text-underline-offset:3px}
+#vz-where button:hover{color:var(--vz-fg)}
+/* transaction frame */
+main.main .card,#nc-pitch,.dk-card{border-radius:22px!important}
+main.main .card{padding:22px!important}
+#nc-pitch{padding:18px!important}
+#nc-pitch .up-field{border-radius:16px;background:rgba(9,13,16,.55);border:1px solid var(--vz-line);padding:16px 18px 14px}
+#nc-pitch .up-lbl{font-size:13px;color:var(--vz-dim)}
+#nc-pitch .up-main{display:flex;align-items:center;gap:12px;margin-top:10px}
+#nc-pitch .up-amt{all:unset;flex:1;min-width:0;font:400 44px/1.1 var(--f-sans);letter-spacing:-.05em;color:var(--vz-strong);cursor:text}
+#nc-pitch .up-amt::placeholder{color:var(--vz-faint)}
+#nc-pitch .up-tok{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px 0 14px;border-radius:30px;background:var(--vz-fg);color:var(--vz-bg);font-size:13px;font-weight:500;white-space:nowrap;transition:background .2s}
+#nc-pitch .up-tok:hover{background:var(--vz-strong)}
+#nc-pitch .up-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+#nc-pitch .up-fiat{font-size:13px;color:var(--vz-faint);font-variant-numeric:tabular-nums}
+#nc-pitch .up-quick{display:flex;gap:6px}
+#nc-pitch .up-quick button{all:unset;cursor:pointer;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1px solid var(--vz-line);background:var(--vz-frost);transition:border-color .2s,transform .2s}
+#nc-pitch .up-quick button:hover{border-color:var(--vz-edge-hi);transform:translateY(-1px)}
+#nc-pitch .up-quick img{width:20px;height:20px;border-radius:50%}
+#nc-pitch .up-fees{margin:10px 0 0;padding:6px 16px;border-radius:16px;background:rgba(16,23,28,.5);border:1px solid var(--vz-hair)}
+#nc-pitch .up-fees>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;font-size:12.5px}
+#nc-pitch .up-fees>div+div{border-top:1px solid var(--vz-hair)}
+#nc-pitch .up-fees dt{color:var(--vz-dim)}#nc-pitch .up-fees dd{margin:0;color:var(--vz-fg);text-align:right}
+#nc-pitch .up-tag{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:30px;background:rgba(255,255,255,.06);border:1px solid var(--vz-line);font-size:11.5px;color:var(--vz-fg)}
+#nc-pitch .np-cta,.dk-cta,main.main form .btn-primary,main.main .card>.btn-primary{width:100%!important;height:54px!important;margin-top:12px!important;border-radius:16px!important;justify-content:center!important;font-size:15px!important;font-weight:500!important}
+#nc-pitch .np-cta::after{display:none}
+#nc-pitch .np-alt{display:block;margin:14px 0 2px;text-align:center;text-decoration:none;font-size:12px}
+#nc-pitch .np-alt:hover{text-decoration:underline}
+#nc-pitch .np-ico{margin:6px 0 0 6px}#nc-pitch .np-k,#nc-pitch h2,#nc-pitch .np-get{margin-left:6px!important;margin-right:6px!important}
+.dk-row,.dk-in,.dk-r,.dk-fees,.dk-meta div,.dk-cf .v,.dk-recent,.dk-ci{border-radius:16px!important}
+.dk-cta{border-radius:16px!important}
+#nc-foot{justify-content:center!important;text-align:center}

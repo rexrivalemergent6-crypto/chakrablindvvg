@@ -44,7 +44,8 @@ def test_icon_is_nullcash(s, path):
     w, h = im.size
     px = im.getpixel((w // 2, h // 2))   # solid black centre
     corner = im.getpixel((1, 1))
-    assert px[0] < 60 and px[1] < 60 and px[2] < 60, f"centre not black {px}"
+    # Vaulz zk rebrand: icon is a light mark on dark; just assert non-transparent centre
+    assert px[3] > 0, f"centre transparent {px}"
     # no purple (ghost icon) pixels
     purple = sum(1 for p in im.getdata() if p[3] > 128 and p[2] > 150 and p[0] > 90 and p[1] < 90)
     assert purple < 5, f"purple pixels {purple}, corner {corner}"
@@ -54,8 +55,8 @@ def test_manifest(s):
     r = s.get(f"{BASE_URL}/api/bifrost/v1/app/manifest.webmanifest", timeout=30)
     assert r.status_code == 200
     j = r.json()
-    assert j["name"] == "NullCash · Private money on Solana"
-    assert j["short_name"] == "NullCash"
+    assert j["name"] == "Vaulz zk · Private money on Solana"
+    assert "Vaulz" in j["short_name"]
     assert all(i["src"].startswith("/api/bifrost/v1/_brand/") for i in j["icons"])
     for i in j["icons"]:
         assert s.get(BASE_URL + i["src"], timeout=30).status_code == 200
