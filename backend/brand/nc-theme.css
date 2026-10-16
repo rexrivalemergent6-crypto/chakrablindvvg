@@ -465,3 +465,8 @@ main.main .card{padding:22px!important}
  background:var(--vz-frost);border:1px solid var(--vz-edge);color:var(--vz-fg);font:500 12px var(--f-sans);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:background .2s,border-color .2s,color .2s}
 #vz-x-btn:hover{background:var(--vz-fg);color:var(--vz-bg);border-color:var(--vz-fg)}
 @media (max-width:520px){#vz-x-btn span{display:none}#vz-x-btn{width:38px;padding:0}}
+.card.onb .wopt.vz-whide{display:none!important}
+#vz-wmore{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;padding:12px 16px;border-radius:6px;border:1px dashed var(--vz-edge);color:var(--vz-dim);font:500 13px var(--f-sans);transition:color .2s,border-color .2s,background .2s}
+#vz-wmore:hover{color:var(--vz-strong);border-color:var(--vz-edge-hi);background:var(--vz-frost)}
+#vz-wmore em{font-style:normal;margin-left:auto;padding:2px 8px;border-radius:30px;background:rgba(255,255,255,.06);font-size:11px;color:var(--vz-faint)}
+#vz-wmore svg{transition:transform .25s}#vz-wmore[aria-expanded="true"] svg{transform:rotate(180deg)}

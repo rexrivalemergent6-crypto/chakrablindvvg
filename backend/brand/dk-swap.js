@@ -1956,7 +1956,34 @@
   function stripDo() {
     try { var u = new URL(location.href); u.searchParams.delete('do'); history.replaceState(history.state, '', u.pathname + (u.search || '') + u.hash); } catch (e) {}
   }
-  function tick() { orderNav(); ensureX(); ensureCA(); syncIntro(); ensureMore(); fitNav(); ensureFoot(); ensureWalletBtn(); ensureDock(); ensurePitch(); ensureSplash(); ensureFees(); ensureStage(); runDo(); }
+
+  /* ---- BlindSpot: wallet list = BlindSpot vault, Phantom, then "More wallets" ---- */
+  var vzWOpen = false;
+  function ensureWallets() {
+    var list = document.querySelector('.card.onb .wlist'); if (!list) return;
+    var opts = Array.prototype.slice.call(list.querySelectorAll(':scope > .wopt'));
+    if (!opts.length) return;
+    var own = list.querySelector(':scope > .wopt-own');
+    var ph = null;
+    opts.forEach(function (o) { if (!ph && o !== own && /phantom/i.test(o.textContent || '')) ph = o; });
+    if (own && list.firstElementChild !== own) list.insertBefore(own, list.firstElementChild);
+    if (ph && own && own.nextElementSibling !== ph) list.insertBefore(ph, own.nextElementSibling);
+    var rest = opts.filter(function (o) { return o !== own && o !== ph; });
+    var tg = list.querySelector(':scope > #vz-wmore');
+    if (!rest.length) { if (tg) tg.remove(); return; }
+    if (!tg) {
+      tg = document.createElement('button'); tg.type = 'button'; tg.id = 'vz-wmore'; tg.setAttribute('data-testid', 'vz-more-wallets');
+      tg.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); vzWOpen = !vzWOpen; ensureWallets(); });
+    }
+    var anchor = ph || own;
+    if (anchor && anchor.nextElementSibling !== tg) list.insertBefore(tg, anchor.nextElementSibling);
+    var label = (vzWOpen ? 'Fewer wallets' : 'More wallets') + '<em>' + rest.length + '</em><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+    if (tg.getAttribute('data-open') !== String(vzWOpen) || tg.getAttribute('data-n') !== String(rest.length)) {
+      tg.innerHTML = label; tg.setAttribute('data-open', String(vzWOpen)); tg.setAttribute('data-n', String(rest.length)); tg.setAttribute('aria-expanded', String(vzWOpen));
+    }
+    rest.forEach(function (o) { if (o.classList.contains('vz-whide') === vzWOpen) o.classList.toggle('vz-whide', !vzWOpen); });
+  }
+  function tick() { orderNav(); ensureX(); ensureCA(); syncIntro(); ensureMore(); fitNav(); ensureFoot(); ensureWalletBtn(); ensureDock(); ensurePitch(); ensureSplash(); ensureFees(); ensureStage(); runDo(); ensureWallets(); }
   setTimeout(function () { if (document.querySelector('main.main')) showTour(false); }, 1400);
   function boot() { ensure(); sync(); tick(); setInterval(tick, 700); document.addEventListener('click', function () { setTimeout(tick, 60); }, true); window.addEventListener('hashchange', function () { setTimeout(tick, 60); }); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

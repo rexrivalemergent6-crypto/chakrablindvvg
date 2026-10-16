@@ -124,3 +124,4 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - Welcome intro tour removed (showTour no-op, footer link removed, menu item -> /#flow).
 - Tabs: Vault (=home balance) · Deposit · Send · Swap · Withdraw; header Vault button removed; /app opens on Vault.
 - X Follow button (https://x.com/tryblind): square 8px-radius "Follow" button in app header (#vz-x-btn, button+window.open so the x.com hide rules don't apply) and React NmNav (nav-x-follow) on landing/docs/vault. Icon-only under 520px/640px.
+- Create-account modal: BlindSpot vault first, Phantom second, rest (Solflare, Backpack…) behind "More wallets (n)" toggle (dk-swap.js ensureWallets, #vz-wmore, .vz-whide). "BlindSpot wallet" -> "BlindSpot vault" everywhere (paraphrase values + rt() catch-all regex).

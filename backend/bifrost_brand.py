@@ -177,7 +177,7 @@ function rt(s){
   .replace(/its audit by ContractWolf/g,'its independent audit')
   .replace(/ContractWolf · /g,'Independent audit · ')
   .replace(/ContractWolf/g,'an independent auditor')
-  .replace(/veil-core/g,'__SLUG__-core')
+  .replace(/veil-core/g,'__SLUG__-core').replace(/BlindSpot [Ww]allet/g,'BlindSpot vault')
   .replace(/@veil[A-Za-z0-9_]*/g,BRAND)
   .replace(/NEAR [Ii]ntents( 1Click)?/g,'Intent network').replace(/1Click/g,'Intent')
   .replace(/HoudiniSwap|Houdini/g,'Private route').replace(/Dark ?[Ss]wap|Darkinator|Cadabra|Bifrost/g,BRAND).replace(/Mayan/g,BRAND)

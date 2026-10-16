@@ -14,8 +14,8 @@
 "BlindSpot fee (included)": "BlindSpot fee (already included)",
 "Copy viewing key": "Copy view-only key",
 "Counted at their first shield": "Counts from their first shield",
-"Create a BlindSpot wallet": "Make a BlindSpot wallet",
-"Create a BlindSpot wallet in seconds, or connect the one you already use. Your keys never leave your device.": "Spin up a BlindSpot wallet in a few seconds, or plug in the wallet you already have. Keys stay on your device, always.",
+"Create a BlindSpot wallet": "Create a BlindSpot vault",
+"Create a BlindSpot wallet in seconds, or connect the one you already use. Your keys never leave your device.": "Spin up a BlindSpot vault in a few seconds, or plug in the wallet you already have. Keys stay on your device, always.",
 "Create a one-time address": "Generate a single-use address",
 "Create my invite link": "Generate my invite link",
 "Create your invite link": "Generate your invite link",
@@ -30,7 +30,7 @@
 "Find my one-time addresses": "Rediscover my single-use addresses",
 "Found by trial-decrypting every commitment in the pool, on": "Discovered by test-decrypting each sealed output in the pool, locally on",
 "Friends who join": "Friends who sign up",
-"From BlindSpot Wallet": "From your BlindSpot Wallet",
+"From BlindSpot Wallet": "From your BlindSpot vault",
 "Give the sender a one-time Solana address instead of your wallet. When the funds land, shield them, gasless, even if they are only tokens.": "Hand the payer a single-use Solana address rather than your wallet. Once funds arrive, shield them with no gas needed, even if you only hold tokens.",
 "Have a BlindSpot recovery key?": "Already have a BlindSpot recovery key?",
 "How it works": "Under the hood",
@@ -38,7 +38,7 @@
 "How this trade is protected": "What keeps this trade safe",
 "I have stored my recovery key safely": "My recovery key is saved somewhere safe",
 "If the price moves past your minimum": "If price slips beyond your minimum",
-"Import your BlindSpot wallet": "Restore your BlindSpot wallet",
+"Import your BlindSpot wallet": "Restore my vault",
 "Into your private balance": "Straight into your private balance",
 "Invite & earn": "Refer & earn",
 "Invite friends, earn": "Refer friends, get rewarded",
@@ -118,5 +118,6 @@
 "Already have a BlindSpot recovery key?": "Have a recovery key already?",
 "Restore your BlindSpot wallet": "Restore my vault",
 "First time on BlindSpot?": "New to private payments?",
-"Take the tour": "See how it works"
+"Take the tour": "See how it works",
+"From your BlindSpot Wallet": "From your BlindSpot vault"
 }
