@@ -1499,6 +1499,7 @@
     ['Your keys, your device', 'Nothing to reset, nothing to leak.', 'Keys are derived and encrypted locally. Back up your recovery key and you are in control.', '<circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M16 7l2 2M14 9l2 2"/>']
   ];
   function showTour(force) {
+    return; // intro removed
     try { if (!force && localStorage.getItem(TOUR_KEY)) return; } catch (e) {}
     if (document.getElementById('nc-tour')) return;
     var i = 0, box = document.createElement('div'); box.id = 'nc-tour'; box.setAttribute('data-testid', 'nc-tour');
@@ -1531,8 +1532,7 @@
       f = document.createElement('footer'); f.id = 'nc-foot'; f.setAttribute('data-testid', 'nc-footer');
       f.innerHTML = '<span>© ' + new Date().getFullYear() + ' BlindSpot</span><nav>' +
         '<a href="/#flow">How it works</a><a href="/#zk">Privacy model</a><a href="/docs">Docs</a><a href="/#fees">Fees</a>' +
-        '<a href="#" data-nc-tour="1">Take the tour</a><a href="/vault">Vault</a></nav>';
-      f.querySelector('[data-nc-tour]').addEventListener('click', function (e) { e.preventDefault(); showTour(true); });
+        '<a href="/vault">Vault</a></nav>';
     }
     main.appendChild(f);
   }
@@ -1583,7 +1583,7 @@
   ];
   var LEARN = [
     { label: 'Vault · quantum-safe SOL', ico: 'lock', href: '/vault', ext: true },
-    { label: 'How BlindSpot works', ico: 'spark', act: 'tour' }, { label: 'Privacy model', ico: 'eye', href: '/#zk' },
+    { label: 'How BlindSpot works', ico: 'spark', href: '/#flow' }, { label: 'Privacy model', ico: 'eye', href: '/#zk' },
     { label: 'Fees', ico: 'coin', href: '/#fees' }, { label: 'Docs', ico: 'book', href: '/docs', ext: true }
   ];
   function dsv(n, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 22) + '" height="' + (w || 22) + '" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + DI[n] + '</svg>'; }
