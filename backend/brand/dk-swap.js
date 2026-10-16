@@ -1579,6 +1579,7 @@
     { k: 'keys', label: 'Keys', ico: 'key' }
   ];
   var LEARN = [
+    { label: 'Vault · quantum-safe SOL', ico: 'lock', href: '/vault', ext: true },
     { label: 'How NullCash works', ico: 'spark', act: 'tour' }, { label: 'Privacy model', ico: 'eye', href: '/#zk' },
     { label: 'Fees', ico: 'coin', href: '/#fees' }, { label: 'Docs', ico: 'book', href: '/docs', ext: true }
   ];
