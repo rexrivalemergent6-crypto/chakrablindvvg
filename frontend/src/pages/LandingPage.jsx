@@ -49,7 +49,7 @@ function ChainView({ s, unseen, setUnseen }) {
   return (
     <div className="flex flex-col items-center gap-5" data-testid="hero-live">
       <p className="text-[11px] text-[var(--vz-dim)]" aria-live="polite">{unseen ? 'Now the chain sees even less.' : 'Some things are better left unseen.'}</p>
-      <div className="vz-glass w-[min(380px,86vw)] p-5" style={{ background: 'rgba(16,23,28,.48)' }}>
+      <div className="vz-glass w-[min(380px,86vw)] p-5" style={{ backgroundColor: 'rgba(16,23,28,.48)' }}>
         <div className="flex items-center justify-between">
           <span className="vz-eyebrow">What the chain sees</span>
           <span className="flex items-center gap-2 text-[10px] text-[var(--vz-faint)]" data-testid="hero-live-ago">
@@ -85,7 +85,7 @@ function WhyDialog({ onClose }) {
   ];
   return (
     <div className="vz vz-dialog-bg" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }} data-testid="why-dialog">
-      <div role="dialog" aria-modal="true" aria-labelledby="why-title" className="vz-glass relative w-[min(760px,100%)] p-8 sm:p-10" style={{ background: 'var(--vz-glass)' }}>
+      <div role="dialog" aria-modal="true" aria-labelledby="why-title" className="vz-glass relative w-[min(760px,100%)] p-8 sm:p-10" style={{ backgroundColor: 'var(--vz-glass)' }}>
         <button type="button" onClick={onClose} aria-label="Close" className="absolute right-4 top-4 h-9 w-9 rounded-full border border-[var(--vz-edge)] text-[18px] text-[var(--vz-dim)] hover:text-white" data-testid="why-close">&times;</button>
         <p className="vz-eyebrow">The point of BlindSpot</p>
         <h2 id="why-title" className="vz-h2 mt-5 !text-[44px] sm:!text-[56px]">Privacy is room<br /><span className="vz-serif">to be yourself.</span></h2>
@@ -124,7 +124,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="vz relative min-h-screen overflow-x-hidden bg-[#090d10]" data-testid="landing-page">
+    <div className="vz vz-lens relative min-h-screen overflow-x-hidden bg-[#090d10]" data-testid="landing-page">
       <div className="vz-world" aria-hidden="true"><div className="vz-orb" style={{ opacity: unseen ? 0.15 : undefined }} /></div>
       <NmNav onWhy={() => setWhy(true)} />
 

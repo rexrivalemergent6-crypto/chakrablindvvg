@@ -306,7 +306,7 @@ html { background:#090d10; color-scheme:dark; }
 .vz-launcher li:nth-child(7n) { border-right:0; }
 .vz-launcher li:nth-last-child(-n+7) { border-bottom:0; }
 .vz-launcher a { position:relative; display:flex; align-items:flex-start; gap:14px; height:100%; min-height:105px; padding:23px 23px 18px; text-decoration:none; color:var(--vz-fg); transition:background .25s; }
-.vz-launcher a:hover { background:var(--vz-frost-hi); }
+.vz-launcher a:hover { background-color:var(--vz-frost-hi); }
 .vz-launcher a .vz-arrow { position:absolute; top:20px; right:20px; color:var(--vz-dim); font-size:15px; transition:transform .2s,color .2s; }
 .vz-launcher a:hover .vz-arrow { transform:translate(2px,-2px); color:var(--vz-strong); }
 .vz-launcher .vz-num { position:absolute; bottom:12px; right:23px; color:var(--vz-faint); font:8px/1 ui-monospace,monospace; }
@@ -325,21 +325,37 @@ html { background:#090d10; color-scheme:dark; }
 .vz-table th { font:500 9px 'DM Sans',sans-serif; letter-spacing:.22em; text-transform:uppercase; color:var(--vz-muted); }
 @media (prefers-reduced-motion:reduce) { .vz-rise, .vz-world .vz-orb { animation:none; } }
 
-/* ---------- BlindSpot lens language (original): squared buttons, split-lens dot, viewfinder corners ---------- */
-.vz-enter { border-radius:12px; gap:14px; padding:14px 20px 14px 16px; }
-.vz-enter::before { content:""; flex:none; width:12px; height:12px; border-radius:50%; border:1.5px solid currentColor; background:linear-gradient(90deg,currentColor 50%,transparent 50%); transition:transform .45s cubic-bezier(.2,.8,.2,1); }
-.vz-enter:hover::before { transform:rotate(180deg); }
-.vz-enter span { margin-left:22px; }
-.vz-pill { border-radius:10px; }
-.vz-glass { border-radius:16px;
-  background:
-    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) left 10px top 10px/12px 1px no-repeat,
-    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) left 10px top 10px/1px 12px no-repeat,
-    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) right 10px top 10px/12px 1px no-repeat,
-    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) right 10px top 10px/1px 12px no-repeat,
-    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) left 10px bottom 10px/12px 1px no-repeat,
-    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) left 10px bottom 10px/1px 12px no-repeat,
-    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) right 10px bottom 10px/12px 1px no-repeat,
-    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) right 10px bottom 10px/1px 12px no-repeat,
-    var(--vz-frost); }
-.vz-eyebrow { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.2em; }
+/* ---------- BlindSpot lens language (landing page only): squared buttons, split-lens dot, viewfinder corners ---------- */
+@property --bs-k { syntax:'<length>'; inherits:false; initial-value:10px; }
+@property --bs-t { syntax:'<color>'; inherits:false; initial-value:rgba(227,232,232,.45); }
+.vz-lens .vz-enter { border-radius:12px; gap:14px; padding:14px 20px 14px 16px; }
+.vz-lens .vz-enter::before { content:""; flex:none; width:12px; height:12px; border-radius:50%; border:1.5px solid currentColor; background:linear-gradient(90deg,currentColor 50%,transparent 50%); transition:transform .45s cubic-bezier(.2,.8,.2,1); }
+.vz-lens .vz-enter:hover::before, .vz-lens .vz-enter:focus-visible::before { transform:rotate(180deg); }
+.vz-lens .vz-enter span { margin-left:22px; }
+.vz-lens .vz-pill { border-radius:10px; }
+.vz-lens .vz-eyebrow { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.2em; }
+/* viewfinder corners: --bs-k = inset, --bs-t = tick colour (both animatable) */
+.vz-lens .vz-glass, .vz-lens .vz-launcher a {
+  --bs-k:10px; --bs-t:rgba(227,232,232,.45);
+  background-image:
+    linear-gradient(var(--bs-t),var(--bs-t)),linear-gradient(var(--bs-t),var(--bs-t)),
+    linear-gradient(var(--bs-t),var(--bs-t)),linear-gradient(var(--bs-t),var(--bs-t)),
+    linear-gradient(var(--bs-t),var(--bs-t)),linear-gradient(var(--bs-t),var(--bs-t)),
+    linear-gradient(var(--bs-t),var(--bs-t)),linear-gradient(var(--bs-t),var(--bs-t));
+  background-position:
+    left var(--bs-k) top var(--bs-k),left var(--bs-k) top var(--bs-k),
+    right var(--bs-k) top var(--bs-k),right var(--bs-k) top var(--bs-k),
+    left var(--bs-k) bottom var(--bs-k),left var(--bs-k) bottom var(--bs-k),
+    right var(--bs-k) bottom var(--bs-k),right var(--bs-k) bottom var(--bs-k);
+  background-size:12px 1px,1px 12px,12px 1px,1px 12px,12px 1px,1px 12px,12px 1px,1px 12px;
+  background-repeat:no-repeat;
+  transition:--bs-k .38s cubic-bezier(.2,.8,.2,1), --bs-t .3s ease, background-color .25s, border-color .25s;
+}
+.vz-lens .vz-glass { border-radius:16px; background-color:var(--vz-frost); }
+/* lens hover: corners close in and brighten on hover / keyboard focus */
+.vz-lens .vz-glass:not(.vz-launcher):hover, .vz-lens .vz-glass:not(.vz-launcher):focus-within { --bs-k:16px; --bs-t:rgba(242,245,245,.92); border-color:var(--vz-edge); }
+/* launcher tiles: corners hidden at rest, snap in like a focusing lens */
+.vz-lens .vz-launcher { --bs-t:rgba(227,232,232,.32); }
+.vz-lens .vz-launcher a { --bs-k:2px; --bs-t:rgba(242,245,245,0); background-color:transparent; }
+.vz-lens .vz-launcher a:hover, .vz-lens .vz-launcher a:focus-visible { --bs-k:10px; --bs-t:rgba(242,245,245,.92); background-color:var(--vz-frost-hi); outline:none; }
+@media (prefers-reduced-motion:reduce) { .vz-lens .vz-glass, .vz-lens .vz-launcher a { transition:none; } }

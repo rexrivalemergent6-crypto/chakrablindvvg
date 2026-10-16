@@ -1906,7 +1906,7 @@
     var head = document.getElementById('vz-head');
     if (!head || head.parentNode !== main) {
       head = document.createElement('section'); head.id = 'vz-head'; head.setAttribute('data-testid', 'vz-hero');
-      head.innerHTML = '<p class="vz-kick">Solana-first · Shielded · Quantum-safe vault</p><h1 class="vz-hero" aria-label="Out of sight. Never out of reach."><span class="l1">Out of <b>sight.</b></span><span class="l2">Never out of reach.</span></h1>';
+      head.innerHTML = '<h1 class="vz-hero" aria-label="The privacy layer for your money"><span class="l1">The privacy <b>layer</b></span><span class="l2">for your money.</span></h1>';
       main.insertBefore(head, main.firstChild); vzLast = null;
     } else if (main.firstChild !== head) { main.insertBefore(head, main.firstChild); }
     var tabs = document.getElementById('vz-tabs');

@@ -33,7 +33,7 @@ export default function NmNav({ active = '', onWhy }) {
               More <span aria-hidden="true" className={`text-[8px] transition-transform ${more ? 'rotate-180' : ''}`}>&#9660;</span>
             </button>
             {more && (
-              <div className="vz-glass absolute left-0 top-[42px] w-[250px] p-1.5" style={{ background: 'var(--vz-glass)' }} data-testid="nav-more-menu">
+              <div className="vz-glass absolute left-0 top-[42px] w-[250px] p-1.5" style={{ backgroundColor: 'var(--vz-glass)' }} data-testid="nav-more-menu">
                 {MORE.map((id) => { const t = byId(id); return (
                   <a key={id} href={t.href} className="flex items-center gap-3 rounded-[4px] px-3 py-2.5 text-[13px] text-[var(--vz-fg)] transition hover:bg-white/[.06]" data-testid={`nav-more-${id}`}>
                     <span className="grid h-7 w-7 place-items-center rounded-[6px] border border-[var(--vz-line)] text-[var(--vz-dim)]"><VzIcon name={t.ico} size={14} /></span>
