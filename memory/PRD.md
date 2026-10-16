@@ -125,3 +125,9 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - Tabs: Vault (=home balance) · Deposit · Send · Swap · Withdraw; header Vault button removed; /app opens on Vault.
 - X Follow button (https://x.com/tryblind): square 8px-radius "Follow" button in app header (#vz-x-btn, button+window.open so the x.com hide rules don't apply) and React NmNav (nav-x-follow) on landing/docs/vault. Icon-only under 520px/640px.
 - Create-account modal: BlindSpot vault first, Phantom second, rest (Solflare, Backpack…) behind "More wallets (n)" toggle (dk-swap.js ensureWallets, #vz-wmore, .vz-whide). "BlindSpot wallet" -> "BlindSpot vault" everywhere (paraphrase values + rt() catch-all regex).
+
+## Iteration 19 — Original "lens" design + research docs + rolling-numbers loader
+- Original BlindSpot design language (nc-theme.css tail + index.css tail): viewfinder corner ticks on cards/glass, split-lens dot on primary buttons (rotates on hover), 10-16px geometry, mono micro labels, squared tabs with lens dot + underline bar. Background unchanged.
+- App hero now "SOLANA-FIRST · SHIELDED · QUANTUM-SAFE VAULT / Out of sight. Never out of reach."
+- Loader: in-app #nc-splash = full-screen canvas of rolling digits; cells under "BlindSpot" lock in and settle (dk-swap.js ensureSplash). Site boot (#nc-boot) has a lighter rolling-digit canvas.
+- Docs: overview repositioned (Solana-first shielded pool + quantum-safe vault); new "Protocol research" group: Why Solana first, The quantum question (honest: pool Groth16 not post-quantum), Quantum-safe vault, Research directions.

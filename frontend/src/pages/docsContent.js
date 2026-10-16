@@ -9,11 +9,13 @@ export const DOC_GROUPS = [
       {
         id: 'overview',
         title: 'What BlindSpot is',
-        lead: 'BlindSpot gives a Solana wallet a second, sealed balance. Money goes in publicly, moves around privately, and comes out wherever you point it.',
+        lead: 'BlindSpot is a Solana-first privacy protocol: a shielded pool for private balances, payments and swaps, plus a quantum-safe vault for long-term SOL.',
         blocks: [
           { k: 'p', t: 'Think of it as two layers. Your normal wallet is the street-level account everyone can look at. Your BlindSpot vault is a back room on the same chain: the network can confirm every action in it is valid, but it cannot see who did it, how much moved, or (if you pay fees in private SOL) which token was involved.' },
           { k: 'kv', rows: [
-            ['Chain', 'Solana mainnet'],
+            ['Chain', 'Solana mainnet, first and natively. Other chains are reached through private routes'],
+            ['Shielded pool', 'Private balances, payments, swaps and exits on Solana'],
+            ['Quantum-safe vault', 'Holds SOL behind hash-based signatures from your passkey or 24 words'],
             ['Custody', 'Non-custodial; secrets are created and kept in your browser'],
             ['Privacy engine', 'Zero-knowledge proofs (Groth16) over a shared note pool'],
             ['Ways out', 'Fresh one-time Solana address, or any chain via cross-chain routes'],
@@ -27,7 +29,7 @@ export const DOC_GROUPS = [
         lead: 'From zero to your first private payment in about two minutes.',
         blocks: [
           { k: 'steps', items: [
-            ['Open a vault', 'Hit Connect wallet and pick Create a BlindSpot vault. Choose a password for this device. You get a recovery key once; store it offline.'],
+            ['Open a vault', 'Hit Create account and pick Create a BlindSpot vault. Choose a password for this device. You get a recovery key once; store it offline.'],
             ['Shield', 'Go to Shield, pick a token and amount, and approve one signature from your public wallet. Your tokens become sealed notes.'],
             ['Use it', 'Send to any blind2… address, trade inside the pool, or exit. No pop-ups: a relayer submits each proof for you.'],
             ['Leave', 'Withdraw to a brand-new address, or use Private route / Privacy swap to land on another chain.'],
@@ -189,6 +191,63 @@ export const DOC_GROUPS = [
         lead: 'An honest map of what the chain can and cannot see.',
         blocks: [
           { k: 'visibility' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'research',
+    title: 'Protocol research',
+    pages: [
+      {
+        id: 'solana-first',
+        title: 'Why Solana first',
+        lead: 'Privacy only works when people actually use it. Solana makes private moves cheap and fast enough to be everyday.',
+        blocks: [
+          { k: 'p', t: 'A shielded pool is only as private as its crowd. Low fees and fast finality mean people can shield, pay and exit in normal amounts and at normal times, which keeps the anonymity set large and lively. That is why BlindSpot is built on Solana first and reaches other chains through private routes rather than spreading thin across many pools.' },
+          { k: 'list', items: ['One deep pool instead of many shallow ones', 'Proof verification on-chain, paid in cents', 'Cross-chain exits without bridging your identity along'] },
+        ],
+      },
+      {
+        id: 'quantum',
+        title: 'The quantum question',
+        lead: 'What a large quantum computer would break, what it would not, and where BlindSpot stands today.',
+        blocks: [
+          { k: 'p', t: 'Large quantum computers would threaten the elliptic-curve maths behind most of crypto: ordinary Solana wallet signatures (Ed25519) and pairing-based proof systems. Hash functions are expected to hold up, with larger security margins.' },
+          { k: 'table', cols: ['Part', 'Status against quantum attacks'], rows: [
+            ['vault', 'Quantum-safe: SOL is released only against a hash-based signature'],
+            ['wallet', 'Ordinary Solana signatures (Ed25519) are not quantum-safe'],
+            ['proofs', 'Groth16 pool proofs are pairing-based and not post-quantum'],
+            ['notes', 'Commitments are hash-based; note encryption is the main harvest-now, decrypt-later concern'],
+          ] },
+          { k: 'note', t: 'BlindSpot does not claim the shielded pool is quantum-proof today. The vault is the quantum-safe part; the rest is active research.' },
+        ],
+      },
+      {
+        id: 'quantum-vault',
+        title: 'Quantum-safe vault',
+        lead: 'A place for SOL you plan to hold for years.',
+        blocks: [
+          { k: 'p', t: 'The vault is an on-chain program that pays out only against a hash-based signature. Its keys come from your passkey (Face ID / Touch ID) or a 24-word phrase and never leave your device. Because the security rests on hash functions rather than elliptic curves, it is designed to survive a future quantum computer.' },
+          { k: 'steps', items: [
+            ['Open', 'Create a vault with your passkey or 24 words.'],
+            ['Fill', 'Send SOL to the vault address from any wallet.'],
+            ['Release', 'Sign a payout with your vault keys; the program checks the hash-based signature on-chain.'],
+          ] },
+        ],
+      },
+      {
+        id: 'roadmap',
+        title: 'Research directions',
+        lead: 'What we are exploring next. None of this is live yet.',
+        blocks: [
+          { k: 'list', items: [
+            'Post-quantum proof systems (hash-based / STARK-style) for the shielded pool',
+            'Post-quantum key exchange (ML-KEM) for note encryption',
+            'Moving vault-held SOL into the pool without an elliptic-curve step',
+            'Bigger, healthier anonymity sets: batching and timing guidance built into the app',
+          ] },
+          { k: 'note', t: 'Research items are shared openly so you can judge them. Treat them as direction, not promises.' },
         ],
       },
     ],

@@ -324,3 +324,22 @@ html { background:#090d10; color-scheme:dark; }
 @keyframes vzFade { from { opacity:0; } to { opacity:1; } }
 .vz-table th { font:500 9px 'DM Sans',sans-serif; letter-spacing:.22em; text-transform:uppercase; color:var(--vz-muted); }
 @media (prefers-reduced-motion:reduce) { .vz-rise, .vz-world .vz-orb { animation:none; } }
+
+/* ---------- BlindSpot lens language (original): squared buttons, split-lens dot, viewfinder corners ---------- */
+.vz-enter { border-radius:12px; gap:14px; padding:14px 20px 14px 16px; }
+.vz-enter::before { content:""; flex:none; width:12px; height:12px; border-radius:50%; border:1.5px solid currentColor; background:linear-gradient(90deg,currentColor 50%,transparent 50%); transition:transform .45s cubic-bezier(.2,.8,.2,1); }
+.vz-enter:hover::before { transform:rotate(180deg); }
+.vz-enter span { margin-left:22px; }
+.vz-pill { border-radius:10px; }
+.vz-glass { border-radius:16px;
+  background:
+    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) left 10px top 10px/12px 1px no-repeat,
+    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) left 10px top 10px/1px 12px no-repeat,
+    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) right 10px top 10px/12px 1px no-repeat,
+    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) right 10px top 10px/1px 12px no-repeat,
+    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) left 10px bottom 10px/12px 1px no-repeat,
+    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) left 10px bottom 10px/1px 12px no-repeat,
+    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) right 10px bottom 10px/12px 1px no-repeat,
+    linear-gradient(rgba(227,232,232,.45),rgba(227,232,232,.45)) right 10px bottom 10px/1px 12px no-repeat,
+    var(--vz-frost); }
+.vz-eyebrow { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; letter-spacing:.2em; }

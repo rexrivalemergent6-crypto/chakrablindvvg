@@ -1738,9 +1738,9 @@
     if (!vl) return;
     window.__ncSplashDone = true;
     var box = document.createElement('div'); box.id = 'nc-splash'; box.setAttribute('data-testid', 'nc-splash');
-    var shownAt = performance.now(), MIN_MS = 1900, leaving = false;
-    box.innerHTML = '<div class="sp-card"><div class="sp-top"><i></i><span>Solana mainnet</span></div><canvas></canvas>' +
-      '<div class="sp-bot"><b>Going unseen.</b><span class="sp-msg">Syncing the pool</span><div class="sp-bar"><i></i></div></div></div>';
+    var shownAt = performance.now(), MIN_MS = 2400, leaving = false;
+    box.innerHTML = '<canvas aria-hidden="true"></canvas><div class="sp-cap"><span class="sp-k">Solana-first \u00b7 shielded \u00b7 quantum-safe vault</span>' +
+      '<span class="sp-msg">Syncing the pool</span><div class="sp-bar"><i></i></div></div>';
     // lives on <body> (not inside the app's own loader) so it stays up for a minimum
     // time even when the app boots instantly from cache, then fades out
     document.body.appendChild(box);
@@ -1755,46 +1755,52 @@
     }, 100);
     setTimeout(function () { if (!leaving) { leaving = true; clearInterval(gone); box.classList.add('sp-out'); setTimeout(function () { box.remove(); }, 420); } }, 20000);
     var cv = box.querySelector('canvas'), ctx = cv.getContext('2d'), msg = box.querySelector('.sp-msg');
-    var MSGS = ['Syncing the pool', 'Loading your notes', 'Warming up proofs', 'Almost there'], mi = 0;
-    var mt = setInterval(function () { mi = (mi + 1) % MSGS.length; msg.classList.remove('in'); void msg.offsetWidth; msg.textContent = MSGS[mi]; msg.classList.add('in'); }, 1400);
-    var dpr = Math.min(2, window.devicePixelRatio || 1), W = 0, H = 0, dots = [], specks = [], t0 = performance.now(), raf;
-    var C = [[111, 124, 132], [200, 224, 235], [242, 245, 245]]; // faint -> ice -> silver
-    function lerp(a, b, k) { return a + (b - a) * k; }
-    function col(k) { var s = k < .5 ? 0 : 1, kk = k < .5 ? k * 2 : (k - .5) * 2; return [lerp(C[s][0], C[s + 1][0], kk) | 0, lerp(C[s][1], C[s + 1][1], kk) | 0, lerp(C[s][2], C[s + 1][2], kk) | 0]; }
+    var MSGS = ['Syncing the pool', 'Counting sealed notes', 'Warming up proofs', 'Almost unseen'], mi = 0;
+    var mt = setInterval(function () { mi = (mi + 1) % MSGS.length; msg.classList.remove('in'); void msg.offsetWidth; msg.textContent = MSGS[mi]; msg.classList.add('in'); }, 1300);
+    // a field of rolling digits; the cells under the word lock in and settle into "BlindSpot"
+    var dpr = Math.min(2, window.devicePixelRatio || 1), W = 0, H = 0, cells = [], cs = 14, cols = 0, rows = 0, t0 = performance.now(), raf, last = 0;
+    var D = '0123456789';
     function build() {
-      W = Math.round(cv.offsetWidth); H = Math.round(cv.offsetHeight); if (!W || !H) return;
-      cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      var off = document.createElement('canvas'), oc = off.getContext('2d'); off.width = W; off.height = H;
-      var fs = Math.min(H * .5, W / 5.4);
+      W = window.innerWidth; H = window.innerHeight; if (!W || !H) return;
+      cv.width = W * dpr; cv.height = H * dpr; cv.style.width = W + 'px'; cv.style.height = H + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cs = W < 600 ? 9 : 12; cols = Math.ceil(W / cs); rows = Math.ceil(H / (cs * 1.25));
+      var off = document.createElement('canvas'), oc = off.getContext('2d'); off.width = cols; off.height = rows;
+      var fs = Math.min(rows * .42, cols / 5.3);
       oc.fillStyle = '#000'; oc.textAlign = 'center'; oc.textBaseline = 'middle';
-      oc.font = '500 ' + fs + 'px "DM Sans", Arial, sans-serif'; oc.fillText('BlindSpot', W / 2, H / 2 - fs * .02);
-      var img = oc.getImageData(0, 0, W, H).data, step = Math.max(6, Math.round(fs / 16)), old = dots; dots = [];
-      for (var y = 0, row = 0; y < H; y += step * .87, row++) {
-        for (var x = (row % 2) * step / 2; x < W; x += step) {
-          var xi = x | 0, yi = y | 0; if (img[(yi * W + xi) * 4 + 3] > 128) {
-            var p = old.length ? old[dots.length % old.length] : null;
-            dots.push({ tx: x, ty: y, x: p ? p.x : Math.random() * W, y: p ? p.y : Math.random() * H, r: step * .38, c: col(x / W), d: Math.random() * .6 });
-          }
-        }
+      oc.font = '800 ' + fs + 'px "DM Sans", Arial Black, sans-serif'; oc.fillText('BlindSpot', cols / 2, rows * .44);
+      var img = oc.getImageData(0, 0, cols, rows).data, cx = cols / 2, cy = rows * .44;
+      cells = [];
+      for (var r = 0; r < rows; r++) for (var c = 0; c < cols; c++) {
+        var on = img[(r * cols + c) * 4 + 3] > 70;
+        var dist = Math.hypot((c - cx) / cols, (r - cy) / rows);
+        cells.push({ c: c, r: r, on: on, d: D[(Math.random() * 10) | 0], lock: on ? .35 + Math.random() * 1.15 + dist * .6 : 0, sp: .03 + Math.random() * .12, ph: Math.random() * 6.28 });
       }
-      specks = []; for (var i = 0; i < 46; i++) specks.push({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25, r: Math.random() * 1.6 + .6, a: Math.random() * .5 + .2 });
     }
     function frame(now) {
       if (!box.isConnected) { clearInterval(mt); cancelAnimationFrame(raf); return; }
       if (!W) build();
-      var t = (now - t0) / 1000; ctx.clearRect(0, 0, W, H);
-      specks.forEach(function (s) { s.x = (s.x + s.vx + W) % W; s.y = (s.y + s.vy + H) % H; ctx.fillStyle = 'rgba(200,224,235,' + (s.a * .5) + ')'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill(); });
-      dots.forEach(function (d, i) {
-        var k = Math.min(1, Math.max(0, (t - d.d) / 1.1)), e = 1 - Math.pow(1 - k, 3);
-        var wob = Math.sin(t * 2.2 + d.tx * .05 + d.ty * .04) * 1.2 * e;
-        d.x += (d.tx - d.x) * (.04 + e * .12); d.y += (d.ty + wob - d.y) * (.04 + e * .12);
-        var pulse = .75 + .25 * Math.sin(t * 3 - d.tx * .02);
-        ctx.shadowColor = 'rgba(' + d.c[0] + ',' + d.c[1] + ',' + d.c[2] + ',.55)'; ctx.shadowBlur = 8 * e;
-        ctx.fillStyle = 'rgba(' + d.c[0] + ',' + d.c[1] + ',' + d.c[2] + ',' + (.35 + .65 * e * pulse) + ')';
-        ctx.beginPath(); ctx.arc(d.x, d.y, d.r * (.6 + .4 * e), 0, 6.283); ctx.fill();
-      });
-      ctx.shadowBlur = 0;
       raf = requestAnimationFrame(frame);
+      if (now - last < 45) return; last = now;
+      var t = (now - t0) / 1000;
+      ctx.clearRect(0, 0, W, H);
+      ctx.font = '500 ' + (cs * .86) + 'px ui-monospace,SFMono-Regular,Menlo,monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      var wave = (t * .55) % 1.6 - .3;
+      for (var i = 0; i < cells.length; i++) {
+        var e = cells[i], x = e.c * cs + cs / 2, y = e.r * cs * 1.25 + cs * .62;
+        var locked = e.on && t > e.lock;
+        if (!locked && Math.random() < e.sp * 3) e.d = D[(Math.random() * 10) | 0];
+        var a;
+        if (e.on) {
+          var k = Math.min(1, Math.max(0, (t - e.lock + .35) / .35));
+          a = locked ? .92 : .18 + .5 * k;
+          ctx.fillStyle = locked ? 'rgba(242,245,245,' + a + ')' : 'rgba(200,224,235,' + a + ')';
+        } else {
+          var band = Math.max(0, .08 - Math.abs(e.r / rows - wave)) * 1.2;
+          a = .05 + .07 * (.5 + .5 * Math.sin(t * 2 + e.ph)) + band;
+          ctx.fillStyle = 'rgba(164,175,180,' + a + ')';
+        }
+        ctx.fillText(e.d, x, y);
+      }
     }
     window.addEventListener('resize', function () { if (box.isConnected) build(); });
     (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () { build(); raf = requestAnimationFrame(frame); });
@@ -1900,7 +1906,7 @@
     var head = document.getElementById('vz-head');
     if (!head || head.parentNode !== main) {
       head = document.createElement('section'); head.id = 'vz-head'; head.setAttribute('data-testid', 'vz-hero');
-      head.innerHTML = '<h1 class="vz-hero" aria-label="The privacy layer for your money"><span class="l1">The privacy <b>layer</b></span><span class="l2">for your money.</span></h1>';
+      head.innerHTML = '<p class="vz-kick">Solana-first · Shielded · Quantum-safe vault</p><h1 class="vz-hero" aria-label="Out of sight. Never out of reach."><span class="l1">Out of <b>sight.</b></span><span class="l2">Never out of reach.</span></h1>';
       main.insertBefore(head, main.firstChild); vzLast = null;
     } else if (main.firstChild !== head) { main.insertBefore(head, main.firstChild); }
     var tabs = document.getElementById('vz-tabs');
