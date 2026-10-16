@@ -73,12 +73,11 @@ export default function NmNav({ active = '', onWhy }) {
           </div>
           <div className="mx-auto w-[91.6%] pb-10">
             <p className="vz-eyebrow mb-4 mt-4">Your private toolkit</p>
-            <ul className="vz-glass vz-launcher" style={{ gridTemplateColumns: 'repeat(2,minmax(0,1fr))' }}>
-              {TOOLS.map((t, i) => (
+            <ul className="bs-discs" style={{ gridTemplateColumns: 'repeat(4,minmax(0,1fr))', rowGap: 22 }} data-testid="menu-discs">
+              {TOOLS.map((t) => (
                 <li key={t.id}><a href={t.href} data-testid={`menu-${t.id}`} onClick={() => setMenu(false)}>
-                  <VzIcon name={t.ico} size={20} className="mt-0.5 shrink-0 text-[var(--vz-dim)]" />
-                  <div><b>{t.label}</b></div>
-                  <span className="vz-num">{String(i + 1).padStart(2, '0')}</span>
+                  <span className="bs-disc-btn"><VzIcon name={t.ico} size={20} /></span>
+                  <b>{t.label}</b>
                 </a></li>
               ))}
             </ul>
