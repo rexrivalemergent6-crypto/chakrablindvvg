@@ -105,3 +105,10 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - Source: https://github.com/rexrivalemergent6-crypto/new-chakra (code already at latest commit 0c16a3d).
 - Created missing backend/.env (MONGO_URL, DB_NAME, CORS_ORIGINS) + frontend/.env (REACT_APP_BACKEND_URL), installed pip + yarn deps, all services running.
 - Verified: landing (/), app (/app#private-route), Bifrost _live relay, live token list + Private route quote via /api/ds proxy.
+
+## Iteration 16 — Vaulz zk rebrand + Omni (omnizec.com) dark stage UI (Oct 2026)
+- Name NullCash -> Vaulz zk everywhere (backend BRAND_NAME/BRAND_SLUG, paraphrase/_strings, manifests, vault mirror, React). X account + CA chip removed everywhere (ensureX/ensureCA no-op, x.com links hidden).
+- Dark only: shim forces data-theme=dark; nc-theme.css rewritten (tokens #090d10/#e3e8e8, frost glass, DM Sans + Instrument Serif, misty background /api/bifrost/v1/_brand/mist.webp). No guardian figure (user choice).
+- App (/app): dk-swap.js ensureStage() -> #vz-head (All tools, "YOUR PRIVATE TOOLKIT / NN", big "Title.", serif tagline) fixed left on >=1180px + #vz-tabs tool tabs; content in right column. ?do=<tool> deep links (runDo) e.g. /app?do=send.
+- Landing (/): Omni stage — NEW callout, "Hit send. / Leave no trace.", Enter Vaulz, live "What the chain sees" card with Go unseen toggle, 14-tool numbered launcher, How it works (#flow), Privacy model (#zk), Fees (#fees), FAQ (#faq), Why privacy dialog. Header NmNav.jsx (tools + More + Vault + Docs + Launch app; mobile menu grid).
+- /docs + /vault restyled dark. Brand assets via scripts/make_vaulz_brand.py (lockup PNG-in-SVG, favicons).

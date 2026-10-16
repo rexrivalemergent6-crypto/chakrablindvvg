@@ -1,18 +1,19 @@
 """
-Bifrost v1 — browser shim + NullCash re-branding layer for the Veil mirror.
+Bifrost v1 — browser shim + Vaulz zk re-branding layer for the Veil mirror.
 
 Veil's own client code still runs unmodified in the browser (wallet creation,
 ZK proofs, RPC, relayer, indexer). This module only:
   * injects a shim that routes every network call through /api/bifrost/v1/*
   * keeps the URL bar on pretty paths (/shield, /shield/about, /shield/docs …)
-  * swaps visible brand text / logos / colours to NullCash
+  * swaps visible brand text / logos / colours to Vaulz zk
 """
 import base64
 import functools
 from pathlib import Path
 
 BRAND_DIR = Path(__file__).parent / "brand"
-BRAND_NAME = "NullCash"
+BRAND_NAME = "Vaulz zk"
+BRAND_SLUG = "vaulz"
 
 
 def _b64(name: str) -> str:
@@ -24,11 +25,10 @@ def _b64(name: str) -> str:
 
 @functools.lru_cache(maxsize=4)
 def lockup_svg(light: bool = False) -> str:
-    mark = _b64("mark-black-256.png" if light else "mark-white-256.png")
-    word = "#12140f" if light else "#f4f6ee"
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 470 128" width="470" height="128">
-<image href="data:image/png;base64,{mark}" xlink:href="data:image/png;base64,{mark}" x="0" y="8" width="112" height="112"/>
-<text x="130" y="86" font-family="'Space Grotesk', Inter, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="64" font-weight="700" letter-spacing="-2.5" fill="{word}">Null<tspan font-weight="500">Cash</tspan></text>
+    # light=True -> dark ink (for light surfaces); default light ink for the dark-only UI
+    png = _b64("vz-lockup-dark-ink.png" if light else "vz-lockup-light-ink.png")
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 537 256" width="537" height="256">
+<image href="data:image/png;base64,{png}" xlink:href="data:image/png;base64,{png}" x="0" y="0" width="537" height="256"/>
 </svg>"""
 
 
@@ -40,7 +40,7 @@ a[href*="t.me/veil"],a[href*="github.com/veil"],a[href*="@veilit.xyz"],.foot-aud
 img[src*="audit-contractwolf"],li:has(> a[href*="contractwolf.io"]),#extension,.ext-soon,.ext-get,
 section#developers,a[href="#developers"],a[href$="/v1/app/api"],a[href*="/v1/app/api#"],a[href*="/v1/app/api?"],a[href="/app/api"],a[href^="/app/api#"],a[href$="docs#developers"],a[href="#extension"]{display:none!important}
 a[href*="contractwolf.io"]{pointer-events:none!important;color:inherit!important;text-decoration:none!important}
-.omark,.tk,.foot-ca,[data-copy="HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump"]{display:none!important}
+a[href*="x.com/"],a[href*="twitter.com/"],.nc-ca,.dk-x,.omark,.tk,.foot-ca,[data-copy="HgTGdc29D5bDMrDvsCLnorxz899VyDj7ZN7FPa6vpump"]{display:none!important}
 html:not(.bf-ready) body{opacity:0}
 html.bf-ready body{opacity:1;transition:opacity .18s ease}
 img[src*="_brand/lockup"]{object-fit:contain;height:26px!important;filter:none!important;width:auto!important;max-width:none!important}
@@ -50,12 +50,12 @@ _SHIM = r"""
 (function(){
 var P='__P__',R='__R__',T='__T__',PRETTY=T==='site'?'/shield/about':'/shield',BRAND='__BRAND__';
 var ORIGIN=location.origin,BU=R+'_brand/';
-try{localStorage.setItem('cb-theme','light');}catch(e){}
-var FL=function(){var h=document.documentElement;if(h.getAttribute('data-theme')!=='light')h.setAttribute('data-theme','light');};FL();try{new MutationObserver(FL).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}
+try{localStorage.setItem('cb-theme','dark');}catch(e){}
+var FL=function(){var h=document.documentElement;if(h.getAttribute('data-theme')!=='dark')h.setAttribute('data-theme','dark');};FL();try{new MutationObserver(FL).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});}catch(e){}
 function isLight(){var th=document.documentElement.getAttribute('data-theme');if(th==='light')return true;if(th==='dark')return false;
  try{var els=[document.body,document.documentElement];for(var i=0;i<els.length;i++){if(!els[i])continue;var c=getComputedStyle(els[i]).backgroundColor;var m=c&&c.match(/rgba?\(([\d.]+)[, ]+([\d.]+)[, ]+([\d.]+)(?:[, /]+([\d.]+))?/);
  if(m&&(m[4]===undefined||parseFloat(m[4])>0.05)){return (0.2126*m[1]+0.7152*m[2]+0.0722*m[3])/255>0.55;}}}catch(e){}return false;}
-function LK(){return BU+(isLight()?'lockup-light.svg':'lockup.svg');}
+function LK(){return BU+'lockup.svg';}
 function up(p){
   if(p.indexOf(R)===0)return p;
   if(p==='/about'||p.indexOf('/about/')===0)return R+'site'+(p.slice(6)||'/');
@@ -94,14 +94,14 @@ var hr=history.replaceState,hp=history.pushState;
 if(!DBG.nopretty)try{hr.call(history,history.state,'',pretty(location.href));}catch(e){}
 function hpatch(f){return function(s,t,u){if(u!=null){var pu=pretty(String(u));try{VBASE=vbaseFrom(new URL(pu,location.href).pathname);}catch(e){}u=pu;}return f.call(this,s,t,u);};}
 if(!DBG.nopretty){history.pushState=hpatch(hp);history.replaceState=hpatch(hr);}
-/* address bar shows NullCash names for in-app hash routes (the app still sees its own on load) */
+/* address bar shows Vaulz zk names for in-app hash routes (the app still sees its own on load) */
 try{if(/^#nullswap\b/i.test(location.hash))hr.call(history,history.state,'',location.pathname+location.search+location.hash.replace(/^#nullswap/i,'#veilswap'));}catch(e){}
 function hashBrand(){try{var h=location.hash||'';if(/veil/i.test(h))hr.call(history,history.state,'',location.pathname+location.search+h.replace(/veil/ig,'null'));}catch(e){}}
 /* before the app's own handlers run (registered first), give the app its real hash back */
 function hashUnbrand(){try{if(/^#nullswap\b/i.test(location.hash||''))hr.call(history,history.state,'',location.pathname+location.search+location.hash.replace(/^#nullswap/i,'#veilswap'));}catch(e){}}
 window.addEventListener('popstate',hashUnbrand,true);
 window.addEventListener('hashchange',hashUnbrand,true);
-/* show the NullCash name only once the Bridge view is really on screen (app has finished routing) */
+/* show the Vaulz zk name only once the Bridge view is really on screen (app has finished routing) */
 function bridgeOn(){var n=document.querySelectorAll('nav.side .nav-i.on');for(var i=0;i<n.length;i++){if(/^\s*Bridge\s*$/i.test(n[i].textContent||''))return true;}return false;}
 var HBon=0;setInterval(function(){if(!/^#veilswap\b/i.test(location.hash||'')){HBon=0;return;}if(bridgeOn()){HBon++;if(HBon>=2)hashBrand();}else HBon=0;},400);
 var of=window.fetch;
@@ -167,7 +167,7 @@ var wo=window.open;window.open=function(u){if(typeof u==='string')arguments[0]=f
 document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');
  if(!a)return;var h=a.getAttribute('href');if(!h||SKIP.test(h))return;var n=fx(h);if(n!==h)a.setAttribute('href',n);},true);
 
-/* ---------- NullCash branding ---------- */
+/* ---------- Vaulz zk branding ---------- */
 var TXT=/veilit\.xyz|Veil|ContractWolf|Jupiter|veil-core|@veil|NEAR Intents|NEAR intents|1Click|DarkSwap|Darkswap|Dark Swap|HoudiniSwap|Houdini|Mayan|Cadabra|Darkinator|Bifrost|(^|[^$A-Za-z0-9_\/.:@-])veil(?![A-Za-z0-9_-])/;
 function rt(s){
  return s.replace(/app\.veilit\.xyz/g,location.host+'/shield')
@@ -177,13 +177,13 @@ function rt(s){
   .replace(/its audit by ContractWolf/g,'its independent audit')
   .replace(/ContractWolf · /g,'Independent audit · ')
   .replace(/ContractWolf/g,'an independent auditor')
-  .replace(/veil-core/g,BRAND.toLowerCase()+'-core')
-  .replace(/@veil[A-Za-z0-9_]*/g,'@usenullcash')
+  .replace(/veil-core/g,'__SLUG__-core')
+  .replace(/@veil[A-Za-z0-9_]*/g,BRAND)
   .replace(/NEAR [Ii]ntents( 1Click)?/g,'Intent network').replace(/1Click/g,'Intent')
   .replace(/HoudiniSwap|Houdini/g,'Private route').replace(/Dark ?[Ss]wap|Darkinator|Cadabra|Bifrost/g,BRAND).replace(/Mayan/g,BRAND)
   .replace(/Jupiter Lend Earn/g,'Lending vault').replace(/Jupiter/g,'Aggregator')
   .replace(/(^|[^$A-Za-z])Veil/g,'$1'+BRAND)
-  .replace(/(^|[^$A-Za-z0-9_\/.:@-])veil(?![A-Za-z0-9_-])/g,'$1'+BRAND.toLowerCase());
+  .replace(/(^|[^$A-Za-z0-9_\/.:@-])veil(?![A-Za-z0-9_-])/g,'$1'+'__SLUG__');
 }
 var SKIPTAG={SCRIPT:1,STYLE:1,NOSCRIPT:1,TEXTAREA:1,INPUT:1,TEMPLATE:1};
 var BATTR=['title','aria-label','placeholder','alt','data-tip','data-title'];
@@ -194,10 +194,10 @@ function brandEl(el){
  if(el.tagName==='IMG'){
   var s=el.getAttribute('src')||'';var b=bimg(s);
   if(!b&&el.closest&&el.closest('a.brand,.brand'))b=LK();
-  if(!b&&/^(veil|darkinator|nullcash)$/i.test(el.getAttribute('alt')||''))b=LK();
+  if(!b&&/^(veil|darkinator|nullcash|vaulz|vaulz zk)$/i.test(el.getAttribute('alt')||''))b=LK();
   if(b&&s!==b&&s.indexOf(b)<0){sa.call(el,'src',b);el.removeAttribute('srcset');}
  }
- if(el.tagName==='A'){var hh=el.getAttribute('href')||'';if(/(x|twitter)\.com\/veil/i.test(hh))sa.call(el,'href','https://x.com/usenullcash');}
+ if(el.tagName==='A'){var hh=el.getAttribute('href')||'';if(/(x|twitter)\.com\//i.test(hh)&&el.style.display!=='none')el.style.display='none';}
 }
 var PARA=__PARA__;
 function brandText(n){if(DBG.notext)return;if(n.parentNode&&(SKIPTAG[n.parentNode.nodeName]||n.parentNode.nodeName==='TITLE'))return;var v=n.nodeValue;if(!v)return;var r=TXT.test(v)?rt(v):v;var tr=r.trim();if(tr&&PARA.hasOwnProperty(tr)){r=r.replace(tr,PARA[tr]);}if(r!==v)n.nodeValue=r;}
@@ -214,8 +214,8 @@ function start(){
  if(started)return;started=true;
  if(DBG.nobrand){document.documentElement.classList.add('bf-ready');setInterval(function(){document.documentElement.classList.add('bf-ready');},300);return;}
  walk(document.documentElement);
- try{var fl=document.createElement('link');sa.call(fl,'rel','icon');sa.call(fl,'href',BU+'favicon.png?v=5');sa.call(fl,'id','bf-icon');document.head.appendChild(fl);}catch(e){}
- // keep only NullCash icons / manifest in <head> (the app re-adds its own on hydration)
+ try{var fl=document.createElement('link');sa.call(fl,'rel','icon');sa.call(fl,'href',BU+'favicon.png?v=6');sa.call(fl,'id','bf-icon');document.head.appendChild(fl);}catch(e){}
+ // keep only Vaulz zk icons / manifest in <head> (the app re-adds its own on hydration)
  var icoClean=function(){try{var ls=document.querySelectorAll('link[rel~="icon"],link[rel="apple-touch-icon"],link[rel="apple-touch-icon-precomposed"],link[rel="manifest"],link[rel="mask-icon"]');for(var i=0;i<ls.length;i++){var hh=ls[i].getAttribute('href')||'';if(hh.indexOf(BU)!==0)ls[i].parentNode&&ls[i].parentNode.removeChild(ls[i]);}}catch(e){}};
  icoClean();setInterval(icoClean,1000);
  var syncTitle=function(){var t=document.title;if(t&&TXT.test(t)){var nt=rt(t);if(nt!==t)document.title=nt;}};
@@ -246,7 +246,7 @@ setTimeout(start,2500);
 
 
 NAV_LABELS = {
-    "Home": "Home", "Shield": "Shield", "Trade": "Swap", "NullCashSwap": "Bridge",
+    "Home": "Home", "Shield": "Shield", "Trade": "Swap", "Vaulz zkSwap": "Bridge",
     "Send": "Send", "Receive": "Receive", "Withdraw": "Withdraw", "Earn": "Earn",
     "Invite": "Invite", "Addresses": "Addresses", "Activity": "History", "Keys": "Keys",
     "More": "More",
@@ -271,6 +271,7 @@ def head_inject(target: str, prefix: str) -> str:
           .replace("__R__", f"{prefix}/")
           .replace("__T__", target)
           .replace("__BRAND__", BRAND_NAME)
+          .replace("__SLUG__", BRAND_SLUG)
           .replace("__PARA__", _para_json()))
     try:
         theme_css = (BRAND_DIR / "nc-theme.css").read_text()
@@ -286,26 +287,26 @@ def head_inject(target: str, prefix: str) -> str:
         f"<script>{boot}</script>"
         '<link rel="preconnect" href="https://fonts.googleapis.com">'
         '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">'
+        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Serif:ital@0;1&display=swap">'
         + (f'<script src="{prefix}/_brand/dk-swap.js" defer></script>' if target == "app" else "")
     )
 
 
-_ICON_V = "5"
+_ICON_V = "6"
 
 
 def nullcash_manifest():
     b = "/api/bifrost/v1/_brand/"
     return {
-        "name": "NullCash · Private money on Solana",
-        "short_name": "NullCash",
+        "name": "Vaulz zk · Private money on Solana",
+        "short_name": "Vaulz zk",
         "description": "Private balances, transfers, trades and swaps on Solana.",
         "id": "/app",
         "start_url": "/app",
         "scope": "/",
         "display": "standalone",
-        "background_color": "#ffffff",
-        "theme_color": "#ffffff",
+        "background_color": "#090d10",
+        "theme_color": "#090d10",
         "icons": [
             {"src": f"{b}favicon-192.png?v={_ICON_V}", "sizes": "192x192", "type": "image/png", "purpose": "any"},
             {"src": f"{b}favicon-512.png?v={_ICON_V}", "sizes": "512x512", "type": "image/png", "purpose": "any"},
@@ -315,7 +316,7 @@ def nullcash_manifest():
 
 
 def brand_icon_for(path: str):
-    """Map any upstream favicon / app-icon / manifest path to a NullCash brand asset name."""
+    """Map any upstream favicon / app-icon / manifest path to a Vaulz zk brand asset name."""
     p = path.lower().split("?", 1)[0]
     base = p.rsplit("/", 1)[-1]
     if base in ("manifest.webmanifest", "manifest.json", "site.webmanifest"):
@@ -351,6 +352,11 @@ def brand_asset(name: str):
         p = BRAND_DIR / "mark-black-256.png"
     elif name == "mark-white.png":
         p = BRAND_DIR / "mark-white-256.png"
+    elif name == "mist.webp":
+        try:
+            return (BRAND_DIR / "mist.webp").read_bytes(), "image/webp"
+        except Exception:
+            return None
     elif name == "favicon.png":
         p = BRAND_DIR / "favicon-192.png"
     elif name == "favicon.ico":

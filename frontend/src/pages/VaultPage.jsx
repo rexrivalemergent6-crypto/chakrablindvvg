@@ -5,26 +5,33 @@ const BACKEND = process.env.REACT_APP_BACKEND_URL || '';
 const VAULT_SRC = `${BACKEND}/api/bifrost/v1/vault/?do=vault`;
 
 export default function VaultPage() {
-  useEffect(() => { document.title = 'NullCash Vault · quantum-safe SOL'; }, []);
+  useEffect(() => { document.title = 'Vault · Vaulz zk'; }, []);
   return (
-    <div className="min-h-screen bg-[#f4f6ee]" data-testid="vault-page">
-      <NmNav />
-      <main className="pt-[84px]">
-        <section className="mx-auto max-w-[1180px] px-4 pt-6 sm:px-6">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#202221]/55">Quantum-safe · on-chain</p>
-          <h1 className="mt-1 text-[30px] font-semibold tracking-tight text-[#202221] sm:text-[40px]">NullCash Vault</h1>
-          <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-[#202221]/70">
-            Keep SOL where a quantum computer cannot reach it. The vault pays out only against a hash-based
-            signature from keys your passkey or 24 words create. Open it with Face ID or make a new vault below.
+    <div className="vz relative min-h-screen bg-[#090d10]" data-testid="vault-page">
+      <div className="vz-world left" aria-hidden="true" />
+      <NmNav active="vault" />
+      <main className="relative z-[1] pt-[96px]">
+        <section className="mx-auto w-[91.6%] pb-4">
+          <a href="/" className="vz-link inline-flex items-center gap-2 text-[11px]" data-testid="vault-all-tools">&larr; All tools</a>
+          <p className="vz-eyebrow mt-6">Your private toolkit / 14</p>
+          <h1 className="mt-4 text-[56px] font-normal leading-[.96] tracking-[-.072em] text-[var(--vz-strong)] sm:text-[80px]">Vault<span className="text-[var(--vz-muted)]">.</span></h1>
+          <p className="vz-serif mt-4 max-w-2xl text-[22px] leading-[1.25] text-[var(--vz-dim)]">
+            Your SOL, out of reach of quantum computers.
+          </p>
+          <p className="mt-3 max-w-2xl text-[13px] leading-[1.65] text-[var(--vz-muted)]">
+            The vault pays out only against a hash-based signature from keys your passkey or 24 words create.
+            Open it with Face ID or make a new vault below.
           </p>
         </section>
-        <iframe
-          src={VAULT_SRC}
-          title="NullCash Vault"
-          data-testid="vault-frame"
-          allow="publickey-credentials-create *; publickey-credentials-get *; clipboard-write; clipboard-read"
-          className="mt-2 block h-[calc(100vh-150px)] min-h-[620px] w-full border-0"
-        />
+        <div className="mx-auto w-[91.6%] pb-10">
+          <iframe
+            src={VAULT_SRC}
+            title="Vaulz zk Vault"
+            data-testid="vault-frame"
+            allow="publickey-credentials-create *; publickey-credentials-get *; clipboard-write; clipboard-read"
+            className="vz-glass block h-[calc(100vh-150px)] min-h-[620px] w-full"
+          />
+        </div>
       </main>
     </div>
   );

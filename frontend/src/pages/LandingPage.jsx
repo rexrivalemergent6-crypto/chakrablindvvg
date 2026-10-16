@@ -1,25 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ArrowRight, ArrowUpRight, Check, X as XIcon, ChevronDown, BookOpen } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import NmNav from '../components/NmNav';
 import Logo from '../components/Logo';
-import NmNav, { X_URL, XGlyph } from '../components/NmNav';
-import { DOC_GROUPS } from './docsContent';
+import { TOOLS, VzIcon } from '../components/vzTools';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
-import { PRODUCTS, JOURNEY, METHODS, PIPE, CLAIMS, PRICES, QA, TECH } from './landingCopy';
+import { JOURNEY, METHODS, CLAIMS, PRICES, QA, TECH, SEEN } from './landingCopy';
 
 const BACKEND = process.env.REACT_APP_BACKEND_URL || '';
 const BF = `${BACKEND}/api/bifrost/v1`;
-const APP = '/app';
-const IMG = (n) => `/landing/${n}.webp`;
-const LINKS = [['Features', '#features'], ['How it works', '#flow'], ['Real ZK', '#zk'], ['Docs', '/docs'], ['Fees', '#fees'], ['FAQ', '#faq']];
 
-/* ---------------- data ---------------- */
+/* live pool stats (relay refreshes upstream every few seconds) */
 function useLiveStats() {
   const [s, setS] = useState({ leaves: null, nullifiers: null, assets: null, at: 0, live: false });
   useEffect(() => {
     let dead = false;
-    const j = (u) => fetch(u, { cache: 'no-store' })
-      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
-    // constant live relay: pool stats every 5s, asset list every 60s (pauses while the tab is hidden)
+    const j = (u) => fetch(u, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
     const stats = () => {
       if (document.hidden) return;
       j(`${BF}/indexer/v1/stats`)
@@ -33,7 +27,7 @@ function useLiveStats() {
     stats(); assets();
     const t1 = setInterval(stats, 5000);
     const t2 = setInterval(assets, 60000);
-    const vis = () => { if (!document.hidden) { stats(); } };
+    const vis = () => { if (!document.hidden) stats(); };
     document.addEventListener('visibilitychange', vis);
     return () => { dead = true; clearInterval(t1); clearInterval(t2); document.removeEventListener('visibilitychange', vis); };
   }, []);
@@ -41,475 +35,241 @@ function useLiveStats() {
 }
 const fmt = (n) => (n === null || n === undefined ? '—' : Number(n).toLocaleString());
 
-/* ---------------- primitives ---------------- */
-function Reveal({ children, delay = 0, className = '' }) {
-  const ref = useRef(null);
-  const [on, setOn] = useState(false);
-  useEffect(() => {
-    const el = ref.current; if (!el) return undefined;
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setOn(true); io.disconnect(); } }, { threshold: 0.12 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  return (
-    <div ref={ref} style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-700 ease-[cubic-bezier(.2,.9,.25,1)] ${on ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'} ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-function LimeBtn({ href, children, testid, big = false, className = '' }) {
-  return (
-    <a href={href} data-testid={testid}
-      className={`nm-lime group inline-flex items-center justify-center gap-2 rounded-[10px] font-semibold text-[#202221] ${big ? 'h-12 px-6 text-[15px]' : 'h-10 px-4 text-[14px]'} ${className}`}>
-      {children}<ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-    </a>
-  );
-}
-
-
-function Kicker({ children, dark = false }) {
-  return (
-    <div className={`inline-flex items-center gap-2 rounded-[8px] border px-2.5 py-1 font-mono text-[11px] uppercase tracking-[.16em] ${dark ? 'border-white/20 text-white/70' : 'border-[#202221]/25 text-[#202221]/70'}`}>
-      <span className={`h-1.5 w-1.5 rounded-full ${dark ? 'bg-[#B9C1CC] shadow-[0_0_0_3px_rgba(185,193,204,.25)]' : 'bg-[#2B2F33] shadow-[0_0_0_3px_rgba(43,47,51,.18)]'}`} />{children}
-    </div>
-  );
-}
-
-/* ---------------- dot-matrix live counter (canvas) ---------------- */
-function DotCounter({ value, label }) {
-  const ref = useRef(null);
-  useEffect(() => {
-    const cv = ref.current; if (!cv) return undefined;
-    const ctx = cv.getContext('2d');
-    const dpr = Math.min(2, window.devicePixelRatio || 1);
-    let raf = 0; let t0 = 0; let visible = true;
-    const W = cv.clientWidth; const H = cv.clientHeight;
-    cv.width = W * dpr; cv.height = H * dpr; ctx.scale(dpr, dpr);
-    // sample text into a dot grid
-    const off = document.createElement('canvas'); off.width = W; off.height = H;
-    const o = off.getContext('2d');
-    o.fillStyle = '#fff'; o.textBaseline = 'middle'; o.textAlign = 'left';
-    o.font = `700 ${Math.round(H * 0.82)}px "Space Mono", monospace`;
-    o.fillText(value, 4, H / 2 + 2);
-    const data = o.getImageData(0, 0, W, H).data;
-    const step = 5; const dots = [];
-    for (let y = step / 2; y < H; y += step) {
-      for (let x = step / 2; x < W; x += step) {
-        const on = data[((y | 0) * W + (x | 0)) * 4 + 3] > 120;
-        dots.push({ x, y, on, p: Math.random() * 6.28, s: 0.5 + Math.random() });
-      }
-    }
-    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible && !raf) raf = requestAnimationFrame(draw); }, { threshold: 0 });
-    io.observe(cv);
-    function draw(ts) {
-      raf = 0; if (!visible) return;
-      if (!t0) t0 = ts;
-      const t = (ts - t0) / 1000;
-      ctx.clearRect(0, 0, W, H);
-      for (let i = 0; i < dots.length; i += 1) {
-        const d = dots[i];
-        if (d.on) {
-          const a = 0.75 + 0.25 * Math.sin(t * 2 + d.p);
-          ctx.fillStyle = `rgba(236,239,243,${a})`;
-          ctx.beginPath(); ctx.arc(d.x, d.y, 1.85, 0, 6.283); ctx.fill();
-        } else {
-          const a = 0.06 + 0.1 * Math.max(0, Math.sin(t * d.s + d.p + d.x * 0.02));
-          ctx.fillStyle = `rgba(217,217,217,${a})`;
-          ctx.fillRect(d.x - 0.8, d.y - 0.8, 1.6, 1.6);
-        }
-      }
-      raf = requestAnimationFrame(draw);
-    }
-    raf = requestAnimationFrame(draw);
-    return () => { cancelAnimationFrame(raf); io.disconnect(); };
-  }, [value]);
-  return <canvas ref={ref} aria-label={`${label}: ${value}`} className="block h-[74px] w-full" />;
-}
-
-function LiveAgo({ at, live }) {
+function useAgo(at) {
   const [, tick] = useState(0);
-  useEffect(() => { const t = setInterval(() => tick((n) => n + 1), 1000); return () => clearInterval(t); }, []);
-  const secs = at ? Math.max(0, Math.floor((Date.now() - at) / 1000)) : null;
-  return (
-    <span className="text-white/45" data-testid="hero-live-ago">
-      {live ? `live · synced ${secs}s ago` : (at ? 'reconnecting…' : 'connecting…')}
-    </span>
-  );
+  useEffect(() => { const t = setInterval(() => tick((x) => x + 1), 1000); return () => clearInterval(t); }, []);
+  if (!at) return 'connecting';
+  return `synced ${Math.max(0, Math.round((Date.now() - at) / 1000))}s ago`;
 }
 
-/* ---------------- sections ---------------- */
-function Hero({ stats }) {
+/* ---------- stage: the chain's view, live ---------- */
+function ChainView({ s, unseen, setUnseen }) {
+  const ago = useAgo(s.at);
+  const val = (v) => (unseen ? <span className="tracking-[-.02em] text-[var(--vz-faint)]">••••</span> : fmt(v));
   return (
-    <section id="top" data-nm-theme="light" className="relative overflow-hidden bg-[#D9D9D9] pb-16 pt-32 sm:pt-36 lg:min-h-[100svh]">
-      <div className="mx-auto grid max-w-[1180px] items-center gap-10 px-5 lg:grid-cols-[1.05fr_1fr]">
-        <div className="relative z-[1]">
-          <Reveal><Kicker>Live on Solana mainnet</Kicker></Reveal>
-          <Reveal delay={60}>
-            <h1 className="nm-h mt-6 text-[46px] font-semibold leading-[1.02] tracking-[-0.03em] text-[#202221] sm:text-[72px] xl:text-[84px]" data-testid="hero-title">
-              Hit send.<br /><span className="sm:whitespace-nowrap">Leave no trace.</span>
-            </h1>
-          </Reveal>
-          <Reveal delay={120}>
-            <p className="mt-6 max-w-[560px] text-[17px] uppercase leading-[1.45] tracking-[.02em] text-[#202221]/85 sm:text-[22px]">
-              A zero-knowledge vault for Solana that pays, trades and bridges to any chain.
-            </p>
-          </Reveal>
-
-          <Reveal delay={180}>
-            <div className="nm-live mt-8 w-full max-w-[520px] overflow-hidden rounded-[12px] border border-[#202221] bg-[#202221] text-[#D9D9D9]" data-testid="hero-live">
-              <div className="flex items-center justify-between px-4 pt-3 font-mono text-[11px] uppercase tracking-[.18em]">
-                <span className="flex items-center gap-2 text-[#B9C1CC]"><span className="nm-pulse" />Sealed notes in the pool</span>
-                <LiveAgo at={stats.at} live={stats.live} />
-              </div>
-              <div className="px-3"><DotCounter value={fmt(stats.leaves)} label="Sealed notes" /></div>
-              <div className="flex items-center justify-between gap-3 px-4 pb-4">
-                <span className="text-[12px] leading-[1.4] text-white/55">Every dot is a commitment.<br />None of them has a name.</span>
-                <LimeBtn href={APP} testid="hero-launch">Open app</LimeBtn>
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal delay={240}>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <a href="/app#private-route" data-testid="hero-swap"
-                className="group inline-flex items-center gap-2 rounded-[10px] border border-[#202221] px-3.5 py-2 text-[14px] font-medium text-[#202221] transition hover:bg-[#202221] hover:text-[#B9C1CC]">
-                Swap without a wallet <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-              </a>
-              <a href={X_URL} target="_blank" rel="noopener noreferrer" data-testid="hero-x"
-                className="inline-flex items-center gap-2 rounded-[10px] border border-[#202221]/40 px-3.5 py-2 text-[14px] text-[#202221]/80 transition hover:border-[#202221]"><XGlyph s={13} /> @usenullcash</a>
-            </div>
-          </Reveal>
-
-          <dl className="mt-8 grid max-w-[520px] grid-cols-3 gap-2" data-testid="hero-stats">
-            {[['Spent nullifiers', fmt(stats.nullifiers)], ['Shieldable tokens', fmt(stats.assets)], ['Swap to', 'Any chain']].map(([k, v]) => (
-              <div key={k} className="rounded-[10px] border border-[#202221]/25 px-3 py-2.5">
-                <dt className="text-[11px] uppercase tracking-[.08em] text-[#202221]/55">{k}</dt>
-                <dd className="nm-h mt-1 text-[20px] font-semibold text-[#202221]">{v}</dd>
-              </div>
-            ))}
-          </dl>
+    <div className="flex flex-col items-center gap-5" data-testid="hero-live">
+      <p className="text-[11px] text-[var(--vz-dim)]" aria-live="polite">{unseen ? 'Now the chain sees even less.' : 'Some things are better left unseen.'}</p>
+      <div className="vz-glass w-[min(380px,86vw)] p-5" style={{ background: 'rgba(16,23,28,.48)' }}>
+        <div className="flex items-center justify-between">
+          <span className="vz-eyebrow">What the chain sees</span>
+          <span className="flex items-center gap-2 text-[10px] text-[var(--vz-faint)]" data-testid="hero-live-ago">
+            <i className={`h-1.5 w-1.5 rounded-full ${s.live ? 'bg-[var(--vz-ok)]' : 'bg-[var(--vz-warn)]'}`} />{s.live ? ago : 'reconnecting'}
+          </span>
         </div>
-
-        <div className="relative">
-          <div className="nm-dots pointer-events-none absolute left-[2%] top-[8%] h-[62%] w-[62%] rounded-full" aria-hidden="true" />
-          <img src={IMG('hero_vault')} alt="NullCash shielding machine: coins drop into a sealed ring and vanish" className="nm-float relative mx-auto w-full max-w-[600px]" draggable="false" />
+        <div className="mt-5 text-[64px] font-normal leading-none tracking-[-.07em] text-[var(--vz-strong)]" data-testid="hero-notes">{val(s.leaves)}</div>
+        <div className="mt-2 text-[11px] text-[var(--vz-dim)]">sealed notes in the pool. <span className="vz-serif text-[14px]">None has a name.</span></div>
+        <div className="mt-5 grid grid-cols-3 border-t border-[var(--vz-hair)] pt-4" data-testid="hero-stats">
+          <div><div className="vz-eyebrow !text-[8px]">Nullifiers</div><div className="mt-1.5 text-[17px] tracking-[-.04em]">{val(s.nullifiers)}</div></div>
+          <div><div className="vz-eyebrow !text-[8px]">Tokens</div><div className="mt-1.5 text-[17px] tracking-[-.04em]">{val(s.assets)}</div></div>
+          <div><div className="vz-eyebrow !text-[8px]">Swap to</div><div className="mt-1.5 text-[17px] tracking-[-.04em]">Any chain</div></div>
         </div>
       </div>
-    </section>
+      <button type="button" onClick={() => setUnseen((v) => !v)} aria-pressed={unseen} className="vz-pill !gap-4 !text-[10px]" data-testid="hero-go-unseen">
+        <span aria-hidden="true" className="flex gap-[3px]"><i className="block h-[2px] w-[6px] bg-current" /><i className="block h-[2px] w-[6px] bg-current" /></span>
+        {unseen ? 'Show me' : 'Go unseen'} <span aria-hidden="true">&#8599;</span>
+      </button>
+    </div>
   );
 }
 
-function Statement() {
+/* ---------- why privacy dialog ---------- */
+function WhyDialog({ onClose }) {
+  useEffect(() => {
+    const k = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', k); return () => window.removeEventListener('keydown', k);
+  }, [onClose]);
+  const P = [
+    ['shield', 'Separate your activity', 'Shield funds into a shared pool. Private payments come from that pool, not straight from your wallet.'],
+    ['route', 'Leave without a trail', 'Bridge, private routes and intent swaps take you to any chain without a wallet link.'],
+    ['check', 'Check for yourself', 'Every move is a zero-knowledge proof, verified on-chain. Keys never leave your browser.'],
+  ];
   return (
-    <section data-nm-theme="light" className="relative overflow-hidden bg-[#D9D9D9] py-20 lg:py-28">
-      <div className="mx-auto grid max-w-[1180px] items-center gap-10 px-5 lg:grid-cols-3">
-        <Reveal>
-          <h2 className="nm-h text-[32px] font-medium leading-[1.12] tracking-[-0.02em] text-[#202221] sm:text-[40px]">NullCash cracks the oldest problem on-chain.</h2>
-          <p className="mt-5 text-[17px] uppercase leading-[1.5] text-[#202221]/80">Private money on a public ledger, with every move proven, not just hidden.</p>
-        </Reveal>
-        <Reveal delay={80}><img src={IMG('ring_portal')} alt="Coins and records falling into the NullCash ring" className="nm-float-slow mx-auto w-full max-w-[380px]" draggable="false" /></Reveal>
-        <Reveal delay={160} className="lg:text-right">
-          <h3 className="nm-h text-[26px] font-medium leading-[1.15] text-[#202221] sm:text-[30px]">Shield once,</h3>
-          <p className="mt-2 text-[19px] leading-[1.45] text-[#202221]/80">and every move after that<br className="hidden lg:block" /> happens behind the wall.</p>
-          <h3 className="nm-h mt-8 text-[26px] font-medium leading-[1.15] text-[#202221] sm:text-[30px]">Same wallet, zero hoops,</h3>
-          <p className="mt-2 text-[19px] leading-[1.45] text-[#202221]/80">your usual flow,<br className="hidden lg:block" /> just off the record.</p>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-const CARDS = [
-  ['icon_browser_key', 'Keys are born in your browser and never leave it.'],
-  ['icon_shield_coin', 'One signature seals any SPL token.'],
-  ['icon_bolt', 'Relayers pay the gas, so private moves need no pop-ups.'],
-  ['icon_route', 'Exit to any chain with no wallet link.'],
-  ['icon_vault', 'Fully non-custodial. Only your proof moves your notes.'],
-];
-function Features() {
-  return (
-    <section id="features" data-nm-theme="dark" className="bg-[#202221] py-24 text-[#D9D9D9] lg:py-28">
-      <div className="mx-auto max-w-[1180px] px-5">
-        <Reveal>
-          <h2 className="nm-h text-[44px] font-semibold leading-[1.02] tracking-[-0.03em] sm:text-[68px]">Your ledger was an open book.</h2>
-          <p className="nm-h mt-1 text-[44px] font-semibold leading-[1.05] tracking-[-0.03em] text-[#B9C1CC] sm:text-[68px]"><span className="nm-chev">&gt;&gt;&gt;</span> Close it.</p>
-        </Reveal>
-        <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {CARDS.map(([img, t], i) => (
-            <Reveal key={img} delay={i * 60}>
-              <div className="nm-card group flex h-full min-h-[250px] flex-col rounded-[10px] bg-[#D9D9D9] p-4 text-[#202221]" data-testid={`feature-card-${i}`}>
-                <img src={IMG(img)} alt="" className="mx-auto h-[130px] w-auto object-contain transition-transform duration-500 group-hover:-translate-y-1.5" draggable="false" />
-                <p className="mt-auto pt-6 text-[16px] font-medium leading-[1.2]">{t}</p>
-              </div>
-            </Reveal>
+    <div className="vz vz-dialog-bg" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }} data-testid="why-dialog">
+      <div role="dialog" aria-modal="true" aria-labelledby="why-title" className="vz-glass relative w-[min(760px,100%)] p-8 sm:p-10" style={{ background: 'var(--vz-glass)' }}>
+        <button type="button" onClick={onClose} aria-label="Close" className="absolute right-4 top-4 h-9 w-9 rounded-full border border-[var(--vz-edge)] text-[18px] text-[var(--vz-dim)] hover:text-white" data-testid="why-close">&times;</button>
+        <p className="vz-eyebrow">The point of Vaulz zk</p>
+        <h2 id="why-title" className="vz-h2 mt-5 !text-[44px] sm:!text-[56px]">Privacy is room<br /><span className="vz-serif">to be yourself.</span></h2>
+        <p className="mt-5 max-w-[520px] text-[14px] leading-[1.6] text-[var(--vz-dim)]">An open blockchain shouldn&rsquo;t mean an open book. Vaulz zk brings private balances, payments and swaps into one place.</p>
+        <div className="mt-8 grid gap-6 sm:grid-cols-3">
+          {P.map(([i, h, t]) => (
+            <div key={h}><VzIcon name={i} size={22} className="text-[var(--vz-dim)]" /><h3 className="mt-3 text-[16px] tracking-[-.03em]">{h}</h3><p className="mt-2 text-[12px] leading-[1.6] text-[var(--vz-muted)]">{t}</p></div>
           ))}
         </div>
-
-        <div className="mt-24">
-          <Reveal>
-            <div className="flex items-end justify-between gap-4 border-b border-[#D9D9D9]/25 pb-5">
-              <h3 className="nm-h text-[30px] font-semibold leading-[1.05] tracking-[-0.02em] text-white sm:text-[44px]">Three doors out of the spotlight.</h3>
-              <span className="hidden font-mono text-[12px] uppercase tracking-[.16em] text-[#D9D9D9]/45 sm:block">vault · route · intent</span>
-            </div>
-          </Reveal>
-          {PRODUCTS.map((p, i) => (
-            <Reveal key={p.key} delay={i * 60}>
-              <a href={p.href} data-testid={`pillar-${p.key}`}
-                className="nm-row group grid gap-5 border-b border-[#D9D9D9]/25 py-8 md:grid-cols-[90px_1.1fr_1.4fr_auto] md:items-start">
-                <span className="font-mono text-[44px] font-bold leading-none text-[#D9D9D9]/25 transition-colors duration-300 group-hover:text-[#B9C1CC]">0{i + 1}</span>
-                <span>
-                  <span className="inline-block rounded-[6px] border border-[#B9C1CC]/70 px-2 py-0.5 font-mono text-[11px] uppercase tracking-[.14em] text-[#B9C1CC]">{p.tag}</span>
-                  <span className="nm-h mt-3 block text-[26px] font-semibold leading-[1.1] text-white sm:text-[30px]">{p.title}</span>
-                </span>
-                <span>
-                  <span className="block text-[17px] leading-[1.5] text-[#D9D9D9]/75 md:pt-9">{p.body}</span>
-                </span>
-                <span className="inline-flex items-center gap-2 self-center whitespace-nowrap rounded-[10px] border border-[#D9D9D9]/40 px-4 py-2.5 text-[14px] font-semibold transition-all duration-300 group-hover:border-[#B9C1CC] group-hover:bg-[#B9C1CC] group-hover:text-[#202221]">{p.cta}<ArrowUpRight className="h-4 w-4" /></span>
-              </a>
-            </Reveal>
-          ))}
-        </div>
+        <p className="mt-8 border-t border-[var(--vz-hair)] pt-5 text-[11px] leading-[1.6] text-[var(--vz-faint)]">Privacy has boundaries. Deposits are on-chain, and recipients can see the payments they receive. Odd amounts and instant in-and-out timing make you easier to spot.</p>
       </div>
-    </section>
+    </div>
   );
 }
 
-function Flow() {
+function SectionHead({ eyebrow, a, b, children }) {
   return (
-    <section id="flow" data-nm-theme="light" className="bg-[#D9D9D9] py-24 lg:py-28">
-      <div className="mx-auto grid max-w-[1180px] gap-12 px-5 lg:grid-cols-[1fr_1.35fr]">
-        <Reveal>
-          <div className="lg:sticky lg:top-28">
-            <Kicker>How it works</Kicker>
-            <h2 className="nm-h mt-5 text-[38px] font-semibold leading-[1.05] tracking-[-0.03em] text-[#202221] sm:text-[54px]">Walk in seen. Walk out unseen.</h2>
-            <p className="mt-4 max-w-[400px] text-[16px] leading-[1.6] text-[#202221]/70">Only the first and last step are public.</p>
-          </div>
-        </Reveal>
-        <ol className="relative space-y-3 border-l-2 border-dashed border-[#202221]/35 pl-6">
-          {JOURNEY.map((s, i) => (
-            <Reveal key={s.t} delay={i * 60}>
-              <li className={`relative rounded-[12px] p-5 ${s.tone === 'dark' ? 'bg-[#202221] text-[#D9D9D9]' : 'border border-[#202221]/60'}`} data-testid={`flow-step-${i}`}>
-                <span className={`absolute -left-[37px] top-5 grid h-6 w-6 place-items-center rounded-full border-2 border-[#202221] text-[11px] font-bold ${s.tone === 'dark' ? 'bg-[#B9C1CC] text-[#202221]' : 'bg-[#D9D9D9] text-[#202221]'}`}>{i + 1}</span>
-                <span className="flex items-center justify-between gap-3">
-                  <span className={`nm-h text-[21px] font-semibold ${s.tone === 'dark' ? 'text-white' : 'text-[#202221]'}`}>{s.t}</span>
-                  <span className={`font-mono text-[10.5px] uppercase tracking-[.14em] ${s.tone === 'dark' ? 'text-[#B9C1CC]' : 'text-[#202221]/55'}`}>{s.tone === 'dark' ? 'off the record' : 'on the record'}</span>
-                </span>
-                <p className={`mt-2 text-[15px] leading-[1.6] ${s.tone === 'dark' ? 'text-[#D9D9D9]/75' : 'text-[#202221]/75'}`}>{s.d}</p>
-              </li>
-            </Reveal>
-          ))}
-        </ol>
-      </div>
-    </section>
-  );
-}
-
-function RealZk() {
-  return (
-    <section id="zk" data-nm-theme="dark" className="bg-[#202221] py-24 text-[#D9D9D9] lg:py-28">
-      <div className="mx-auto max-w-[1180px] px-5">
-        <div className="grid items-center gap-8 lg:grid-cols-[1.4fr_1fr]">
-          <Reveal>
-            <Kicker dark>Real zero-knowledge</Kicker>
-            <h2 className="nm-h mt-5 text-[38px] font-semibold leading-[1.05] tracking-[-0.03em] sm:text-[56px]">Hiding is easy.<br /><span className="text-[#B9C1CC]">Proving is the point.</span></h2>
-            <p className="mt-5 max-w-[620px] text-[17px] leading-[1.6] text-[#D9D9D9]/70">Others blur the trail. NullCash proves every move.</p>
-          </Reveal>
-          <Reveal delay={80}><img src={IMG('icon_proof')} alt="Sealed proof" className="nm-float-slow mx-auto w-[220px] lg:ml-auto lg:mr-0" draggable="false" /></Reveal>
-        </div>
-
-        <div className="mt-12 overflow-hidden rounded-[12px] border border-[#D9D9D9]/20">
-          {METHODS.map((z, i) => (
-            <div key={z.k} className={`grid gap-2 px-5 py-5 sm:grid-cols-[200px_1fr_auto] sm:items-center ${i ? 'border-t border-[#D9D9D9]/15' : ''} ${z.zk ? 'bg-[#B9C1CC] text-[#202221]' : ''}`} data-testid={`zk-system-${i}`}>
-              <span className="nm-h text-[20px] font-semibold">{z.k}</span>
-              <span className={`text-[15px] leading-[1.5] ${z.zk ? 'text-[#202221]/85' : 'text-[#D9D9D9]/75'}`}><b className="font-semibold">{z.line}</b> {z.verdict}</span>
-              <span className={`inline-flex w-fit items-center gap-1.5 rounded-[8px] px-2.5 py-1 font-mono text-[11px] uppercase tracking-[.12em] ${z.zk ? 'bg-[#202221] text-[#B9C1CC]' : 'border border-[#D9D9D9]/25 text-[#D9D9D9]/60'}`}>{z.zk ? <><Check className="h-3.5 w-3.5" />proof</> : <><XIcon className="h-3.5 w-3.5" />no proof</>}</span>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-10 grid gap-6 lg:grid-cols-2">
-          <Reveal>
-            <div className="h-full rounded-[12px] border border-[#D9D9D9]/20 p-6">
-              <div className="font-mono text-[11px] uppercase tracking-[.16em] text-[#D9D9D9]/50">Life of a proof</div>
-              <ol className="mt-4 space-y-2" data-testid="zk-pipeline">
-                {PIPE.map((s, i) => (
-                  <li key={s} className="flex items-center gap-3 font-mono text-[13.5px]">
-                    <span className={`grid h-7 w-7 place-items-center rounded-[7px] text-[12px] ${i === 2 ? 'bg-[#B9C1CC] text-[#202221]' : 'border border-[#D9D9D9]/30'}`}>{i + 1}</span>{s}
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </Reveal>
-          <Reveal delay={60}>
-            <div className="h-full rounded-[12px] bg-[#D9D9D9] p-6 text-[#202221]">
-              <div className="font-mono text-[11px] uppercase tracking-[.16em] text-[#202221]/55">What a proof swears to</div>
-              <ul className="mt-4 space-y-3">
-                {CLAIMS.map((x) => <li key={x} className="flex gap-3 text-[15.5px] font-medium leading-[1.45]"><Check className="mt-0.5 h-4 w-4 shrink-0" />{x}</li>)}
-              </ul>
-            </div>
-          </Reveal>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Tech() {
-  return (
-    <section id="tech" data-nm-theme="light" className="bg-[#D9D9D9] py-24 lg:py-28">
-      <div className="mx-auto max-w-[1180px] px-5">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <Reveal>
-            <Kicker>Docs</Kicker>
-            <h2 className="nm-h mt-5 text-[38px] font-semibold leading-[1.05] tracking-[-0.03em] text-[#202221] sm:text-[56px]">Read the manual.</h2>
-            <p className="mt-3 max-w-[560px] text-[16.5px] leading-[1.6] text-[#202221]/75">The full story lives in the docs.</p>
-          </Reveal>
-          <a href="/docs" data-testid="docs-open" className="nm-lime inline-flex h-12 items-center gap-2 rounded-[10px] px-5 text-[15px] font-semibold text-[#202221]"><BookOpen className="h-4 w-4" />Open the docs</a>
-        </div>
-        <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {DOC_GROUPS.map((g, i) => (
-            <Reveal key={g.id} delay={i * 60}>
-              <div className="flex h-full flex-col rounded-[12px] border border-[#202221]/70 p-5" data-testid={`docs-group-${g.id}`}>
-                <span className="font-mono text-[12px] text-[#202221]/50">0{i + 1}</span>
-                <h3 className="nm-h mt-2 text-[20px] font-semibold text-[#202221]">{g.title}</h3>
-                <ul className="mt-4 space-y-1.5">
-                  {g.pages.map((p) => (
-                    <li key={p.id}><a href={`/docs#${p.id}`} className="group inline-flex items-center gap-1.5 text-[14.5px] text-[#202221]/75 hover:text-[#202221]">{p.title}<ArrowUpRight className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100" /></a></li>
-                  ))}
-                </ul>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-
-        <Reveal>
-          <div className="mt-14" id="privacy">
-            <h3 className="nm-h text-[26px] font-semibold text-[#202221] sm:text-[32px]">The tech, in one line each.</h3>
-            <div className="mt-5 grid gap-px overflow-hidden rounded-[12px] border border-[#202221]/70 bg-[#202221]/70 sm:grid-cols-2 lg:grid-cols-3" data-testid="tech-grid">
-              {TECH.map(([k, v]) => (
-                <div key={k} className="group bg-[#D9D9D9] p-5 transition-colors duration-300 hover:bg-[#202221]">
-                  <div className="font-mono text-[13px] font-bold text-[#202221] transition-colors group-hover:text-[#B9C1CC]">{k}</div>
-                  <div className="mt-2 text-[15px] leading-[1.45] text-[#202221]/75 transition-colors group-hover:text-[#D9D9D9]">{v}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-function Fees() {
-  const [open, setOpen] = useState(false);
-  return (
-    <section id="fees" data-nm-theme="light" className="bg-[#D9D9D9] pb-24">
-      <div className="mx-auto max-w-[1180px] px-5">
-        <Reveal>
-          <div className="rounded-[14px] border border-[#202221]/70">
-            <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} data-testid="fees-toggle"
-              className="flex w-full items-center justify-between gap-4 px-5 py-5 text-left sm:px-7">
-              <span>
-                <span className="nm-h block text-[24px] font-semibold text-[#202221] sm:text-[30px]">Fees</span>
-                <span className="mt-1 block text-[14.5px] text-[#202221]/70">Private sends are free. Everything else is shown before you confirm.</span>
-              </span>
-              <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-[10px] border border-[#202221] transition-transform duration-300 ${open ? 'rotate-180 bg-[#202221] text-[#B9C1CC]' : ''}`}><ChevronDown className="h-5 w-5" /></span>
-            </button>
-            <div className={`grid transition-all duration-500 ease-[cubic-bezier(.2,.9,.25,1)] ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-              <div className="overflow-hidden">
-                <div className="overflow-x-auto px-5 pb-6 sm:px-7">
-                  <table className="w-full min-w-[560px] text-left text-[14.5px]" data-testid="fees-table">
-                    <thead><tr className="border-b border-[#202221]/30 text-[#202221]/60">
-                      <th className="py-3 pr-4 font-medium">Action</th><th className="py-3 pr-4 font-medium">Protocol fee</th><th className="py-3 font-medium">Network cost</th>
-                    </tr></thead>
-                    <tbody>{PRICES.map((f) => (
-                      <tr key={f[0]} className="border-b border-[#202221]/12 last:border-0">
-                        <td className="py-3 pr-4 font-semibold text-[#202221]">{f[0]}</td>
-                        <td className="py-3 pr-4 text-[#202221]">{f[1]}</td>
-                        <td className="py-3 text-[#202221]/70">{f[2]}</td>
-                      </tr>
-                    ))}</tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-function Faq() {
-  return (
-    <section id="faq" data-nm-theme="light" className="bg-[#D9D9D9] pb-24">
-      <div className="mx-auto grid max-w-[1180px] gap-10 px-5 lg:grid-cols-[1fr_1.6fr]">
-        <Reveal>
-          <Kicker>FAQ</Kicker>
-          <h2 className="nm-h mt-5 text-[38px] font-semibold leading-[1.05] tracking-[-0.03em] text-[#202221] sm:text-[52px]">Fair questions.</h2>
-          <p className="mt-4 max-w-[360px] text-[16px] leading-[1.6] text-[#202221]/70">Short answers. Long ones are in the docs.</p>
-        </Reveal>
-        <Accordion type="single" collapsible className="space-y-2">
-          {QA.map(([q, a], i) => (
-            <AccordionItem key={q} value={`f${i}`} className="rounded-[12px] border border-[#202221]/60 px-5 data-[state=open]:bg-[#e4e4e4]" data-testid={`faq-${i}`}>
-              <AccordionTrigger className="py-4 text-left text-[16px] font-semibold text-[#202221] hover:no-underline">{q}</AccordionTrigger>
-              <AccordionContent className="pb-4 text-[15px] leading-[1.65] text-[#202221]/75">{a}</AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </div>
-    </section>
-  );
-}
-
-function FinalCta() {
-  return (
-    <section data-nm-theme="dark" className="overflow-hidden bg-[#202221] text-[#D9D9D9]">
-      <div className="mx-auto grid max-w-[1180px] items-center gap-8 px-5 py-20 lg:min-h-[90svh] lg:grid-cols-2">
-        <Reveal className="order-2 lg:order-1"><img src={IMG('eye_closed')} alt="An eye zipped shut" className="nm-float-slow mx-auto w-full max-w-[520px]" draggable="false" /></Reveal>
-        <Reveal delay={80} className="order-1 lg:order-2">
-          <h2 className="nm-h text-[30px] font-medium leading-[1.12] tracking-[-0.02em] text-white sm:text-[42px]">Being watched shouldn&apos;t be the price of using money.</h2>
-          <p className="mt-6 text-[17px] leading-[1.65] text-[#D9D9D9]/75 sm:text-[20px]">Privacy isn&apos;t hiding. It&apos;s choosing who gets to look.</p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            <a href={APP} data-testid="cta-launch" className="nm-lime flex h-12 items-center justify-center gap-2 rounded-[10px] text-[16px] font-semibold text-[#202221]">Open the app <ArrowRight className="h-4 w-4" /></a>
-            <a href={X_URL} target="_blank" rel="noopener noreferrer" data-testid="cta-x"
-              className="flex h-12 items-center justify-center gap-2 rounded-[10px] border border-[#D9D9D9] text-[16px] transition-all duration-300 hover:border-[#B9C1CC] hover:bg-[#B9C1CC] hover:text-[#202221]"><XGlyph /> Follow @usenullcash</a>
-          </div>
-        </Reveal>
-      </div>
-      <footer className="border-t border-white/10" data-testid="landing-footer">
-        <div className="mx-auto flex max-w-[1180px] flex-col items-center justify-between gap-4 px-5 py-8 text-[13px] text-[#D9D9D9]/55 sm:flex-row">
-          <Logo light size={24} />
-          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-            {LINKS.map(([l, h]) => <a key={h} href={h} className="hover:text-white">{l}</a>)}
-            <a href={X_URL} target="_blank" rel="noopener noreferrer" className="hover:text-white">X</a>
-          </div>
-          <span>© {new Date().getFullYear()} NullCash</span>
-        </div>
-      </footer>
-    </section>
+    <div className="max-w-[760px]">
+      <p className="vz-eyebrow">{eyebrow}</p>
+      <h2 className="vz-h2 mt-6">{a}<br /><span className="vz-serif">{b}</span></h2>
+      {children && <p className="mt-6 max-w-[520px] text-[14px] leading-[1.65] text-[var(--vz-dim)]">{children}</p>}
+    </div>
   );
 }
 
 export default function LandingPage() {
-  const stats = useLiveStats();
-  useEffect(() => { document.title = 'NullCash · Hit send. Leave no trace.'; }, []);
+  const s = useLiveStats();
+  const [why, setWhy] = useState(false);
+  const [unseen, setUnseen] = useState(false);
+  useEffect(() => {
+    document.title = 'Vaulz zk — Everywhere. Unseen.';
+    if (window.location.hash) {
+      const t = document.getElementById(window.location.hash.slice(1));
+      if (t) setTimeout(() => t.scrollIntoView(), 80);
+    }
+  }, []);
+
   return (
-    <div className="nm-landing min-h-screen overflow-x-hidden bg-[#D9D9D9] text-[#202221]" data-testid="landing-page">
-      <NmNav />
-      <main>
-        <Hero stats={stats} />
-        <Statement />
-        <Features />
-        <Flow />
-        <RealZk />
-        <Tech />
-        <Fees />
-        <Faq />
-        <FinalCta />
+    <div className="vz relative min-h-screen overflow-x-hidden bg-[#090d10]" data-testid="landing-page">
+      <div className="vz-world" aria-hidden="true"><div className="vz-orb" style={{ opacity: unseen ? 0.15 : undefined }} /></div>
+      <NmNav onWhy={() => setWhy(true)} />
+
+      {/* ---------------- stage ---------------- */}
+      <main id="top" className="relative z-[1] mx-auto flex min-h-[100svh] w-[91.6%] flex-col pt-[96px]">
+        <div className="grid flex-1 items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+          <div className="vz-rise py-6">
+            <a href="/app#private-route" className="vz-glass mb-8 inline-flex max-w-full items-center gap-3 py-3 pl-3 pr-5 text-[var(--vz-fg)] no-underline transition hover:bg-white/[.06]" data-testid="hero-callout">
+              <span className="rounded-[4px] bg-[#d9a85a] px-2 py-[3px] text-[8px] font-semibold tracking-[.12em] text-[#090d10]">NEW</span>
+              <VzIcon name="route" size={20} className="shrink-0 text-[var(--vz-dim)]" />
+              <span className="min-w-0"><b className="block text-[13px] font-medium tracking-[-.01em]">Private route: Solana to any chain</b><span className="block text-[11px] text-[var(--vz-dim)]">No wallet to connect. One deposit, delivered anywhere.</span></span>
+              <span aria-hidden="true" className="ml-2 text-[var(--vz-dim)]">&#8599;</span>
+            </a>
+            <p className="vz-eyebrow mb-6">The art of leaving no trace</p>
+            <h1 className="vz-h1" data-testid="hero-title">Hit send.<br /><span className="vz-serif">Leave no trace.</span></h1>
+            <p className="mt-6 text-[13px] leading-[1.7] text-[var(--vz-dim)]">Private balances. Private payments. Private swaps.<br />For a chain that sees too much.</p>
+            <div className="mt-7 flex flex-wrap items-center gap-4">
+              <a href="/app?do=shield" className="vz-enter" data-testid="hero-launch">Enter Vaulz <span aria-hidden="true">&#8599;</span></a>
+              <a href="/app#private-route" className="vz-link text-[12px] underline decoration-[var(--vz-edge)] underline-offset-4" data-testid="hero-swap">Swap without a wallet</a>
+            </div>
+          </div>
+          <div className="vz-rise flex justify-center pb-6 lg:pb-0" style={{ animationDelay: '.15s' }}>
+            <ChainView s={s} unseen={unseen} setUnseen={setUnseen} />
+          </div>
+        </div>
+
+        <div className="vz-rise pb-10" style={{ animationDelay: '.25s' }}>
+          <div className="mb-3 flex items-center justify-between">
+            <span className="vz-eyebrow">Your world. Your business.</span>
+            <a href="/docs" className="vz-link text-[10px] underline underline-offset-2" data-testid="launcher-docs">Read the docs <span aria-hidden="true">&#8599;</span></a>
+          </div>
+          <ul className="vz-glass vz-launcher" data-testid="launcher">
+            {TOOLS.map((t, i) => (
+              <li key={t.id}>
+                <a href={t.href} data-testid={`tool-${t.id}`}>
+                  <VzIcon name={t.ico} size={20} className="mt-0.5 shrink-0 text-[var(--vz-dim)]" />
+                  <div className="min-w-0"><b>{t.label}</b><small>{t.d}</small></div>
+                  <span className="vz-arrow" aria-hidden="true">&#8599;</span>
+                  <span className="vz-num">{String(i + 1).padStart(2, '0')}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </main>
+
+      {/* ---------------- how it works ---------------- */}
+      <section id="flow" className="relative z-[1] mx-auto w-[91.6%] border-t border-[var(--vz-hair)] py-24" data-testid="section-flow">
+        <SectionHead eyebrow="How it works" a="In publicly." b="Out unseen.">One signature seals your coins into notes. From there everything moves by proof, and you leave whenever, wherever you like.</SectionHead>
+        <ol className="vz-glass mt-12 grid sm:grid-cols-5">
+          {JOURNEY.map((j, i) => (
+            <li key={j.t} className="border-b border-[var(--vz-hair)] p-6 last:border-0 sm:border-b-0 sm:border-r">
+              <span className="vz-mono text-[9px] text-[var(--vz-faint)]">{String(i + 1).padStart(2, '0')}</span>
+              <h3 className="mt-6 text-[22px] tracking-[-.045em]">{j.t}</h3>
+              <p className="mt-2 text-[12px] leading-[1.55] text-[var(--vz-dim)]">{j.d}</p>
+              <span className={`mt-5 inline-block text-[9px] uppercase tracking-[.22em] ${j.tone === 'dark' ? 'text-[var(--vz-ok)]' : 'text-[var(--vz-faint)]'}`}>{j.tone === 'dark' ? 'unseen' : 'public'}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* ---------------- privacy model ---------------- */}
+      <section id="zk" className="relative z-[1] mx-auto w-[91.6%] border-t border-[var(--vz-hair)] py-24" data-testid="section-zk">
+        <SectionHead eyebrow="Privacy model" a="Less trust." b="More proof.">Hiding data is not the same as proving it. Vaulz zk proves every move is valid without showing who made it.</SectionHead>
+        <div className="mt-12 grid gap-4 lg:grid-cols-3">
+          {METHODS.map((m) => (
+            <div key={m.k} className={`vz-glass p-6 ${m.zk ? '!border-[var(--vz-edge-hi)]' : ''}`}>
+              <p className="vz-eyebrow">{m.k}</p>
+              <p className="mt-4 text-[20px] tracking-[-.04em]">{m.line}</p>
+              <p className={`vz-serif mt-3 text-[18px] ${m.zk ? 'text-[var(--vz-strong)]' : 'text-[var(--vz-faint)]'}`}>{m.verdict}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="vz-glass p-6">
+            <p className="vz-eyebrow">Every proof says</p>
+            <ul className="mt-4 space-y-3">{CLAIMS.map((c) => (
+              <li key={c} className="flex gap-3 text-[14px] text-[var(--vz-fg)]"><span className="mt-[9px] h-px w-3 shrink-0 bg-[var(--vz-dim)]" />{c}</li>
+            ))}</ul>
+          </div>
+          <div className="vz-glass p-6">
+            <p className="vz-eyebrow">Under the hood</p>
+            <dl className="mt-4 divide-y divide-[var(--vz-hair)]">{TECH.map(([k, v]) => (
+              <div key={k} className="grid gap-1 py-2.5 sm:grid-cols-[190px_1fr]"><dt className="text-[13px] text-[var(--vz-strong)]">{k}</dt><dd className="text-[12px] text-[var(--vz-dim)]">{v}</dd></div>
+            ))}</dl>
+          </div>
+        </div>
+        <div className="vz-glass mt-4 overflow-x-auto" data-testid="landing-visibility">
+          <table className="vz-table w-full min-w-[640px] text-left text-[13px]">
+            <thead><tr className="border-b border-[var(--vz-hair)]"><th className="px-5 py-4">Action</th><th className="px-5 py-4">The chain sees</th><th className="px-5 py-4">Stays unseen</th></tr></thead>
+            <tbody>{SEEN.map((v) => (
+              <tr key={v.a} className="border-b border-[var(--vz-hair)] last:border-0"><td className="px-5 py-3.5 text-[var(--vz-strong)]">{v.a}</td><td className="px-5 py-3.5 text-[var(--vz-dim)]">{v.out}</td><td className="px-5 py-3.5">{v.inn}</td></tr>
+            ))}</tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* ---------------- fees ---------------- */}
+      <section id="fees" className="relative z-[1] mx-auto w-[91.6%] border-t border-[var(--vz-hair)] py-24" data-testid="section-fees">
+        <SectionHead eyebrow="Fees" a="Shown before" b="you confirm.">Private payments carry no protocol fee. Everything else is a small, fixed share, always visible up front.</SectionHead>
+        <div className="vz-glass mt-12 overflow-x-auto">
+          <table className="vz-table w-full min-w-[560px] text-left text-[13px]" data-testid="fees-table">
+            <thead><tr className="border-b border-[var(--vz-hair)]"><th className="px-5 py-4">Action</th><th className="px-5 py-4">Protocol fee</th><th className="px-5 py-4">Network cost</th></tr></thead>
+            <tbody>{PRICES.map((f) => (
+              <tr key={f[0]} className="border-b border-[var(--vz-hair)] last:border-0"><td className="px-5 py-3.5 text-[var(--vz-strong)]">{f[0]}</td><td className="px-5 py-3.5">{f[1]}</td><td className="px-5 py-3.5 text-[var(--vz-dim)]">{f[2]}</td></tr>
+            ))}</tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* ---------------- faq ---------------- */}
+      <section id="faq" className="relative z-[1] mx-auto w-[91.6%] border-t border-[var(--vz-hair)] py-24" data-testid="section-faq">
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,.8fr)_minmax(0,1.2fr)]">
+          <SectionHead eyebrow="Questions" a="Asked," b="answered." />
+          <Accordion type="single" collapsible className="vz-glass px-6">
+            {QA.map(([q, a], i) => (
+              <AccordionItem key={q} value={`q${i}`} className="border-[var(--vz-hair)] last:border-0">
+                <AccordionTrigger className="py-5 text-left text-[15px] font-normal tracking-[-.02em] text-[var(--vz-fg)] hover:no-underline" data-testid={`faq-${i}`}>{q}</AccordionTrigger>
+                <AccordionContent className="pb-5 text-[13px] leading-[1.65] text-[var(--vz-dim)]">{a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </section>
+
+      {/* ---------------- closing ---------------- */}
+      <section className="relative z-[1] mx-auto w-[91.6%] border-t border-[var(--vz-hair)] py-24 text-center" data-testid="section-cta">
+        <p className="vz-eyebrow">Ready when you are</p>
+        <h2 className="vz-h2 mt-6">Everywhere.<br /><span className="vz-serif">Unseen.</span></h2>
+        <div className="mt-9 flex flex-wrap justify-center gap-4">
+          <a href="/app?do=shield" className="vz-enter" data-testid="cta-launch">Enter Vaulz <span aria-hidden="true">&#8599;</span></a>
+          <a href="/docs" className="vz-pill !h-[46px]" data-testid="cta-docs">Read the docs</a>
+        </div>
+      </section>
+
+      <footer className="relative z-[1] mx-auto flex w-[91.6%] flex-col items-center justify-between gap-4 border-t border-[var(--vz-hair)] py-8 text-[11px] text-[var(--vz-faint)] sm:flex-row" data-testid="site-footer">
+        <Logo size={20} />
+        <nav className="flex flex-wrap justify-center gap-5">
+          <a className="vz-link" href="/app">App</a><a className="vz-link" href="/vault">Vault</a><a className="vz-link" href="/docs">Docs</a>
+          <a className="vz-link" href="#flow">How it works</a><a className="vz-link" href="#fees">Fees</a><a className="vz-link" href="#faq">FAQ</a>
+        </nav>
+        <span>&copy; {new Date().getFullYear()} Vaulz zk</span>
+      </footer>
+
+      {why && <WhyDialog onClose={() => setWhy(false)} />}
     </div>
   );
 }

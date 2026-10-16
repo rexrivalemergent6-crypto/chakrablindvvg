@@ -1,79 +1,91 @@
-import React, { useEffect, useState } from 'react';
-import { ArrowRight, BookOpen, Radio, Workflow, Receipt, ShieldCheck, HelpCircle, Repeat, Lock } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import Logo from './Logo';
-import CaChip from './CaChip';
+import { TOOLS, VzIcon } from './vzTools';
 
-export const X_URL = 'https://x.com/usenullcash';
+const MAIN = ['shield', 'send', 'swap', 'bridge', 'private-route', 'privacy-swap'];
+const MORE = ['track', 'receive', 'withdraw', 'history', 'addresses', 'keys', 'chain'];
+const byId = (id) => TOOLS.find((t) => t.id === id);
 
-export const XGlyph = ({ s = 15 }) => (
-  <svg viewBox="0 0 24 24" width={s} height={s} fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
-);
-
-const ITEMS = [
-  { l: 'Now live: open the app', h: '/app', I: Radio, id: 'live' },
-  { l: 'Docs', h: '/docs', I: BookOpen, id: 'docs' },
-  { l: 'Vault · quantum-safe SOL', h: '/vault', I: Lock, id: 'vault' },
-  { l: 'Meet the community', h: X_URL, I: null, id: 'x', ext: true },
-  { l: 'How it works', h: '/#flow', I: Workflow, id: 'flow' },
-  { l: 'Swap without a wallet', h: '/app#private-route', I: Repeat, id: 'swap' },
-  { l: 'Fees', h: '/docs#fees', I: Receipt, id: 'fees' },
-  { l: 'Privacy model', h: '/docs#visibility', I: ShieldCheck, id: 'privacy' },
-  { l: 'FAQ', h: '/#faq', I: HelpCircle, id: 'faq' },
-];
-
-export default function NmNav() {
-  const [dark, setDark] = useState(false);
-  const [open, setOpen] = useState(false);
+// Vaulz zk top bar: wordmark, tool links with icons, More, Vault, Docs, Why privacy, Launch.
+export default function NmNav({ active = '', onWhy }) {
+  const [more, setMore] = useState(false);
+  const [menu, setMenu] = useState(false);
+  const ref = useRef(null);
   useEffect(() => {
-    const f = () => {
-      const secs = Array.from(document.querySelectorAll('[data-nm-theme]'));
-      const hit = secs.find((s) => { const r = s.getBoundingClientRect(); return r.top <= 50 && r.bottom > 50; });
-      setDark(hit ? hit.dataset.nmTheme === 'dark' : false);
-    };
-    f(); window.addEventListener('scroll', f, { passive: true });
-    return () => window.removeEventListener('scroll', f);
+    const k = (e) => { if (e.key === 'Escape') { setMore(false); setMenu(false); } };
+    const c = (e) => { if (ref.current && !ref.current.contains(e.target)) setMore(false); };
+    window.addEventListener('keydown', k); document.addEventListener('mousedown', c);
+    return () => { window.removeEventListener('keydown', k); document.removeEventListener('mousedown', c); };
   }, []);
-  useEffect(() => {
-    if (!open) return undefined;
-    const k = (e) => { if (e.key === 'Escape') setOpen(false); };
-    window.addEventListener('keydown', k);
-    return () => window.removeEventListener('keydown', k);
-  }, [open]);
-  const d = dark && !open;
-  const line = d ? 'border-[#D9D9D9]/40' : 'border-[#202221]/70';
+  useEffect(() => { document.body.style.overflow = menu ? 'hidden' : ''; return () => { document.body.style.overflow = ''; }; }, [menu]);
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3 sm:px-6">
-      <div className={`mx-auto max-w-[1180px] overflow-hidden rounded-[14px] border backdrop-blur-md transition-colors duration-500 ${line} ${d ? 'bg-[#202221]/80 text-[#D9D9D9]' : 'bg-[#D9D9D9]/90 text-[#202221]'}`}>
-        <div className="flex h-[64px] items-center justify-between gap-3 px-3 sm:px-4">
-          <a href="/" data-testid="nav-logo" className="shrink-0"><Logo light={d} /></a>
-          <div className="flex min-w-0 items-center gap-2">
-            <CaChip line={line} />
-            <a href={X_URL} target="_blank" rel="noopener noreferrer" aria-label="NullCash on X" data-testid="nav-x"
-              className={`hidden h-10 w-10 place-items-center rounded-[10px] border transition hover:-translate-y-0.5 sm:grid ${line}`}><XGlyph /></a>
-            <button type="button" onClick={() => setOpen((v) => !v)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} data-testid="nav-menu"
-              className={`nm-burger relative grid h-10 w-10 place-items-center rounded-[10px] border ${line}`}>
-              <span className={`nm-bl ${open ? 'o1' : ''}`} /><span className={`nm-bl ${open ? 'o2' : ''}`} /><span className={`nm-bl ${open ? 'o3' : ''}`} />
+    <header className="vz fixed inset-x-0 top-0 z-50" data-testid="site-header"
+      style={{ background: 'linear-gradient(180deg,rgba(9,13,16,.9) 0%,rgba(9,13,16,.5) 70%,rgba(9,13,16,0) 100%)' }}>
+      <div className="mx-auto flex h-[76px] w-[91.6%] items-center gap-6">
+        <a href="/" className="shrink-0" data-testid="nav-logo"><Logo size={27} /></a>
+        <nav className="ml-6 hidden min-w-0 flex-1 items-center gap-1 xl:flex" data-testid="nav-tools">
+          {MAIN.map((id) => { const t = byId(id); return (
+            <a key={id} href={t.href} className={`vz-navlink ${active === id ? 'on' : ''}`} data-testid={`nav-${id}`}><VzIcon name={t.ico} />{t.label}</a>
+          ); })}
+          <div className="relative" ref={ref}>
+            <button type="button" className={`vz-navlink ${more ? 'on' : ''}`} onClick={() => setMore((v) => !v)} aria-expanded={more} data-testid="nav-more">
+              More <span aria-hidden="true" className={`text-[8px] transition-transform ${more ? 'rotate-180' : ''}`}>&#9660;</span>
             </button>
+            {more && (
+              <div className="vz-glass absolute left-0 top-[42px] w-[250px] p-1.5" style={{ background: 'var(--vz-glass)' }} data-testid="nav-more-menu">
+                {MORE.map((id) => { const t = byId(id); return (
+                  <a key={id} href={t.href} className="flex items-center gap-3 rounded-[4px] px-3 py-2.5 text-[13px] text-[var(--vz-fg)] transition hover:bg-white/[.06]" data-testid={`nav-more-${id}`}>
+                    <span className="grid h-7 w-7 place-items-center rounded-[6px] border border-[var(--vz-line)] text-[var(--vz-dim)]"><VzIcon name={t.ico} size={14} /></span>
+                    <span><span className="block">{t.label}</span><span className="block text-[11px] text-[var(--vz-faint)]">{t.d}</span></span>
+                  </a>
+                ); })}
+              </div>
+            )}
           </div>
-        </div>
-        <div className={`grid transition-all duration-500 ease-[cubic-bezier(.2,.9,.25,1)] ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>
-          <nav className="overflow-hidden" data-testid="nav-drawer" aria-hidden={!open}>
-            {ITEMS.map(({ l, h, I, id, ext }, i) => (
-              <a key={id} href={h} onClick={() => setOpen(false)} tabIndex={open ? 0 : -1} data-testid={`nav-item-${id}`}
-                {...(ext ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                style={{ transitionDelay: open ? `${i * 35}ms` : '0ms' }}
-                className={`group flex items-center gap-3 border-t border-[#202221]/70 px-4 py-3.5 text-[16px] transition-all duration-300 hover:bg-[#202221] hover:text-[#B9C1CC] ${open ? 'translate-x-0 opacity-100' : '-translate-x-2 opacity-0'}`}>
-                <span className="grid h-6 w-6 place-items-center">{I ? <I className="h-[19px] w-[19px]" strokeWidth={1.8} /> : <XGlyph s={17} />}</span>
-                <span className="flex-1">{l}</span>
-                <ArrowRight className="h-4 w-4 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
-              </a>
-            ))}
-            <div className="border-t border-[#202221]/70 p-3">
-              <a href="/app" data-testid="nav-launch" className="nm-lime flex h-12 items-center justify-center gap-2 rounded-[10px] text-[15px] font-semibold text-[#202221]">Open app <ArrowRight className="h-4 w-4" /></a>
-            </div>
-          </nav>
+          <a href="/vault" className={`vz-navlink ${active === 'vault' ? 'on' : ''}`} data-testid="nav-vault"><VzIcon name="lock" />Vault
+            <span className="ml-1 rounded-[4px] bg-[#d9a85a] px-1.5 py-[1px] text-[8px] font-semibold tracking-[.08em] text-[#090d10]">NEW</span></a>
+          <a href="/docs" className={`vz-navlink ${active === 'docs' ? 'on' : ''}`} data-testid="nav-docs">Docs</a>
+        </nav>
+        <div className="ml-auto flex items-center gap-2 sm:gap-5">
+          {onWhy && (
+            <span className="hidden md:block"><button type="button" onClick={onWhy} className="vz-navlink" data-testid="nav-why">Why privacy <span aria-hidden="true">&#8599;</span></button></span>
+          )}
+          <a href="/app" className="vz-pill whitespace-nowrap" data-testid="nav-launch">Launch app</a>
+          <span className="xl:hidden"><button type="button" className="vz-pill w-[38px] !px-0" onClick={() => setMenu(true)} aria-label="Open menu" data-testid="nav-menu-open">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 8h16M4 16h16" /></svg>
+          </button></span>
         </div>
       </div>
+
+      {menu && (
+        <div className="vz fixed inset-0 z-[60] overflow-y-auto bg-[#090d10]/[.97] backdrop-blur-xl" data-testid="nav-menu">
+          <div className="mx-auto flex h-[76px] w-[91.6%] items-center justify-between">
+            <Logo size={27} />
+            <button type="button" className="vz-pill w-[38px] !px-0" onClick={() => setMenu(false)} aria-label="Close menu" data-testid="nav-menu-close">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
+          </div>
+          <div className="mx-auto w-[91.6%] pb-10">
+            <p className="vz-eyebrow mb-4 mt-4">Your private toolkit</p>
+            <ul className="vz-glass vz-launcher" style={{ gridTemplateColumns: 'repeat(2,minmax(0,1fr))' }}>
+              {TOOLS.map((t, i) => (
+                <li key={t.id}><a href={t.href} data-testid={`menu-${t.id}`} onClick={() => setMenu(false)}>
+                  <VzIcon name={t.ico} size={20} className="mt-0.5 shrink-0 text-[var(--vz-dim)]" />
+                  <div><b>{t.label}</b></div>
+                  <span className="vz-num">{String(i + 1).padStart(2, '0')}</span>
+                </a></li>
+              ))}
+            </ul>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a href="/docs" className="vz-pill" onClick={() => setMenu(false)}>Docs</a>
+              <a href="/#flow" className="vz-pill" onClick={() => setMenu(false)}>How it works</a>
+              <a href="/#fees" className="vz-pill" onClick={() => setMenu(false)}>Fees</a>
+              <a href="/#faq" className="vz-pill" onClick={() => setMenu(false)}>FAQ</a>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

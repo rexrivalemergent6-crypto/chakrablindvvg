@@ -36,7 +36,7 @@ TARGETS = {
     "indexer": "https://indexer.veilit.xyz",
     "relayer": "https://relayer.veilit.xyz",
     "rpc": "https://rpc.veilit.xyz",
-    # quantum-safe Solana vault (on-chain program) mirrored & re-branded as NullCash Vault
+    # quantum-safe Solana vault (on-chain program) mirrored & re-branded as Vaulz zk Vault
     "vault": "https://www.omnizec.com",
 }
 # order matters: subdomains before apex
@@ -386,7 +386,7 @@ def strip_project_token_json(text: str) -> str:
 
 
 def null_prefix_js(text: str) -> str:
-    """Show NullCash prefixes (nullsk2…, nullvk1…, null2…) for keys/addresses.
+    """Show Vaulz zk prefixes (nullsk2…, nullvk1…, null2…) for keys/addresses.
     Same length as the upstream prefixes so all slicing/decoding stays intact;
     checksum domain strings ("veil/recovery", "veil/address") are untouched, and
     parsers accept BOTH prefixes so older keys/addresses keep working."""
@@ -446,7 +446,7 @@ def app_js_fixes(text: str) -> str:
 def _vault_rewrite(text: str, origin: str, ctype: str) -> str:
     """Isolated rewrite for the omnizec Solana vault SPA (kept fully separate from the
     veilit app/site logic so nothing else can break). Makes the mirror run on our own
-    domain, reuse our mainnet RPC proxy, and wear NullCash branding."""
+    domain, reuse our mainnet RPC proxy, and wear Vaulz zk branding."""
     p = f"{PREFIX}/vault"
     # route the app's RPC through our existing Solana-mainnet proxy
     text = text.replace("/api/rpc", f"{PREFIX}/rpc")
@@ -459,13 +459,13 @@ def _vault_rewrite(text: str, origin: str, ctype: str) -> str:
         text = re.sub(r'((?:href|src|poster|data-src|content)=["\'])/(?!/|api/bifrost/)',
                       rf"\1{p}/", text)
         text = re.sub(r'url\((["\']?)/(?!/|api/bifrost/)', rf"url(\1{p}/", text)
-        # NullCash branding + icons
-        text = re.sub(r"<title>[^<]*</title>", "<title>NullCash Vault · quantum-safe SOL</title>", text, count=1)
+        # Vaulz zk branding + icons
+        text = re.sub(r"<title>[^<]*</title>", "<title>Vaulz zk Vault · quantum-safe SOL</title>", text, count=1)
         text = re.sub(r'<link\b[^>]*rel=["\'](?:shortcut )?(?:icon|apple-touch-icon(?:-precomposed)?|mask-icon)["\'][^>]*>', "", text)
         text = re.sub(r'<link\b[^>]*rel=["\']manifest["\'][^>]*>', "", text)
-        icons = (f'<link rel="icon" href="{PREFIX}/_brand/favicon-32.png?v=5" sizes="32x32" type="image/png"/>'
-                 f'<link rel="apple-touch-icon" href="{PREFIX}/_brand/apple-touch-icon.png?v=5" sizes="180x180"/>'
-                 '<meta name="apple-mobile-web-app-title" content="NullCash Vault"/>'
+        icons = (f'<link rel="icon" href="{PREFIX}/_brand/favicon-32.png?v=6" sizes="32x32" type="image/png"/>'
+                 f'<link rel="apple-touch-icon" href="{PREFIX}/_brand/apple-touch-icon.png?v=6" sizes="180x180"/>'
+                 '<meta name="apple-mobile-web-app-title" content="Vaulz zk Vault"/>'
                  '<style id="nc-vault-skin">'
                  'header.site-header,footer.site-footer,nav.tool-tabs,.unseen-world,.presence-control,.back-link,.workspace-heading{display:none!important}'
                  'html,body{background:#f4f6ee!important}'
@@ -485,8 +485,8 @@ def _vault_rewrite(text: str, origin: str, ctype: str) -> str:
         text = re.sub(r'function\((\w+)\)\{return`/`\+\1\}',
                       lambda m: 'function(%s){return`%s/`+%s}' % (m.group(1), p, m.group(1)), text)
         # light, safe visible-string branding only (no identifier/logic changes)
-        text = text.replace("omni vault", "NullCash vault")
-        text = text.replace("omni included", "NullCash included").replace("© OMNI", "© NullCash").replace("© 2026 OMNI", "© 2026 NullCash")
+        text = text.replace("omni vault", "Vaulz zk vault")
+        text = text.replace("omni included", "Vaulz zk included").replace("© OMNI", "© Vaulz zk").replace("© 2026 OMNI", "© 2026 Vaulz zk")
         text = text.replace("The vault opens only on ", "This vault opens only on ")
     return text
 
@@ -524,8 +524,8 @@ def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
             text = text.replace("'veil-theme'", "'cb-theme'").replace('"veil-theme"', '"cb-theme"')
             if "text/html" in ctype:
                 text = text.replace(f"{p}/veil-mark.webp", f"{PREFIX}/_brand/mark.png")
-                text = text.replace("Pulling the veil over", "Pulling the nullcash over")
-                text = re.sub(r"(?<![A-Za-z$])Veil(?![A-Za-z])", "NullCash", text)
+                text = text.replace("Pulling the veil over", "Pulling the vaulz over")
+                text = re.sub(r"(?<![A-Za-z$])Veil(?![A-Za-z])", "Vaulz zk", text)
                 # document-relative urls (page URL is shown as /shield/... so resolve them here)
                 text = re.sub(r'((?:\s)(?:src|poster|srcset)=["\'])(?![/#?"\']|[a-zA-Z][a-zA-Z0-9+.-]*:)',
                               rf"\1{p}/", text)
@@ -534,14 +534,14 @@ def rewrite_text(text: str, target: str, origin: str, ctype: str) -> str:
             # next flight / json payload references
             text = re.sub(r'(?<![A-Za-z0-9_/.])/_next/', f"{p}/_next/", text)
             if "text/html" in ctype:
-                # NullCash icons with fresh (cache-busted) URLs so browsers / iOS drop any old icon
+                # Vaulz zk icons with fresh (cache-busted) URLs so browsers / iOS drop any old icon
                 text = re.sub(r'<link\b[^>]*rel=["\'](?:shortcut )?(?:icon|apple-touch-icon(?:-precomposed)?|mask-icon)["\'][^>]*>', "", text)
                 text = re.sub(r'<link\b[^>]*rel=["\']manifest["\'][^>]*>', "", text)
-                icons = (f'<link rel="icon" href="{PREFIX}/_brand/favicon-32.png?v=5" sizes="32x32" type="image/png"/>'
-                         f'<link rel="icon" href="{PREFIX}/_brand/favicon-192.png?v=5" sizes="192x192" type="image/png"/>'
-                         f'<link rel="apple-touch-icon" href="{PREFIX}/_brand/apple-touch-icon.png?v=5" sizes="180x180"/>'
-                         f'<link rel="manifest" href="{PREFIX}/_brand/manifest.webmanifest?v=5"/>'
-                         '<meta name="apple-mobile-web-app-title" content="NullCash"/>')
+                icons = (f'<link rel="icon" href="{PREFIX}/_brand/favicon-32.png?v=6" sizes="32x32" type="image/png"/>'
+                         f'<link rel="icon" href="{PREFIX}/_brand/favicon-192.png?v=6" sizes="192x192" type="image/png"/>'
+                         f'<link rel="apple-touch-icon" href="{PREFIX}/_brand/apple-touch-icon.png?v=6" sizes="180x180"/>'
+                         f'<link rel="manifest" href="{PREFIX}/_brand/manifest.webmanifest?v=6"/>'
+                         '<meta name="apple-mobile-web-app-title" content="Vaulz zk"/>')
                 inj = _inject_script(target) + icons
                 if "<head>" in text:
                     text = text.replace("<head>", "<head>" + inj, 1)

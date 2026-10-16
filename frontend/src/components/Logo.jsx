@@ -1,21 +1,16 @@
 import React from 'react';
 
-// NullCash brand: concentric-ring mark + wordmark.
-export default function Logo({ size = 30, withWord = true, light = false }) {
+// Vaulz zk wordmark: DM Sans "vaulz" + Instrument Serif italic "zk".
+export default function Logo({ size = 30, className = '' }) {
   return (
-    <div className="flex items-center gap-2.5 group" data-testid="nullcash-logo">
-      <img
-        src={light ? '/brand/nullcash-mark-white.png?v=1' : '/brand/nullcash-mark-black.png?v=1'}
-        alt="NullCash"
-        style={{ height: size, width: size }}
-        className="shrink-0 object-contain transition-transform duration-500 group-hover:rotate-[-25deg]"
-        draggable="false"
-      />
-      {withWord && (
-        <span className={`nc-display text-[21px] font-bold tracking-[-0.04em] ${light ? 'text-white' : 'text-[#14160f]'}`}>
-          Null<span className="font-medium">Cash</span>
-        </span>
-      )}
-    </div>
+    <span
+      className={`vz inline-flex items-baseline select-none text-[var(--vz-strong)] ${className}`}
+      style={{ fontSize: size, lineHeight: 1 }}
+      data-testid="vaulz-logo"
+      aria-label="Vaulz zk"
+    >
+      <span style={{ fontWeight: 500, letterSpacing: '-0.075em' }}>vaulz</span>
+      <span className="vz-serif" style={{ fontSize: '1.08em', marginLeft: '0.16em', letterSpacing: '-0.03em', color: 'var(--vz-dim)' }}>zk</span>
+    </span>
   );
 }

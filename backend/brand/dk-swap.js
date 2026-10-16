@@ -1,4 +1,4 @@
-/* NullCash in-app swaps: Private route, Privacy swap, Track (design-only reference: square-card swap UI)
+/* Vaulz zk in-app swaps: Private route, Privacy swap, Track (design-only reference: square-card swap UI)
    Live data via /api/ds. */
 (function () {
   if (window.__dkSwap) return;
@@ -157,7 +157,7 @@
 
   /* ---------------- CSS ---------------- */
   var CSS = [
-    "#dk-view,#dk-modal{--dk-bg:var(--nc-card,#fff);--dk-box:var(--s-field,#f3f4ee);--dk-line:var(--line,rgba(0,0,0,.08));--dk-line2:var(--line-2,rgba(0,0,0,.14));--dk-mut:var(--fg-3,#8a8d80);--dk-fg:var(--fg,#14160f);--dk-fg2:var(--fg-2,#4a4d42);--dk-acc:var(--veil-hi,#2b2f33);--dk-grad:linear-gradient(180deg,#c5ccd6,#afb7c3);--dk-ease:cubic-bezier(.2,.9,.25,1);--dk-spring:cubic-bezier(.34,1.56,.64,1)}",
+    "#dk-view,#dk-modal{--dk-bg:var(--nc-card,#fff);--dk-box:var(--s-field,#f3f4ee);--dk-line:var(--line,rgba(0,0,0,.08));--dk-line2:var(--line-2,rgba(0,0,0,.14));--dk-mut:var(--fg-3,#8a8d80);--dk-fg:var(--fg,#14160f);--dk-fg2:var(--fg-2,#4a4d42);--dk-acc:var(--veil-hi,#2b2f33);--dk-grad:#e3e8e8;--dk-ease:cubic-bezier(.2,.9,.25,1);--dk-spring:cubic-bezier(.34,1.56,.64,1)}",
     "html:not(.dk-on) #dk-view{display:none!important}",
     "#dk-intro{max-width:760px;margin:0 auto 18px;padding:16px 20px;border-radius:20px;border:1px solid var(--nc-card-line,rgba(0,0,0,.07));background:var(--nc-card,#fff);box-shadow:var(--nc-shadow,none);color:var(--fg-2);font-family:var(--f-sans);animation:ncRise .4s cubic-bezier(.2,.9,.25,1) both}",
     "#dk-intro .dk-intro-k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--veil-hi);font-weight:700}",
@@ -168,7 +168,7 @@
     ".dk-nw{font-style:normal;margin-left:auto;font-size:8.5px;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:999px;background:var(--veil-wash);color:var(--veil-hi);white-space:nowrap}",
     ".dk-x{display:inline-flex;align-items:center;justify-content:center;margin-right:6px;text-decoration:none}",
     "@media (max-width:520px){#dk-intro{margin:0 0 14px;padding:14px;cursor:pointer}#dk-intro:not(.open) p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}#dk-intro:not(.open) .dk-intro-t{display:none}#dk-intro:not(.open)::after{content:'Tap to read more';display:block;margin-top:6px;font-size:11px;color:var(--fg-3)}}",
-    "html.dk-on main.main>:not(#dk-view):not(#dk-intro):not(#nc-foot){display:none!important}",
+    "html.dk-on main.main>:not(#dk-view):not(#dk-intro):not(#nc-foot):not(#vz-head):not(#vz-tabs){display:none!important}",
     "html.dk-on .nav-i.on:not(.dk-nav){background:transparent!important;color:var(--fg-2)!important}",
     "html.dk-on nav.tabbar .nav-i.on:not(.dk-nav),html.dk-on nav.tabbar .nav-i.on:not(.dk-nav) *{color:var(--fg-3)!important;background:transparent!important;box-shadow:none!important}",
     "nav.tabbar:has(.dk-nav){grid-template-columns:repeat(6,minmax(0,1fr))!important}",
@@ -176,20 +176,20 @@
     "#dk-view{display:block;padding:6px 0 40px;font-family:var(--f-sans);color:var(--dk-fg)}",
     "#dk-view *,#dk-modal *{box-sizing:border-box}",
     ".dk-wrap{width:min(470px,100%);margin:0 auto}",
-    ".dk-seg{position:relative;display:flex;justify-content:center;gap:4px;margin:0 auto 18px;padding:4px;width:max-content;max-width:100%;border-radius:999px;background:var(--dk-box);border:1px solid var(--dk-line)}",
+    ".dk-seg{position:relative;display:flex;justify-content:flex-start;gap:4px;margin:0 0 18px;padding:4px;width:max-content;max-width:100%;border-radius:999px;background:var(--dk-box);border:1px solid var(--dk-line)}",
     ".dk-seg button{all:unset;cursor:pointer;padding:8px 16px;border-radius:999px;color:var(--dk-mut);font-size:14px;font-weight:500;display:inline-flex;gap:7px;align-items:center;white-space:nowrap;transition:background .25s var(--dk-ease),color .2s,transform .22s var(--dk-spring)}",
     ".dk-seg button:hover{color:var(--dk-fg)}.dk-seg button:active{transform:scale(.95)}",
-    ".dk-seg button.on{background:var(--dk-bg);color:var(--dk-fg);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px -6px rgba(0,0,0,.18)}",
+    ".dk-seg button.on{background:var(--dk-fg);color:#090d10;font-weight:500;box-shadow:none}",
     ".dk-cl{width:16px;height:16px;border-radius:50%;background:var(--veil-wash);color:var(--veil-hi);font-size:10px;display:inline-flex;align-items:center;justify-content:center}",
     ".dk-ci{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:10px 12px;border-radius:14px;border:1px solid var(--dk-line);background:var(--dk-box)}",
-    ".dk-ci-ic{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:9px;background:#14160f;color:#f4f6ee}",
+    ".dk-ci-ic{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:6px;background:rgba(255,255,255,.06);border:1px solid var(--dk-line2);color:var(--dk-fg)}",
     ".dk-ci b{display:block;font-size:13px;font-weight:650}.dk-ci small{display:block;margin-top:2px;font-size:11.5px;color:var(--dk-mut);line-height:1.35}",
-    ".dk-card{background:var(--dk-bg);border:1px solid var(--nc-card-line,var(--dk-line));border-radius:26px;padding:18px 18px 22px;box-shadow:var(--nc-shadow,none);animation:ncRise .45s var(--dk-ease) both}",
+    ".dk-card{background:var(--dk-bg);border:1px solid var(--nc-card-line,var(--dk-line));border-radius:6px;padding:22px 22px 24px;-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);box-shadow:var(--nc-shadow,none);animation:ncRise .45s var(--dk-ease) both}",
     ".dk-lbl{color:var(--dk-mut);font-size:13.5px;font-weight:500;margin:8px 6px 8px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}",
     ".dk-lbl small{font-size:12px;color:var(--dk-mut)}",
-    ".dk-row{display:flex;gap:6px;padding:6px;border-radius:20px;background:var(--dk-box);border:1px solid var(--dk-line);transition:border-color .2s,box-shadow .2s}",
+    ".dk-row{display:flex;gap:6px;padding:6px;border-radius:6px;background:var(--dk-box);border:1px solid var(--dk-line);transition:border-color .2s,box-shadow .2s}",
     ".dk-row:focus-within{border-color:rgba(90,98,110,.55);box-shadow:0 0 0 4px rgba(160,170,184,.2)}",
-    ".dk-tok{all:unset;box-sizing:border-box;cursor:pointer;width:140px;height:62px;flex:none;background:var(--dk-bg);border:1px solid var(--dk-line);border-radius:15px;padding:10px 12px;display:flex;align-items:center;gap:10px;transition:transform .22s var(--dk-spring),border-color .2s,box-shadow .2s}",
+    ".dk-tok{all:unset;box-sizing:border-box;cursor:pointer;width:140px;height:62px;flex:none;background:var(--dk-bg);border:1px solid var(--dk-line);border-radius:30px;padding:10px 12px;display:flex;align-items:center;gap:10px;transition:transform .22s var(--dk-spring),border-color .2s,box-shadow .2s}",
     ".dk-tok:hover{border-color:var(--dk-line2);box-shadow:0 4px 14px -8px rgba(0,0,0,.25)}.dk-tok:active{transform:scale(.97)}",
     ".dk-tok .t{min-width:0;display:flex;flex-direction:column}",
     ".dk-sym{font-weight:600;font-size:15.5px;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:78px}",
@@ -200,10 +200,10 @@
     ".dk-ico .lt{border-radius:50%;background:var(--veil-wash);color:var(--veil-hi);align-items:center;justify-content:center;font-size:12px;font-weight:700;display:flex}",
     ".dk-ico img.b{position:absolute;right:-3px;bottom:-3px;width:13px;height:13px;border-radius:50%;border:1.5px solid var(--dk-bg);background:var(--dk-bg)}",
     ".dk-amt{flex:1;min-width:0;min-height:62px;height:auto;background:transparent;border:0;padding:6px 10px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end;gap:2px;cursor:text;text-align:right}",
-    ".dk-amt input{all:unset;font-family:var(--f-sans);font-weight:600;font-size:24px;line-height:1.2;width:100%;color:var(--dk-fg);text-align:right;letter-spacing:-.02em}",
+    ".dk-amt input{all:unset;font-family:var(--f-sans);font-weight:400;font-size:28px;line-height:1.2;width:100%;color:var(--dk-fg);text-align:right;letter-spacing:-.02em}",
     ".dk-amt input::placeholder{color:var(--dk-mut)}",
     ".dk-amt .u{font-size:12px;line-height:1.35;padding-bottom:1px;color:var(--dk-mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}",
-    ".dk-out{font-weight:600;font-size:24px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}",
+    ".dk-out{font-weight:400;font-size:28px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}",
     ".dk-out.z{color:var(--dk-mut)}",
     ".dk-flip{all:unset;width:38px;height:38px;margin:-8px auto -8px;position:relative;z-index:2;border-radius:13px;border:4px solid var(--dk-bg);background:var(--dk-box);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dk-fg2);transition:transform .35s var(--dk-spring),background .2s}",
     ".dk-flip:hover{transform:rotate(180deg);background:var(--veil-wash);color:var(--veil-hi)}",
@@ -221,7 +221,7 @@
     ".dk-r.on{border-color:rgba(90,98,110,.7);background:var(--veil-wash);box-shadow:0 0 0 3px rgba(160,170,184,.18)}",
     ".dk-r .k{font-size:12px;color:var(--dk-mut)}",
     ".dk-r .v{font-weight:600;font-size:14px}",
-    ".dk-r .best{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#1a2200;background:var(--dk-grad);padding:2px 8px;border-radius:999px;margin-left:8px}",
+    ".dk-r .best{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#090d10;background:var(--dk-grad);padding:2px 8px;border-radius:999px;margin-left:8px}",
     ".dk-fees{margin-top:8px;border:1px solid var(--dk-line);background:var(--dk-box);border-radius:14px;padding:6px 12px}",
     ".dk-fees>div{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:12.5px;border-top:1px dashed var(--dk-line)}",
     ".dk-fees>div:first-child{border-top:0}",
@@ -232,8 +232,8 @@
     ".dk-meta b{display:block;font-weight:500;font-size:11px;color:var(--dk-mut)}",
     ".dk-meta span{font-weight:600;font-size:12.5px}",
     ".dk-lim{font-size:12px;color:var(--dk-mut);margin:8px 8px 0}",
-    ".dk-cta{all:unset;box-sizing:border-box;width:100%;margin-top:20px;height:52px;border-radius:999px;font-size:16px;font-weight:600;color:#1a2200;cursor:pointer;background:var(--dk-grad);box-shadow:0 8px 24px -8px rgba(40,44,50,.85),inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .22s var(--dk-spring),box-shadow .25s,opacity .2s,filter .2s}",
-    ".dk-cta:hover{transform:translateY(-1px);box-shadow:0 12px 30px -8px rgba(40,44,50,.95),inset 0 1px 0 rgba(255,255,255,.6)}",
+    ".dk-cta{all:unset;box-sizing:border-box;width:100%;margin-top:20px;height:52px;border-radius:999px;font-size:16px;font-weight:600;color:#090d10;cursor:pointer;background:var(--dk-grad);box-shadow:none;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .22s var(--dk-spring),box-shadow .25s,opacity .2s,filter .2s}",
+    ".dk-cta:hover{transform:translateY(-1px);background:#f2f5f5}",
     ".dk-cta:active{transform:scale(.975)}",
     ".dk-cta[disabled]{opacity:.45;cursor:not-allowed;filter:grayscale(.35);transform:none;box-shadow:none}",
     ".dk-err{margin-top:14px;border-radius:14px;border:1px solid rgba(200,48,74,.25);background:rgba(200,48,74,.07);color:var(--bad,#c8304a);padding:10px 12px;font-size:13px;animation:ncRise .3s var(--dk-ease) both}",
@@ -242,8 +242,8 @@
     ".dk-live i{width:7px;height:7px;border-radius:50%;background:#8c95a3}",
     ".dk-spin{width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:dks .8s linear infinite;display:inline-block}",
     "@keyframes dks{to{transform:rotate(360deg)}}",
-    "#dk-modal{position:fixed;inset:0;z-index:90;background:rgba(18,19,21,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:grid;place-items:center;font-family:var(--f-sans);color:var(--dk-fg);animation:ncFade .2s ease both}",
-    ".dk-mb{width:min(440px,calc(100% - 24px));max-height:calc(100vh - 52px);background:var(--dk-bg);border:1px solid var(--nc-card-line,var(--dk-line));border-radius:26px;padding:20px;display:flex;flex-direction:column;box-shadow:0 30px 80px -24px rgba(20,22,25,.45);animation:ncPop .32s var(--dk-spring) both}",
+    "#dk-modal{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:grid;place-items:center;font-family:var(--f-sans);color:var(--dk-fg);animation:ncFade .2s ease both}",
+    ".dk-mb{width:min(440px,calc(100% - 24px));max-height:calc(100vh - 52px);background:var(--vz-glass,#10171c);border:1px solid var(--nc-card-line,var(--dk-line));border-radius:8px;padding:20px;display:flex;flex-direction:column;box-shadow:0 30px 80px -24px rgba(20,22,25,.45);animation:ncPop .32s var(--dk-spring) both}",
     ".dk-mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}",
     ".dk-mh h3{margin:0;font-size:18px;font-weight:600}",
     ".dk-mb .dk-x{all:unset;cursor:pointer;color:var(--dk-fg2);display:flex;width:32px;height:32px;border-radius:10px;align-items:center;justify-content:center;transition:background .2s,transform .2s var(--dk-spring)}",
@@ -284,7 +284,7 @@
     ".dk-steps{margin-top:18px;display:grid;gap:10px}",
     ".dk-step{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--dk-mut);transition:color .3s}",
     ".dk-step i{width:26px;height:26px;border-radius:50%;border:1px solid var(--dk-line2);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:11px;font-weight:600;transition:background .3s,border-color .3s}",
-    ".dk-step.done{color:var(--dk-fg)} .dk-step.done i{background:var(--dk-grad);border-color:transparent;color:#1a2200}",
+    ".dk-step.done{color:var(--dk-fg)} .dk-step.done i{background:var(--dk-grad);border-color:transparent;color:#090d10}",
     ".dk-step.act{color:var(--dk-fg)} .dk-step.act i{border-color:#8c95a3;animation:ncPulse 1.8s ease-in-out infinite}",
     ".dk-badge{display:inline-flex;align-items:center;gap:6px;border-radius:999px;background:var(--veil-wash);padding:4px 10px;font-size:12px;font-weight:600;color:var(--veil-hi);margin-top:10px}",
     ".dk-recent{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:10px;border:1px solid var(--dk-line);background:var(--dk-box);border-radius:16px;padding:11px 12px;margin-top:6px;font-size:13px;transition:border-color .2s,transform .2s var(--dk-spring)}",
@@ -292,7 +292,7 @@
     ".dk-recent code{margin-left:auto;font-family:var(--f-mono,monospace);font-size:11px;color:var(--dk-mut);max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
     "@media (max-width:520px){.dk-tok{width:122px}#dk-view{padding:4px 0 150px}.dk-card{padding:14px 12px 18px;border-radius:22px}"
     + ".dk-seg{width:100%}.dk-seg button{flex:1;justify-content:center;padding:8px 6px;font-size:13px;gap:5px}.dk-seg button svg{display:none}}",
-    /* ---- token picker: Portal-style arrangement (NullCash light) ---- */
+    /* ---- token picker: Portal-style arrangement (Vaulz zk light) ---- */
     ".dk-pk{width:min(480px,calc(100% - 24px));padding:14px 20px 0;max-height:calc(100vh - 40px);overflow:hidden}",
     ".dk-pk .dk-grab{width:44px;height:5px;border-radius:9px;background:var(--dk-line2);margin:0 auto 6px;display:none}",
     ".dk-pk .dk-mh{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;margin:4px 0 16px}",
@@ -306,7 +306,7 @@
     ".dk-pk .dk-chain{height:76px;border-radius:14px;gap:7px;font-size:12.5px;padding:0 3px;border:1.5px solid var(--dk-line2);color:var(--dk-fg2)}",
     ".dk-pk .dk-chain img,.dk-pk .dk-chain .dk-cl{width:30px;height:30px;border-radius:50%;flex:none}",
     ".dk-pk .dk-chain .dk-cl{display:flex;align-items:center;justify-content:center;background:var(--dk-box);font-weight:700;font-size:13px;color:var(--dk-fg2)}",
-    ".dk-pk .dk-chain .dk-more{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--dk-fg2);color:#fff;font-size:20px;line-height:1;font-weight:400}",
+    ".dk-pk .dk-chain .dk-more{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--dk-fg2);color:#090d10;font-size:20px;line-height:1;font-weight:400}",
     ".dk-pk .dk-chain.on{background:var(--veil-wash);border-color:rgba(90,98,110,.75);color:var(--dk-fg);font-weight:600;box-shadow:0 0 0 3px rgba(160,170,184,.22)}",
     ".dk-pk .dk-chain.fixed{cursor:default}",
     ".dk-pk .dk-srch{border-radius:999px;padding:13px 18px;border:1.5px solid var(--dk-line2);background:transparent;gap:12px}",
@@ -448,7 +448,7 @@
     var pct = cost != null && usdIn > 0 ? cost / usdIn * 100 : null;
     var total = cost != null ? usd(cost) + ' (' + pct.toFixed(2) + '%)' : '—';
     if (near) {
-      if (sel.appFeeBps != null) rows.push(['NullCash fee (' + (sel.appFeeBps / 100).toFixed(2) + '%)', fmt(amt * sel.appFeeBps / 10000) + ' ' + sIn + (S.send && S.send.price ? ' · ' + usd(amt * sel.appFeeBps / 10000 * S.send.price) : '')]);
+      if (sel.appFeeBps != null) rows.push(['Vaulz zk fee (' + (sel.appFeeBps / 100).toFixed(2) + '%)', fmt(amt * sel.appFeeBps / 10000) + ' ' + sIn + (S.send && S.send.price ? ' · ' + usd(amt * sel.appFeeBps / 10000 * S.send.price) : '')]);
       if (sel.withdrawFee != null) rows.push(['Network fee (' + ((S.recv && S.recv.chainName) || 'destination') + ')', fmt(sel.withdrawFee) + ' ' + sOut + (sel.pOut ? ' · ' + usd(sel.withdrawFee * sel.pOut) : '')]);
       if (sel.minOut != null) rows.push(['Minimum received', fmt(sel.minOut) + ' ' + sOut]);
       if (sel.refundFee != null) rows.push(['Refund fee (only if it fails)', fmt(sel.refundFee) + ' ' + sIn]);
@@ -1001,7 +1001,7 @@
     if (o.feeRows && o.feeRows.length) h += '<div class="dk-fees dk-fees-m" data-testid="dk-order-fees"><div class="dk-fees-h"><span>Total fees</span><b>' + esc(o.feeTotal || '—') + '</b></div>' + o.feeRows.map(function (r) { return '<div><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>'; }).join('') + '</div>';
     h += '<div class="dk-cf"><div class="k">Receiving address</div><div class="v"><code>' + esc(o.addressTo || '') + '</code></div></div>';
     h += '<button class="dk-cta" data-act="trackorder" data-id="' + esc(o.id) + '" data-testid="dk-order-track">Track this order</button>';
-    h += '<div class="dk-note">Live order via NullCash. Only deposit from your own Solana wallet.</div></div>';
+    h += '<div class="dk-note">Live order via Vaulz zk. Only deposit from your own Solana wallet.</div></div>';
     m.innerHTML = h;
     clearInterval(orderTimer);
     if (o.expires) {
@@ -1137,7 +1137,7 @@
     }).join('');
     function stat(k, v, t) { return '<div class="ch-stat"><span>$ ' + k + '</span><b' + (t ? ' title="' + esc(t) + '"' : '') + '>' + v + '</b></div>'; }
     return '<div class="ch-page" data-testid="chain-page"><div class="ch-term">' +
-      '<div class="ch-bar"><i></i><i></i><i></i><span>root@nullcash:~$ watch --chain solana-mainnet<em>_</em></span>' +
+      '<div class="ch-bar"><i></i><i></i><i></i><span>root@vaulz:~$ watch --chain solana-mainnet<em>_</em></span>' +
       '<span class="ch-live ' + (live ? 'on' : 'off') + '" data-testid="chain-live">' + (live ? '\u25cf LIVE \u00b7 sync <b class="ch-next">4s</b>' : (CH.err ? '\u25cb RECONNECTING' : '\u25cb CONNECTING')) + '</span></div>' +
       '<div class="ch-stats" data-testid="chain-stats">' +
         stat('merkle_root', st.root ? esc(chShort(st.root, 6)) : '\u2026', st.root) +
@@ -1244,7 +1244,7 @@
       var compact = nav.classList.contains('tabbar');
       var btns = Array.prototype.slice.call(nav.querySelectorAll('.nav-i'));
       if (!btns.length) return;
-      var anchor = btns.find(function (b) { return /(NullCash)Swap|^Bridge$|Bridge out|^Swap$/.test(b.textContent.trim()); }) ||
+      var anchor = btns.find(function (b) { return /(Vaulz zk|Vaulz zk)Swap|^Bridge$|Bridge out|^Swap$/.test(b.textContent.trim()); }) ||
                    btns.find(function (b) { return /Trade/.test(b.textContent); }) || btns[btns.length - 1];
       var frag = document.createDocumentFragment();
       (compact ? [{ k: 'any', label: 'Swaps', hash: 'private-route', icon: IC.route }] : NAV_ITEMS).forEach(function (it) {
@@ -1280,7 +1280,7 @@
   }, 400);
 
   // visual-only ordering of the sidebar / bottom bar (CSS order; React keeps its DOM untouched)
-  var SIDE_ORDER = ['home|overview', 'shield|vanish', 'send|pay', 'swap|trade', 'bridge|bridge out|nullcashswap',
+  var SIDE_ORDER = ['home|overview', 'shield|vanish', 'send|pay', 'swap|trade', 'bridge|bridge out|vaulz zkswap|nullcashswap',
     'dk:private', 'dk:privacy', 'dk:track', 'history|activity', 'dk:chain', 'nc:more',
     'receive|request', 'withdraw|cash out', 'earn|yield', 'addresses|burner addresses', 'invite|referrals', 'keys|vault & keys'];
   var TAB_ORDER = ['home|overview', 'dk:any', 'shield|vanish', 'swap|trade', 'send|pay', 'more'];
@@ -1297,17 +1297,17 @@
   }
 
   // ---- per-tab explainers (users always know what a tab does) ----
-  var X_URL = 'https://x.com/usenullcash';
+  var X_URL = '';
   var INTRO = {
-    'dk:private': ['Private route · no wallet needed', 'Swap from Solana to any chain without connecting a wallet. NullCash compares several multi-hop routes, you pick one and send a single deposit to a one-time address; the route converts and delivers to your destination address. Nothing links your Solana wallet to the receiving address beyond the route itself.', ['No wallet connection', 'Multi-hop routing', 'One deposit']],
+    'dk:private': ['Private route · no wallet needed', 'Swap from Solana to any chain without connecting a wallet. Vaulz zk compares several multi-hop routes, you pick one and send a single deposit to a one-time address; the route converts and delivers to your destination address. Nothing links your Solana wallet to the receiving address beyond the route itself.', ['No wallet connection', 'Multi-hop routing', 'One deposit']],
     'dk:privacy': ['Privacy swap · no wallet needed', 'Intent-based confidential swap. You state what you want (send X, receive at least Y on chain Z); a competitive solver network fills it and settlement runs through confidential processing. Refunds return to your Solana refund address if the intent is not filled.', ['Solver competition', 'Confidential settlement', 'Auto refund']],
     'dk:track': ['Track order', 'Paste an order ID to see its live status, from waiting for deposit through confirmation, exchange and delivery. Orders created on this device are listed below.', ['Live status', 'Local order list']],
     'home': ['Home', 'Your private balance, recent activity and quick actions. Everything shown here is decrypted locally from your notes; nothing about it is readable on-chain.', ['Local decryption', 'Notes', 'No tracking']],
     'shield': ['Shield · ZK shielded deposit', 'Yes, this is real zero-knowledge. Shield moves public tokens from a Solana wallet into the shielded pool: the program stores a Poseidon commitment to (token, amount, owner key, blinding) as a leaf in a 2^26 Merkle tree. From then on the funds are notes only you can open. Every later spend is a Groth16 proof (BN254) that the note exists in the tree and that you hold its key, checked on-chain without revealing which note.', ['Groth16 / BN254', 'Poseidon Merkle tree', 'Nullifiers block double-spends']],
     'swap': ['Swap · private trade inside the pool', 'Trade one shielded token for another without leaving the pool. A proof spends your input note, the program routes the trade through on-chain liquidity and writes the output as a new note. Outside observers see a pool trade happen, not who made it or how big it was.', ['Proof-bound terms', 'Relayer pays gas', 'Output lands as a note']],
     'bridge': ['Bridge', 'Exit the shielded pool directly to another network. The proof binds the destination chain, address and minimum output, so a relayer cannot change where funds go.', ['Bound destination', 'Cross-chain exit', 'Relayer submitted']],
-    'send': ['Send · private transfer', 'Send to any NullCash address. Your note is spent by proof and a new note is encrypted to the recipient’s viewing key. On-chain: one nullifier and two new commitments. No sender, recipient or amount is revealed.', ['Encrypted to recipient', '0 public amounts', 'No wallet signature']],
-    'receive': ['Receive privately', 'Share your NullCash address or a payment link. Incoming notes are found by scanning with your viewing key locally; the address itself never appears on-chain.', ['Viewing key scan', 'Shareable address', 'Unlinkable receipts']],
+    'send': ['Send · private transfer', 'Send to any Vaulz zk address. Your note is spent by proof and a new note is encrypted to the recipient’s viewing key. On-chain: one nullifier and two new commitments. No sender, recipient or amount is revealed.', ['Encrypted to recipient', '0 public amounts', 'No wallet signature']],
+    'receive': ['Receive privately', 'Share your Vaulz zk address or a payment link. Incoming notes are found by scanning with your viewing key locally; the address itself never appears on-chain.', ['Viewing key scan', 'Shareable address', 'Unlinkable receipts']],
     'withdraw': ['Withdraw to Solana', 'Turn notes back into public tokens at any Solana address, ideally a fresh burner one. The amount and destination become public at exit, but the proof does not link them to the deposit that funded them.', ['Public exit', 'Use a burner address', 'Unlinkable to deposit']],
     'earn': ['Earn while shielded', 'Lend shielded balances into allow-listed on-chain vaults from inside the pool. Positions are held by the program and accounted to your notes, so your wallet never appears as the depositor.', ['Allow-listed vaults', 'Position as notes', 'Withdraw any time']],
     'history': ['History', 'Your own decrypted activity log. Only your device can read it; the chain only ever sees nullifiers and commitments.', ['Local only', 'Decrypted with your keys']],
@@ -1342,20 +1342,22 @@
     if (lastIntro !== k) { el.innerHTML = introHTML(k); el.setAttribute('data-tab', k); lastIntro = k; }
   }
   function ensureX() {
+    return;
     var tr = document.querySelector('header .top-right');
     if (tr && !tr.querySelector('.dk-x')) {
       var a = document.createElement('a');
       a.className = 'dk-x'; a.href = X_URL; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      a.setAttribute('aria-label', 'NullCash on X'); a.setAttribute('data-testid', 'dk-x-link');
+      a.setAttribute('aria-label', 'Vaulz zk on X'); a.setAttribute('data-testid', 'dk-x-link');
       a.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
       tr.insertBefore(a, tr.firstChild);
     }
   }
-  /* ---- NullCash: contract address chip in header (all app pages) ---- */
+  /* ---- Vaulz zk: contract address chip in header (all app pages) ---- */
   var NC_CA = '31GYUbJW5vjF1o7VM5SGP9Emj5WDBHb1cdcR8BM6pump';
   var CA_COPY = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>';
   var CA_OK = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>';
   function ensureCA() {
+    return;
     var tr = document.querySelector('header .top-right') || document.querySelector('header.site-top');
     if (!tr || tr.querySelector('.nc-ca')) return;
     var b = document.createElement('button'); b.type = 'button'; b.className = 'nc-ca';
@@ -1377,7 +1379,7 @@
     var x = tr.querySelector('.dk-x');
     tr.insertBefore(b, x || tr.firstChild);
   }
-  /* ---- NullCash: keep desktop top tabs clear of the header controls ---- */
+  /* ---- Vaulz zk: keep desktop top tabs clear of the header controls ---- */
   var OVF_ORDER = ['chain', 'history', 'bridge', 'track', 'send', 'privacy swap', 'shield', 'private route', 'swap'];
   function navKey(b) {
     var t = '';
@@ -1427,7 +1429,7 @@
     nav.classList.toggle('nc-tight', over());
     if (now.length !== was.length && document.getElementById('nc-more-pop')) closeMore();
   }
-  /* ---- NullCash: top-tab "More" menu (desktop) ---- */
+  /* ---- Vaulz zk: top-tab "More" menu (desktop) ---- */
   var MORE_OVF = { 'chain': 'Live pool terminal', 'history': 'Your local activity', 'bridge': 'Move funds across chains', 'track': 'Follow a swap order live',
     'send': 'Pay anyone privately', 'privacy swap': 'No wallet · shielded cross-chain', 'shield': 'Move tokens into the pool', 'private route': 'No wallet · best-rate cross-chain', 'swap': 'Trade inside the pool' };
   var MORE = { 'receive': 'Get paid to a private address', 'withdraw': 'Exit to any Solana address',
@@ -1488,10 +1490,10 @@
     mb.classList.toggle('on', anyOn || !!nav.querySelector('.nav-i.nc-ovf.on'));
   }
 
-  /* ---- NullCash: welcome tour (first visit) ---- */
+  /* ---- Vaulz zk: welcome tour (first visit) ---- */
   var TOUR_KEY = 'nc-tour-v1';
   var TOUR = [
-    ['Welcome to NullCash', 'Private money on Solana.', 'Shield your tokens into a zero-knowledge pool. Your balance and history become notes only you can read.', 'mark'],
+    ['Welcome to Vaulz zk', 'Private money on Solana.', 'Shield your tokens into a zero-knowledge pool. Your balance and history become notes only you can read.', 'mark'],
     ['Shield, send, swap', 'Everything happens inside the pool.', 'Pay anyone, trade tokens and earn yield with proofs instead of public transfers. Nobody sees who, what or how much.', '<path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>'],
     ['No wallet? No problem', 'Private route & Privacy swap.', 'Swap from Solana to any chain with one deposit to a one-time address. Track every order live.', '<path d="M7 7h11l-3-3M17 17H6l3 3"/>'],
     ['Your keys, your device', 'Nothing to reset, nothing to leak.', 'Keys are derived and encrypted locally. Back up your recovery key and you are in control.', '<circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M16 7l2 2M14 9l2 2"/>']
@@ -1520,16 +1522,16 @@
   }
   window.__ncTour = function () { showTour(true); };
 
-  /* ---- NullCash: footer ---- */
+  /* ---- Vaulz zk: footer ---- */
   function ensureFoot() {
     var main = document.querySelector('main.main'); if (!main) return;
     var f = document.getElementById('nc-foot');
     if (f && f.parentNode === main && main.lastElementChild === f) return;
     if (!f) {
       f = document.createElement('footer'); f.id = 'nc-foot'; f.setAttribute('data-testid', 'nc-footer');
-      f.innerHTML = '<span>© ' + new Date().getFullYear() + ' NullCash</span><nav>' +
+      f.innerHTML = '<span>© ' + new Date().getFullYear() + ' Vaulz zk</span><nav>' +
         '<a href="/#flow">How it works</a><a href="/#zk">Privacy model</a><a href="/docs">Docs</a><a href="/#fees">Fees</a>' +
-        '<a href="#" data-nc-tour="1">Take the tour</a><a href="' + X_URL + '" target="_blank" rel="noopener noreferrer">X</a></nav>';
+        '<a href="#" data-nc-tour="1">Take the tour</a><a href="/vault">Vault</a></nav>';
       f.querySelector('[data-nc-tour]').addEventListener('click', function (e) { e.preventDefault(); showTour(true); });
     }
     main.appendChild(f);
@@ -1541,7 +1543,7 @@
     if (off !== wb.classList.contains('nc-off')) wb.classList.toggle('nc-off', off);
     if (wb.getAttribute('data-testid') !== 'nc-connect-btn') wb.setAttribute('data-testid', 'nc-connect-btn');
   }
-  /* ---- NullCash: mobile dock + Menu sheet ---- */
+  /* ---- Vaulz zk: mobile dock + Menu sheet ---- */
   var DI = {
     wallet: '<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 13h2"/><path d="M3 10h18"/><path d="M7 6V5a2 2 0 0 1 2-2h8"/>',
     hide: '<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c5 0 9 4.5 10 7a13 13 0 0 1-3 4.2M6.3 6.3A13 13 0 0 0 2 12c1 2.5 5 7 10 7a9.6 9.6 0 0 0 4.4-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
@@ -1580,7 +1582,7 @@
   ];
   var LEARN = [
     { label: 'Vault · quantum-safe SOL', ico: 'lock', href: '/vault', ext: true },
-    { label: 'How NullCash works', ico: 'spark', act: 'tour' }, { label: 'Privacy model', ico: 'eye', href: '/#zk' },
+    { label: 'How Vaulz zk works', ico: 'spark', act: 'tour' }, { label: 'Privacy model', ico: 'eye', href: '/#zk' },
     { label: 'Fees', ico: 'coin', href: '/#fees' }, { label: 'Docs', ico: 'book', href: '/docs', ext: true }
   ];
   function dsv(n, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 22) + '" height="' + (w || 22) + '" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + DI[n] + '</svg>'; }
@@ -1616,7 +1618,7 @@
         return '<button class="ns-tile' + (cur === t.k ? ' on' : '') + '" style="animation-delay:' + (i * 22) + 'ms" data-k="' + t.k + '" data-testid="nc-menu-' + t.k.replace(/[^a-z]+/g, '-') + '"><i>' + dsv(t.ico, 20) + '</i><span>' + t.label + '</span></button>';
       }).join('') + '</div><div class="ns-sec">Learn</div><div class="ns-list">' + LEARN.map(function (l, i) {
         return (l.href ? '<a href="' + l.href + '"' : '<button data-act="' + l.act + '"') + ' class="ns-row" data-testid="nc-learn-' + i + '"><i>' + dsv(l.ico, 18) + '</i><span>' + l.label + '</span><em>' + dsv(l.ext ? 'out' : 'chev', 16) + '</em>' + (l.href ? '</a>' : '</button>');
-      }).join('') + '</div><div class="ns-foot"><span>© ' + new Date().getFullYear() + ' NullCash</span><a href="' + X_URL + '" target="_blank" rel="noopener noreferrer">X</a><a href="/">Home page</a></div></div></div>';
+      }).join('') + '</div><div class="ns-foot"><span>© ' + new Date().getFullYear() + ' Vaulz zk</span><a href="/docs">Docs</a><a href="/">Home page</a></div></div></div>';
     s.addEventListener('click', function (e) {
       if (e.target === s || e.target.closest('.ns-x')) { closeSheet(); return; }
       var t = e.target.closest('.ns-tile'); if (t) { openFeature(t.getAttribute('data-k')); return; }
@@ -1648,7 +1650,7 @@
     });
   }
 
-  /* ---- NullCash: explain first, connect last ---- */
+  /* ---- Vaulz zk: explain first, connect last ---- */
   var SHORT = {
     home: ['Wallet', 'Your money, out of sight.'], shield: ['Hide', 'Make your tokens private.'],
     send: ['Pay', 'Send without a trace.'], swap: ['Trade', 'Swap inside the pool.'],
@@ -1714,7 +1716,7 @@
     p.querySelector('.np-cta').addEventListener('click', openOnb);
   }
 
-  /* ---- NullCash: particle splash (original canvas animation, Solana palette) ---- */
+  /* ---- Vaulz zk: particle splash (original canvas animation, Solana palette) ---- */
   function ensureSplash() {
     if (window.__ncSplashDone || document.getElementById('nc-splash')) return;
     var vl = document.querySelector('.vl');
@@ -1723,7 +1725,7 @@
     var box = document.createElement('div'); box.id = 'nc-splash'; box.setAttribute('data-testid', 'nc-splash');
     var shownAt = performance.now(), MIN_MS = 1900, leaving = false;
     box.innerHTML = '<div class="sp-card"><div class="sp-top"><i></i><span>Solana mainnet</span></div><canvas></canvas>' +
-      '<div class="sp-bot"><b>Getting ready</b><span class="sp-msg">Syncing the pool</span><div class="sp-bar"><i></i></div></div></div>';
+      '<div class="sp-bot"><b>Going unseen.</b><span class="sp-msg">Syncing the pool</span><div class="sp-bar"><i></i></div></div></div>';
     // lives on <body> (not inside the app's own loader) so it stays up for a minimum
     // time even when the app boots instantly from cache, then fades out
     document.body.appendChild(box);
@@ -1741,16 +1743,16 @@
     var MSGS = ['Syncing the pool', 'Loading your notes', 'Warming up proofs', 'Almost there'], mi = 0;
     var mt = setInterval(function () { mi = (mi + 1) % MSGS.length; msg.classList.remove('in'); void msg.offsetWidth; msg.textContent = MSGS[mi]; msg.classList.add('in'); }, 1400);
     var dpr = Math.min(2, window.devicePixelRatio || 1), W = 0, H = 0, dots = [], specks = [], t0 = performance.now(), raf;
-    var C = [[153, 69, 255], [86, 140, 255], [25, 251, 155]]; // Solana purple -> blue -> green
+    var C = [[111, 124, 132], [200, 224, 235], [242, 245, 245]]; // faint -> ice -> silver
     function lerp(a, b, k) { return a + (b - a) * k; }
     function col(k) { var s = k < .5 ? 0 : 1, kk = k < .5 ? k * 2 : (k - .5) * 2; return [lerp(C[s][0], C[s + 1][0], kk) | 0, lerp(C[s][1], C[s + 1][1], kk) | 0, lerp(C[s][2], C[s + 1][2], kk) | 0]; }
     function build() {
       W = Math.round(cv.offsetWidth); H = Math.round(cv.offsetHeight); if (!W || !H) return;
       cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       var off = document.createElement('canvas'), oc = off.getContext('2d'); off.width = W; off.height = H;
-      var fs = Math.min(H * .78, W / 2.6);
+      var fs = Math.min(H * .72, W / 3.6);
       oc.fillStyle = '#000'; oc.textAlign = 'center'; oc.textBaseline = 'middle';
-      oc.font = '800 ' + fs + 'px "Space Grotesk", Arial Black, sans-serif'; oc.fillText('SOL', W / 2, H / 2 + fs * .04);
+      oc.font = '500 ' + fs + 'px "DM Sans", Arial, sans-serif'; oc.fillText('vaulz', W / 2, H / 2 - fs * .02);
       var img = oc.getImageData(0, 0, W, H).data, step = Math.max(6, Math.round(fs / 16)), old = dots; dots = [];
       for (var y = 0, row = 0; y < H; y += step * .87, row++) {
         for (var x = (row % 2) * step / 2; x < W; x += step) {
@@ -1766,7 +1768,7 @@
       if (!box.isConnected) { clearInterval(mt); cancelAnimationFrame(raf); return; }
       if (!W) build();
       var t = (now - t0) / 1000; ctx.clearRect(0, 0, W, H);
-      specks.forEach(function (s) { s.x = (s.x + s.vx + W) % W; s.y = (s.y + s.vy + H) % H; ctx.fillStyle = 'rgba(255,255,255,' + s.a + ')'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill(); });
+      specks.forEach(function (s) { s.x = (s.x + s.vx + W) % W; s.y = (s.y + s.vy + H) % H; ctx.fillStyle = 'rgba(200,224,235,' + (s.a * .5) + ')'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 6.283); ctx.fill(); });
       dots.forEach(function (d, i) {
         var k = Math.min(1, Math.max(0, (t - d.d) / 1.1)), e = 1 - Math.pow(1 - k, 3);
         var wob = Math.sin(t * 2.2 + d.tx * .05 + d.ty * .04) * 1.2 * e;
@@ -1839,7 +1841,89 @@
   })();
   document.addEventListener('input', function () { setTimeout(ensureFees, 120); }, true);
   window.addEventListener('hashchange', function () { Array.prototype.forEach.call(document.querySelectorAll('.nc-fee-tog'), function (b) { b.setAttribute('data-open', '0'); }); ensureFees(); });
-  function tick() { orderNav(); ensureX(); ensureCA(); syncIntro(); ensureMore(); fitNav(); ensureFoot(); ensureWalletBtn(); ensureDock(); ensurePitch(); ensureSplash(); ensureFees(); }
+
+  /* ---- Vaulz zk: tool stage (eyebrow / big title / tool tabs) ---- */
+  var VZ_TOOLS = [
+    { k: 'shield', label: 'Shield', ico: 'vzshield', d: 'Your funds. A little further from view.' },
+    { k: 'send', label: 'Send', ico: 'pay', d: 'Pay or get paid. Privately.' },
+    { k: 'swap', label: 'Swap', ico: 'trade', d: 'Trade inside the pool. Not from your wallet.' },
+    { k: 'bridge', label: 'Bridge', ico: 'bridge', d: 'Out to any chain. Not from your wallet.' },
+    { k: 'dk:private-route', label: 'Private route', ico: 'route', d: 'Solana to any chain. No wallet needed.' },
+    { k: 'dk:privacy-swap', label: 'Privacy swap', ico: 'lock', d: 'Say what you want. Solvers fill it.' },
+    { k: 'dk:track', label: 'Track', ico: 'track', d: 'Every order, step by step.' },
+    { k: 'receive', label: 'Receive', ico: 'inbox', d: 'Get paid without showing your wallet.' },
+    { k: 'withdraw', label: 'Withdraw', ico: 'exit', d: 'Cash out. Come back unlinked.' },
+    { k: 'history', label: 'History', ico: 'clock', d: 'Only you can read it.' },
+    { k: 'addresses', label: 'Addresses', ico: 'pin', d: 'Single-use exits. No clusters.' },
+    { k: 'keys', label: 'Keys', ico: 'key', d: 'Your vault. Your control.' },
+    { k: 'dk:chain', label: 'Chain', ico: 'term', d: 'What the chain sees. Live.' },
+    { k: '/vault', label: 'Vault', ico: 'lock', href: '/vault', d: 'Quantum-safe SOL.' },
+    { k: '/docs', label: 'Docs', ico: 'book', href: '/docs', d: 'How it works, and how to check it.' }
+  ];
+  DI.vzshield = '<path d="M12 3 4.5 6v5.5c0 4.2 3.5 7.4 7.5 9.5 4-2.1 7.5-5.3 7.5-9.5V6Z"/><path d="m8.5 11.5 2.5 2.5 4.5-5"/>';
+  function vzTool(k) {
+    for (var i = 0; i < VZ_TOOLS.length; i++) if (VZ_TOOLS[i].k === k) return { t: VZ_TOOLS[i], n: i + 1 };
+    return null;
+  }
+  var vzLast = null;
+  function ensureStage() {
+    var main = document.querySelector('main.main'); if (!main) return;
+    var k = currentKey() || 'home';
+    var hit = vzTool(k);
+    var head = document.getElementById('vz-head');
+    if (!head || head.parentNode !== main) {
+      head = document.createElement('section'); head.id = 'vz-head'; head.setAttribute('data-testid', 'vz-stage-head');
+      main.insertBefore(head, main.firstChild); vzLast = null;
+    } else if (main.firstChild !== head) { main.insertBefore(head, main.firstChild); }
+    var tabs = document.getElementById('vz-tabs');
+    if (!tabs || tabs.parentNode !== main) {
+      tabs = document.createElement('nav'); tabs.id = 'vz-tabs'; tabs.setAttribute('aria-label', 'Tools'); tabs.setAttribute('data-testid', 'vz-tool-tabs');
+      tabs.innerHTML = VZ_TOOLS.map(function (t) {
+        var id = t.k.replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
+        return t.href ? '<a href="' + t.href + '" data-k="' + t.k + '" data-testid="vz-tab-' + id + '">' + dsv(t.ico, 13) + t.label + '</a>'
+          : '<button type="button" data-k="' + t.k + '" data-testid="vz-tab-' + id + '">' + dsv(t.ico, 13) + t.label + '</button>';
+      }).join('');
+      tabs.addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-k]'); if (!b) return;
+        e.preventDefault(); openFeature(b.getAttribute('data-k')); setTimeout(ensureStage, 60);
+      });
+      head.nextSibling ? main.insertBefore(tabs, head.nextSibling) : main.appendChild(tabs);
+    } else if (head.nextSibling !== tabs) { main.insertBefore(tabs, head.nextSibling); }
+    Array.prototype.forEach.call(tabs.children, function (b) {
+      var on = b.getAttribute('data-k') === k;
+      if (on !== b.classList.contains('on')) { b.classList.toggle('on', on); if (on) try { b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (x) {} }
+    });
+    var key = k;
+    if (vzLast === key) return;
+    vzLast = key;
+    var title, eyebrow, desc;
+    if (hit) { title = hit.t.label; eyebrow = 'Your private toolkit / ' + (hit.n < 10 ? '0' : '') + hit.n; desc = hit.t.d; }
+    else if (SHORT[k]) { title = k === 'home' ? 'Wallet' : SHORT[k][0]; eyebrow = k === 'home' ? 'Your private balance' : 'Your private toolkit'; desc = SHORT[k][1]; }
+    else { title = 'Wallet'; eyebrow = 'Your private balance'; desc = 'Your money, out of sight.'; }
+    head.setAttribute('data-tool', k);
+    head.innerHTML = '<a class="vz-back" href="/" data-testid="vz-all-tools"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>All tools</a>' +
+      '<p class="vz-eyebrow" data-testid="vz-eyebrow">' + esc(eyebrow) + '</p>' +
+      '<h1 class="vz-title" data-testid="vz-title">' + esc(title) + '<em>.</em></h1>' +
+      '<p class="vz-desc">' + esc(desc) + '</p>' +
+      '<div class="vz-meta"><i></i><span>Live on Solana mainnet</span></div>';
+    try { document.title = title + ' · Vaulz zk'; } catch (x) {}
+  }
+
+  /* ---- Vaulz zk: ?do=<tool> deep links (from the landing launcher / docs) ---- */
+  var vzDo = (function () { try { return (new URLSearchParams(location.search).get('do') || '').toLowerCase(); } catch (e) { return ''; } })();
+  var vzDoTries = 0;
+  function runDo() {
+    if (!vzDo) return;
+    var DK = { 'private-route': 1, 'privacy-swap': 1, track: 1, chain: 1 };
+    if (DK[vzDo]) { var v0 = vzDo; vzDo = ''; stripDo(); go(v0); return; }
+    var b = nativeNav(vzDo);
+    if (b) { vzDo = ''; stripDo(); b.click(); try { window.scrollTo(0, 0); } catch (e) {} return; }
+    if (++vzDoTries > 40) { vzDo = ''; stripDo(); }
+  }
+  function stripDo() {
+    try { var u = new URL(location.href); u.searchParams.delete('do'); history.replaceState(history.state, '', u.pathname + (u.search || '') + u.hash); } catch (e) {}
+  }
+  function tick() { orderNav(); ensureX(); ensureCA(); syncIntro(); ensureMore(); fitNav(); ensureFoot(); ensureWalletBtn(); ensureDock(); ensurePitch(); ensureSplash(); ensureFees(); ensureStage(); runDo(); }
   setTimeout(function () { if (document.querySelector('main.main')) showTour(false); }, 1400);
   function boot() { ensure(); sync(); tick(); setInterval(tick, 700); document.addEventListener('click', function () { setTimeout(tick, 60); }, true); window.addEventListener('hashchange', function () { setTimeout(tick, 60); }); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();

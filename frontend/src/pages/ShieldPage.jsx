@@ -6,7 +6,7 @@ const BACKEND = process.env.REACT_APP_BACKEND_URL || '';
 const BIFROST = `${BACKEND}/api/bifrost/v1`;
 
 // Map any pretty site URL to the Bifrost v1 upstream mirror (one single site):
-//   /                -> app  /            (NullCash app: wallet, shield, trade, swaps...)
+//   /                -> app  /            (Vaulz zk app: wallet, shield, trade, swaps...)
 //   /docs, /security -> app  /docs ...
 //   /about[...]      -> site /...         (landing)
 //   /swap            -> app  /#private-route   (legacy)
@@ -27,7 +27,7 @@ export function shieldUpstream(pathname, search = '', hash = '') {
   return `${BIFROST}/${target}${rest}${search}${hash}`;
 }
 
-// ZK Shield: full-page NullCash app experience served by the app mirror
+// ZK Shield: full-page Vaulz zk app experience served by the app mirror
 // (no iframe). This route just hands the browser over to the mirror, which
 // rewrites the address bar back to /shield.
 export default function ShieldPage() {
@@ -39,12 +39,12 @@ export default function ShieldPage() {
   return (
     <div
       data-testid="shield-loading"
-      className="min-h-screen bg-[#07060c] flex flex-col items-center justify-center gap-5 text-white"
+      className="vz min-h-screen bg-[#090d10] flex flex-col items-center justify-center gap-5 text-[#e3e8e8]"
     >
       <div className="animate-pulse">
-        <Logo size={44} />
+        <Logo size={40} />
       </div>
-      <p className="text-sm text-white/50 tracking-wide">Loading NullCash…</p>
+      <p className="vz-serif text-[18px] text-[#a4afb4]">Going unseen…</p>
     </div>
   );
 }
