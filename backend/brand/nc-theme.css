@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Vaulz zk theme — dark only, "everywhere, unseen" stage style.
+   BlindSpot theme — dark only, "everywhere, unseen" stage style.
    DM Sans + Instrument Serif, frost-glass surfaces on a misty night backdrop.
    Pure presentation layer over the mirrored app; no behaviour changes.
    ========================================================================== */
@@ -310,7 +310,7 @@ html.nc-onb-open .card.onb>h2::after{content:"Create account.";font-size:34px;fo
 html.nc-onb-open .card.onb>.wlist{margin:0!important}
 html.nc-onb-open main.main>.view,html.nc-onb-open main.main,html.nc-onb-open .shell>*:not(header){animation:none!important;transform:none!important;filter:none!important}
 
-/* ---------- splash (Vaulz zk loader) ---------- */
+/* ---------- splash (BlindSpot loader) ---------- */
 .vl>*:not(#nc-splash){display:none!important}
 .vl::before,.vl::after{display:none!important}
 .vl{display:flex!important;align-items:center!important;justify-content:center!important;background:#090d10!important}

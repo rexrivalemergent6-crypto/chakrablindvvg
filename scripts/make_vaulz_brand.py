@@ -23,49 +23,50 @@ def sans(size, wght=500):
     return f
 
 
+MARK_SRC = Path("/app/scripts/blindspot-mark-src.png")
+
+
+def _mark_img(size, ink=None):
+    m = Image.open(MARK_SRC).convert("RGBA").resize((size, size), Image.LANCZOS)
+    if ink:
+        r, g, b, a = m.split()
+        m = Image.merge("RGBA", (Image.new("L", m.size, ink[0]), Image.new("L", m.size, ink[1]), Image.new("L", m.size, ink[2]), a))
+    return m
+
+
 def lockup(color, path, h=256):
-    s = sans(int(h * 0.62), 500)
-    z = ImageFont.truetype(F_SERIF, int(h * 0.74))
-    tmp = Image.new("RGBA", (h * 6, h), (0, 0, 0, 0))
+    s = sans(int(h * 0.50), 500)
+    mk = _mark_img(int(h * 0.86), None if color[0] > 128 else (20, 24, 27))
+    tmp = Image.new("RGBA", (h * 8, h), (0, 0, 0, 0))
+    tmp.paste(mk, (0, (h - mk.size[1]) // 2), mk)
     d = ImageDraw.Draw(tmp)
-    x = 8
-    base = int(h * 0.80)
-    # tight tracking for the sans part
-    for ch in "vaulz":
+    x = int(h * 1.0)
+    base = int(h * 0.68)
+    for ch in "BlindSpot":
         d.text((x, base), ch, font=s, fill=color, anchor="ls")
-        x += int(d.textlength(ch, font=s) - h * 0.03)
-    x += int(h * 0.12)
-    d.text((x, base), "zk", font=z, fill=color, anchor="ls")
-    x += int(d.textlength("zk", font=z))
+        x += int(d.textlength(ch, font=s) - h * 0.012)
     bbox = tmp.getbbox()
-    out = tmp.crop((0, 0, bbox[2] + 8, h))
-    out.save(path)
-    return out
+    tmp.crop((0, 0, bbox[2] + 8, h)).save(path)
 
 
-def mark(size, path, maskable=False, bg=PANEL):
-    im = Image.new("RGBA", (size, size), (0, 0, 0, 0) if not maskable else bg)
-    d = ImageDraw.Draw(im)
-    r = int(size * 0.24)
-    if not maskable:
-        d.rounded_rectangle((0, 0, size - 1, size - 1), radius=r, fill=bg)
-    f = sans(int(size * (0.62 if not maskable else 0.48)), 500)
-    cx, cy = size / 2, size / 2
-    d.text((cx - size * 0.05, cy + size * 0.02), "v", font=f, fill=INK, anchor="mm")
-    # the omni-like full stop
-    dr = size * 0.055
-    dx, dy = cx + size * 0.19, cy + size * 0.16
-    d.ellipse((dx - dr, dy - dr, dx + dr, dy + dr), fill=INK)
+def mark(size, path, maskable=False, bg=(0, 0, 0, 255), transparent=False):
+    im = Image.new("RGBA", (size, size), (0, 0, 0, 0) if (transparent or not maskable) else bg)
+    if not transparent and not maskable:
+        ImageDraw.Draw(im).rounded_rectangle((0, 0, size - 1, size - 1), radius=int(size * 0.22), fill=bg)
+    k = 1.0 if transparent else (0.62 if maskable else 0.78)
+    mk = _mark_img(max(1, int(size * k)))
+    im.paste(mk, ((size - mk.size[0]) // 2, (size - mk.size[1]) // 2), mk)
     im.save(path)
     return im
 
 
 if __name__ == "__main__":
-    lockup(INK, BRAND / "vz-lockup-light-ink.png")          # light text (for dark UI)
+    lockup(INK, BRAND / "vz-lockup-light-ink.png")
     lockup((20, 24, 27, 255), BRAND / "vz-lockup-dark-ink.png")
-    m = mark(512, BRAND / "mark-256.png")
-    for name, sz in (("mark-white-256.png", 256), ("mark-black-256.png", 256)):
-        mark(sz, BRAND / name)
+    mark(512, BRAND / "mark-256.png", transparent=True)
+    mark(256, BRAND / "mark-white-256.png", transparent=True)
+    mark(256, BRAND / "mark-black-256.png")
+    mark(512, PUB / "brand" / "blindspot-mark.png", transparent=True)
     for sz, name in ((32, "favicon-32.png"), (64, "favicon-64.png"), (192, "favicon-192.png"), (512, "favicon-512.png")):
         mark(sz, BRAND / name)
     mark(180, BRAND / "apple-touch-icon.png", maskable=True)

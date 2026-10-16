@@ -1,4 +1,4 @@
-// Every Vaulz zk tool, in launcher order. `href` opens the tool directly inside the app.
+// Every BlindSpot tool, in launcher order. `href` opens the tool directly inside the app.
 export const TOOLS = [
   { id: 'shield', label: 'Shield', d: 'Your funds. A little further from view.', href: '/app?do=shield', ico: 'shield' },
   { id: 'send', label: 'Send', d: 'Pay or get paid. Privately.', href: '/app?do=send', ico: 'send' },

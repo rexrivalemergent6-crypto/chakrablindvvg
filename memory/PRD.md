@@ -112,3 +112,9 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - App (/app): dk-swap.js ensureStage() -> #vz-head (All tools, "YOUR PRIVATE TOOLKIT / NN", big "Title.", serif tagline) fixed left on >=1180px + #vz-tabs tool tabs; content in right column. ?do=<tool> deep links (runDo) e.g. /app?do=send.
 - Landing (/): Omni stage — NEW callout, "Hit send. / Leave no trace.", Enter Vaulz, live "What the chain sees" card with Go unseen toggle, 14-tool numbered launcher, How it works (#flow), Privacy model (#zk), Fees (#fees), FAQ (#faq), Why privacy dialog. Header NmNav.jsx (tools + More + Vault + Docs + Launch app; mobile menu grid).
 - /docs + /vault restyled dark. Brand assets via scripts/make_vaulz_brand.py (lockup PNG-in-SVG, favicons).
+
+## Iteration 17 — BlindSpot rebrand + Umbra-style app (Oct 2026)
+- Name -> BlindSpot (BRAND_NAME/BRAND_SLUG in bifrost_brand.py, all JSON/JS/CSS/React). User logo (split-lens mark) = scripts/blindspot-mark-src.png -> favicons, lockup (mark + "BlindSpot"), in-app marks, /brand/blindspot-mark.png; old NullCash/Cadabra marks deleted. ?v=7 icon cache bust.
+- App (/app) restyled after v2.umbraprivacy.com (dark): centred hero "The privacy layer / for your money.", Deposit(=Shield)/Send/Swap/Withdraw tabs with sliding indicator, rounded 22px transaction frame; gated state = Umbra-style form ("You're depositing", amount, Select Token, quick tokens, fee rows) + "Create an account". Header: Vault button (=Home/balance), Create account, ••• menu (all other tools). Top nav + mobile dock hidden. /app defaults to Deposit.
+- Landing (/) kept in Omni style (rebranded). Visible-text scan of 12 pages: zero third-party brand names.
+- Declined (again): hiding upstream providers at network/proxy level.

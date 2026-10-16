@@ -84,7 +84,7 @@ export default function NcDocsPage() {
   const pages = useMemo(() => DOC_GROUPS.flatMap((g) => g.pages.map((p) => ({ ...p, group: g.title }))), []);
   const [active, setActive] = useState(pages[0].id);
   useEffect(() => {
-    document.title = 'Docs · Vaulz zk';
+    document.title = 'Docs · BlindSpot';
     const els = pages.map((p) => document.getElementById(p.id)).filter(Boolean);
     const io = new IntersectionObserver((ents) => {
       const vis = ents.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
@@ -148,7 +148,7 @@ export default function NcDocsPage() {
       </div>
       <footer className="relative z-[1] mx-auto flex w-[91.6%] flex-col items-center justify-between gap-3 border-t border-[var(--vz-hair)] py-8 text-[11px] text-[var(--vz-faint)] sm:flex-row">
         <Logo size={20} />
-        <span>&copy; {new Date().getFullYear()} Vaulz zk</span>
+        <span>&copy; {new Date().getFullYear()} BlindSpot</span>
       </footer>
     </div>
   );

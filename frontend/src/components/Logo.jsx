@@ -1,16 +1,13 @@
 import React from 'react';
 
-// Vaulz zk wordmark: DM Sans "vaulz" + Instrument Serif italic "zk".
-export default function Logo({ size = 30, className = '' }) {
+// BlindSpot brand: the split-lens mark + DM Sans wordmark.
+export default function Logo({ size = 30, withWord = true, className = '' }) {
   return (
-    <span
-      className={`vz inline-flex items-baseline select-none text-[var(--vz-strong)] ${className}`}
-      style={{ fontSize: size, lineHeight: 1 }}
-      data-testid="vaulz-logo"
-      aria-label="Vaulz zk"
-    >
-      <span style={{ fontWeight: 500, letterSpacing: '-0.075em' }}>vaulz</span>
-      <span className="vz-serif" style={{ fontSize: '1.08em', marginLeft: '0.16em', letterSpacing: '-0.03em', color: 'var(--vz-dim)' }}>zk</span>
+    <span className={`vz inline-flex items-center select-none text-[var(--vz-strong)] ${className}`}
+      style={{ fontSize: size * 0.82, lineHeight: 1, gap: size * 0.32 }} data-testid="blindspot-logo" aria-label="BlindSpot">
+      <img src="/brand/blindspot-mark.png?v=7" alt="BlindSpot" width={size} height={size}
+        style={{ width: size, height: size }} className="shrink-0 object-contain" draggable="false" />
+      {withWord && <span style={{ fontWeight: 500, letterSpacing: '-0.045em' }}>BlindSpot</span>}
     </span>
   );
 }

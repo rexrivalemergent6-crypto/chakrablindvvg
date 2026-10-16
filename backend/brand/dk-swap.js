@@ -1,4 +1,4 @@
-/* Vaulz zk in-app swaps: Private route, Privacy swap, Track (design-only reference: square-card swap UI)
+/* BlindSpot in-app swaps: Private route, Privacy swap, Track (design-only reference: square-card swap UI)
    Live data via /api/ds. */
 (function () {
   if (window.__dkSwap) return;
@@ -292,7 +292,7 @@
     ".dk-recent code{margin-left:auto;font-family:var(--f-mono,monospace);font-size:11px;color:var(--dk-mut);max-width:38%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}",
     "@media (max-width:520px){.dk-tok{width:122px}#dk-view{padding:4px 0 150px}.dk-card{padding:14px 12px 18px;border-radius:22px}"
     + ".dk-seg{width:100%}.dk-seg button{flex:1;justify-content:center;padding:8px 6px;font-size:13px;gap:5px}.dk-seg button svg{display:none}}",
-    /* ---- token picker: Portal-style arrangement (Vaulz zk light) ---- */
+    /* ---- token picker: Portal-style arrangement (BlindSpot light) ---- */
     ".dk-pk{width:min(480px,calc(100% - 24px));padding:14px 20px 0;max-height:calc(100vh - 40px);overflow:hidden}",
     ".dk-pk .dk-grab{width:44px;height:5px;border-radius:9px;background:var(--dk-line2);margin:0 auto 6px;display:none}",
     ".dk-pk .dk-mh{display:grid;grid-template-columns:40px 1fr 40px;align-items:center;margin:4px 0 16px}",
@@ -448,7 +448,7 @@
     var pct = cost != null && usdIn > 0 ? cost / usdIn * 100 : null;
     var total = cost != null ? usd(cost) + ' (' + pct.toFixed(2) + '%)' : '—';
     if (near) {
-      if (sel.appFeeBps != null) rows.push(['Vaulz zk fee (' + (sel.appFeeBps / 100).toFixed(2) + '%)', fmt(amt * sel.appFeeBps / 10000) + ' ' + sIn + (S.send && S.send.price ? ' · ' + usd(amt * sel.appFeeBps / 10000 * S.send.price) : '')]);
+      if (sel.appFeeBps != null) rows.push(['BlindSpot fee (' + (sel.appFeeBps / 100).toFixed(2) + '%)', fmt(amt * sel.appFeeBps / 10000) + ' ' + sIn + (S.send && S.send.price ? ' · ' + usd(amt * sel.appFeeBps / 10000 * S.send.price) : '')]);
       if (sel.withdrawFee != null) rows.push(['Network fee (' + ((S.recv && S.recv.chainName) || 'destination') + ')', fmt(sel.withdrawFee) + ' ' + sOut + (sel.pOut ? ' · ' + usd(sel.withdrawFee * sel.pOut) : '')]);
       if (sel.minOut != null) rows.push(['Minimum received', fmt(sel.minOut) + ' ' + sOut]);
       if (sel.refundFee != null) rows.push(['Refund fee (only if it fails)', fmt(sel.refundFee) + ' ' + sIn]);
@@ -1001,7 +1001,7 @@
     if (o.feeRows && o.feeRows.length) h += '<div class="dk-fees dk-fees-m" data-testid="dk-order-fees"><div class="dk-fees-h"><span>Total fees</span><b>' + esc(o.feeTotal || '—') + '</b></div>' + o.feeRows.map(function (r) { return '<div><span>' + esc(r[0]) + '</span><b>' + esc(r[1]) + '</b></div>'; }).join('') + '</div>';
     h += '<div class="dk-cf"><div class="k">Receiving address</div><div class="v"><code>' + esc(o.addressTo || '') + '</code></div></div>';
     h += '<button class="dk-cta" data-act="trackorder" data-id="' + esc(o.id) + '" data-testid="dk-order-track">Track this order</button>';
-    h += '<div class="dk-note">Live order via Vaulz zk. Only deposit from your own Solana wallet.</div></div>';
+    h += '<div class="dk-note">Live order via BlindSpot. Only deposit from your own Solana wallet.</div></div>';
     m.innerHTML = h;
     clearInterval(orderTimer);
     if (o.expires) {
@@ -1137,7 +1137,7 @@
     }).join('');
     function stat(k, v, t) { return '<div class="ch-stat"><span>$ ' + k + '</span><b' + (t ? ' title="' + esc(t) + '"' : '') + '>' + v + '</b></div>'; }
     return '<div class="ch-page" data-testid="chain-page"><div class="ch-term">' +
-      '<div class="ch-bar"><i></i><i></i><i></i><span>root@vaulz:~$ watch --chain solana-mainnet<em>_</em></span>' +
+      '<div class="ch-bar"><i></i><i></i><i></i><span>root@blindspot:~$ watch --chain solana-mainnet<em>_</em></span>' +
       '<span class="ch-live ' + (live ? 'on' : 'off') + '" data-testid="chain-live">' + (live ? '\u25cf LIVE \u00b7 sync <b class="ch-next">4s</b>' : (CH.err ? '\u25cb RECONNECTING' : '\u25cb CONNECTING')) + '</span></div>' +
       '<div class="ch-stats" data-testid="chain-stats">' +
         stat('merkle_root', st.root ? esc(chShort(st.root, 6)) : '\u2026', st.root) +
@@ -1244,7 +1244,7 @@
       var compact = nav.classList.contains('tabbar');
       var btns = Array.prototype.slice.call(nav.querySelectorAll('.nav-i'));
       if (!btns.length) return;
-      var anchor = btns.find(function (b) { return /(Vaulz zk|Vaulz zk)Swap|^Bridge$|Bridge out|^Swap$/.test(b.textContent.trim()); }) ||
+      var anchor = btns.find(function (b) { return /(BlindSpot|BlindSpot)Swap|^Bridge$|Bridge out|^Swap$/.test(b.textContent.trim()); }) ||
                    btns.find(function (b) { return /Trade/.test(b.textContent); }) || btns[btns.length - 1];
       var frag = document.createDocumentFragment();
       (compact ? [{ k: 'any', label: 'Swaps', hash: 'private-route', icon: IC.route }] : NAV_ITEMS).forEach(function (it) {
@@ -1280,7 +1280,7 @@
   }, 400);
 
   // visual-only ordering of the sidebar / bottom bar (CSS order; React keeps its DOM untouched)
-  var SIDE_ORDER = ['home|overview', 'shield|vanish', 'send|pay', 'swap|trade', 'bridge|bridge out|vaulz zkswap|nullcashswap',
+  var SIDE_ORDER = ['home|overview', 'shield|vanish', 'send|pay', 'swap|trade', 'bridge|bridge out|blindspotswap|blindspotswap|nullcashswap',
     'dk:private', 'dk:privacy', 'dk:track', 'history|activity', 'dk:chain', 'nc:more',
     'receive|request', 'withdraw|cash out', 'earn|yield', 'addresses|burner addresses', 'invite|referrals', 'keys|vault & keys'];
   var TAB_ORDER = ['home|overview', 'dk:any', 'shield|vanish', 'swap|trade', 'send|pay', 'more'];
@@ -1299,15 +1299,15 @@
   // ---- per-tab explainers (users always know what a tab does) ----
   var X_URL = '';
   var INTRO = {
-    'dk:private': ['Private route · no wallet needed', 'Swap from Solana to any chain without connecting a wallet. Vaulz zk compares several multi-hop routes, you pick one and send a single deposit to a one-time address; the route converts and delivers to your destination address. Nothing links your Solana wallet to the receiving address beyond the route itself.', ['No wallet connection', 'Multi-hop routing', 'One deposit']],
+    'dk:private': ['Private route · no wallet needed', 'Swap from Solana to any chain without connecting a wallet. BlindSpot compares several multi-hop routes, you pick one and send a single deposit to a one-time address; the route converts and delivers to your destination address. Nothing links your Solana wallet to the receiving address beyond the route itself.', ['No wallet connection', 'Multi-hop routing', 'One deposit']],
     'dk:privacy': ['Privacy swap · no wallet needed', 'Intent-based confidential swap. You state what you want (send X, receive at least Y on chain Z); a competitive solver network fills it and settlement runs through confidential processing. Refunds return to your Solana refund address if the intent is not filled.', ['Solver competition', 'Confidential settlement', 'Auto refund']],
     'dk:track': ['Track order', 'Paste an order ID to see its live status, from waiting for deposit through confirmation, exchange and delivery. Orders created on this device are listed below.', ['Live status', 'Local order list']],
     'home': ['Home', 'Your private balance, recent activity and quick actions. Everything shown here is decrypted locally from your notes; nothing about it is readable on-chain.', ['Local decryption', 'Notes', 'No tracking']],
     'shield': ['Shield · ZK shielded deposit', 'Yes, this is real zero-knowledge. Shield moves public tokens from a Solana wallet into the shielded pool: the program stores a Poseidon commitment to (token, amount, owner key, blinding) as a leaf in a 2^26 Merkle tree. From then on the funds are notes only you can open. Every later spend is a Groth16 proof (BN254) that the note exists in the tree and that you hold its key, checked on-chain without revealing which note.', ['Groth16 / BN254', 'Poseidon Merkle tree', 'Nullifiers block double-spends']],
     'swap': ['Swap · private trade inside the pool', 'Trade one shielded token for another without leaving the pool. A proof spends your input note, the program routes the trade through on-chain liquidity and writes the output as a new note. Outside observers see a pool trade happen, not who made it or how big it was.', ['Proof-bound terms', 'Relayer pays gas', 'Output lands as a note']],
     'bridge': ['Bridge', 'Exit the shielded pool directly to another network. The proof binds the destination chain, address and minimum output, so a relayer cannot change where funds go.', ['Bound destination', 'Cross-chain exit', 'Relayer submitted']],
-    'send': ['Send · private transfer', 'Send to any Vaulz zk address. Your note is spent by proof and a new note is encrypted to the recipient’s viewing key. On-chain: one nullifier and two new commitments. No sender, recipient or amount is revealed.', ['Encrypted to recipient', '0 public amounts', 'No wallet signature']],
-    'receive': ['Receive privately', 'Share your Vaulz zk address or a payment link. Incoming notes are found by scanning with your viewing key locally; the address itself never appears on-chain.', ['Viewing key scan', 'Shareable address', 'Unlinkable receipts']],
+    'send': ['Send · private transfer', 'Send to any BlindSpot address. Your note is spent by proof and a new note is encrypted to the recipient’s viewing key. On-chain: one nullifier and two new commitments. No sender, recipient or amount is revealed.', ['Encrypted to recipient', '0 public amounts', 'No wallet signature']],
+    'receive': ['Receive privately', 'Share your BlindSpot address or a payment link. Incoming notes are found by scanning with your viewing key locally; the address itself never appears on-chain.', ['Viewing key scan', 'Shareable address', 'Unlinkable receipts']],
     'withdraw': ['Withdraw to Solana', 'Turn notes back into public tokens at any Solana address, ideally a fresh burner one. The amount and destination become public at exit, but the proof does not link them to the deposit that funded them.', ['Public exit', 'Use a burner address', 'Unlinkable to deposit']],
     'earn': ['Earn while shielded', 'Lend shielded balances into allow-listed on-chain vaults from inside the pool. Positions are held by the program and accounted to your notes, so your wallet never appears as the depositor.', ['Allow-listed vaults', 'Position as notes', 'Withdraw any time']],
     'history': ['History', 'Your own decrypted activity log. Only your device can read it; the chain only ever sees nullifiers and commitments.', ['Local only', 'Decrypted with your keys']],
@@ -1347,12 +1347,12 @@
     if (tr && !tr.querySelector('.dk-x')) {
       var a = document.createElement('a');
       a.className = 'dk-x'; a.href = X_URL; a.target = '_blank'; a.rel = 'noopener noreferrer';
-      a.setAttribute('aria-label', 'Vaulz zk on X'); a.setAttribute('data-testid', 'dk-x-link');
+      a.setAttribute('aria-label', 'BlindSpot on X'); a.setAttribute('data-testid', 'dk-x-link');
       a.innerHTML = '<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
       tr.insertBefore(a, tr.firstChild);
     }
   }
-  /* ---- Vaulz zk: contract address chip in header (all app pages) ---- */
+  /* ---- BlindSpot: contract address chip in header (all app pages) ---- */
   var NC_CA = '31GYUbJW5vjF1o7VM5SGP9Emj5WDBHb1cdcR8BM6pump';
   var CA_COPY = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>';
   var CA_OK = '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg>';
@@ -1379,7 +1379,7 @@
     var x = tr.querySelector('.dk-x');
     tr.insertBefore(b, x || tr.firstChild);
   }
-  /* ---- Vaulz zk: keep desktop top tabs clear of the header controls ---- */
+  /* ---- BlindSpot: keep desktop top tabs clear of the header controls ---- */
   var OVF_ORDER = ['chain', 'history', 'bridge', 'track', 'send', 'privacy swap', 'shield', 'private route', 'swap'];
   function navKey(b) {
     var t = '';
@@ -1429,7 +1429,7 @@
     nav.classList.toggle('nc-tight', over());
     if (now.length !== was.length && document.getElementById('nc-more-pop')) closeMore();
   }
-  /* ---- Vaulz zk: top-tab "More" menu (desktop) ---- */
+  /* ---- BlindSpot: top-tab "More" menu (desktop) ---- */
   var MORE_OVF = { 'chain': 'Live pool terminal', 'history': 'Your local activity', 'bridge': 'Move funds across chains', 'track': 'Follow a swap order live',
     'send': 'Pay anyone privately', 'privacy swap': 'No wallet · shielded cross-chain', 'shield': 'Move tokens into the pool', 'private route': 'No wallet · best-rate cross-chain', 'swap': 'Trade inside the pool' };
   var MORE = { 'receive': 'Get paid to a private address', 'withdraw': 'Exit to any Solana address',
@@ -1490,10 +1490,10 @@
     mb.classList.toggle('on', anyOn || !!nav.querySelector('.nav-i.nc-ovf.on'));
   }
 
-  /* ---- Vaulz zk: welcome tour (first visit) ---- */
+  /* ---- BlindSpot: welcome tour (first visit) ---- */
   var TOUR_KEY = 'nc-tour-v1';
   var TOUR = [
-    ['Welcome to Vaulz zk', 'Private money on Solana.', 'Shield your tokens into a zero-knowledge pool. Your balance and history become notes only you can read.', 'mark'],
+    ['Welcome to BlindSpot', 'Private money on Solana.', 'Shield your tokens into a zero-knowledge pool. Your balance and history become notes only you can read.', 'mark'],
     ['Shield, send, swap', 'Everything happens inside the pool.', 'Pay anyone, trade tokens and earn yield with proofs instead of public transfers. Nobody sees who, what or how much.', '<path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2 2 4-4"/>'],
     ['No wallet? No problem', 'Private route & Privacy swap.', 'Swap from Solana to any chain with one deposit to a one-time address. Track every order live.', '<path d="M7 7h11l-3-3M17 17H6l3 3"/>'],
     ['Your keys, your device', 'Nothing to reset, nothing to leak.', 'Keys are derived and encrypted locally. Back up your recovery key and you are in control.', '<circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M16 7l2 2M14 9l2 2"/>']
@@ -1522,14 +1522,14 @@
   }
   window.__ncTour = function () { showTour(true); };
 
-  /* ---- Vaulz zk: footer ---- */
+  /* ---- BlindSpot: footer ---- */
   function ensureFoot() {
     var main = document.querySelector('main.main'); if (!main) return;
     var f = document.getElementById('nc-foot');
     if (f && f.parentNode === main && main.lastElementChild === f) return;
     if (!f) {
       f = document.createElement('footer'); f.id = 'nc-foot'; f.setAttribute('data-testid', 'nc-footer');
-      f.innerHTML = '<span>© ' + new Date().getFullYear() + ' Vaulz zk</span><nav>' +
+      f.innerHTML = '<span>© ' + new Date().getFullYear() + ' BlindSpot</span><nav>' +
         '<a href="/#flow">How it works</a><a href="/#zk">Privacy model</a><a href="/docs">Docs</a><a href="/#fees">Fees</a>' +
         '<a href="#" data-nc-tour="1">Take the tour</a><a href="/vault">Vault</a></nav>';
       f.querySelector('[data-nc-tour]').addEventListener('click', function (e) { e.preventDefault(); showTour(true); });
@@ -1543,7 +1543,7 @@
     if (off !== wb.classList.contains('nc-off')) wb.classList.toggle('nc-off', off);
     if (wb.getAttribute('data-testid') !== 'nc-connect-btn') wb.setAttribute('data-testid', 'nc-connect-btn');
   }
-  /* ---- Vaulz zk: mobile dock + Menu sheet ---- */
+  /* ---- BlindSpot: mobile dock + Menu sheet ---- */
   var DI = {
     wallet: '<rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 13h2"/><path d="M3 10h18"/><path d="M7 6V5a2 2 0 0 1 2-2h8"/>',
     hide: '<path d="M3 3l18 18"/><path d="M10.6 5.1A10 10 0 0 1 12 5c5 0 9 4.5 10 7a13 13 0 0 1-3 4.2M6.3 6.3A13 13 0 0 0 2 12c1 2.5 5 7 10 7a9.6 9.6 0 0 0 4.4-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>',
@@ -1583,7 +1583,7 @@
   ];
   var LEARN = [
     { label: 'Vault · quantum-safe SOL', ico: 'lock', href: '/vault', ext: true },
-    { label: 'How Vaulz zk works', ico: 'spark', act: 'tour' }, { label: 'Privacy model', ico: 'eye', href: '/#zk' },
+    { label: 'How BlindSpot works', ico: 'spark', act: 'tour' }, { label: 'Privacy model', ico: 'eye', href: '/#zk' },
     { label: 'Fees', ico: 'coin', href: '/#fees' }, { label: 'Docs', ico: 'book', href: '/docs', ext: true }
   ];
   function dsv(n, w) { return '<svg viewBox="0 0 24 24" width="' + (w || 22) + '" height="' + (w || 22) + '" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + DI[n] + '</svg>'; }
@@ -1619,7 +1619,7 @@
         return '<button class="ns-tile' + (cur === t.k ? ' on' : '') + '" style="animation-delay:' + (i * 22) + 'ms" data-k="' + t.k + '" data-testid="nc-menu-' + t.k.replace(/[^a-z]+/g, '-') + '"><i>' + dsv(t.ico, 20) + '</i><span>' + t.label + '</span></button>';
       }).join('') + '</div><div class="ns-sec">Learn</div><div class="ns-list">' + LEARN.map(function (l, i) {
         return (l.href ? '<a href="' + l.href + '"' : '<button data-act="' + l.act + '"') + ' class="ns-row" data-testid="nc-learn-' + i + '"><i>' + dsv(l.ico, 18) + '</i><span>' + l.label + '</span><em>' + dsv(l.ext ? 'out' : 'chev', 16) + '</em>' + (l.href ? '</a>' : '</button>');
-      }).join('') + '</div><div class="ns-foot"><span>© ' + new Date().getFullYear() + ' Vaulz zk</span><a href="/docs">Docs</a><a href="/">Home page</a></div></div></div>';
+      }).join('') + '</div><div class="ns-foot"><span>© ' + new Date().getFullYear() + ' BlindSpot</span><a href="/docs">Docs</a><a href="/">Home page</a></div></div></div>';
     s.addEventListener('click', function (e) {
       if (e.target === s || e.target.closest('.ns-x')) { closeSheet(); return; }
       var t = e.target.closest('.ns-tile'); if (t) { openFeature(t.getAttribute('data-k')); return; }
@@ -1651,7 +1651,7 @@
     });
   }
 
-  /* ---- Vaulz zk: explain first, connect last ---- */
+  /* ---- BlindSpot: explain first, connect last ---- */
   var SHORT = {
     home: ['Wallet', 'Your money, out of sight.'], shield: ['Hide', 'Make your tokens private.'],
     send: ['Pay', 'Send without a trace.'], swap: ['Trade', 'Swap inside the pool.'],
@@ -1731,7 +1731,7 @@
     p.querySelector('.np-cta').addEventListener('click', openOnb);
   }
 
-  /* ---- Vaulz zk: particle splash (original canvas animation, Solana palette) ---- */
+  /* ---- BlindSpot: particle splash (original canvas animation, Solana palette) ---- */
   function ensureSplash() {
     if (window.__ncSplashDone || document.getElementById('nc-splash')) return;
     var vl = document.querySelector('.vl');
@@ -1765,9 +1765,9 @@
       W = Math.round(cv.offsetWidth); H = Math.round(cv.offsetHeight); if (!W || !H) return;
       cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       var off = document.createElement('canvas'), oc = off.getContext('2d'); off.width = W; off.height = H;
-      var fs = Math.min(H * .72, W / 3.6);
+      var fs = Math.min(H * .5, W / 5.4);
       oc.fillStyle = '#000'; oc.textAlign = 'center'; oc.textBaseline = 'middle';
-      oc.font = '500 ' + fs + 'px "DM Sans", Arial, sans-serif'; oc.fillText('vaulz', W / 2, H / 2 - fs * .02);
+      oc.font = '500 ' + fs + 'px "DM Sans", Arial, sans-serif'; oc.fillText('BlindSpot', W / 2, H / 2 - fs * .02);
       var img = oc.getImageData(0, 0, W, H).data, step = Math.max(6, Math.round(fs / 16)), old = dots; dots = [];
       for (var y = 0, row = 0; y < H; y += step * .87, row++) {
         for (var x = (row % 2) * step / 2; x < W; x += step) {
@@ -1857,7 +1857,7 @@
   document.addEventListener('input', function () { setTimeout(ensureFees, 120); }, true);
   window.addEventListener('hashchange', function () { Array.prototype.forEach.call(document.querySelectorAll('.nc-fee-tog'), function (b) { b.setAttribute('data-open', '0'); }); ensureFees(); });
 
-  /* ---- Vaulz zk: Umbra-style workspace (hero + Deposit/Send/Swap/Withdraw + Vault / Create account) ---- */
+  /* ---- BlindSpot: Umbra-style workspace (hero + Deposit/Send/Swap/Withdraw + Vault / Create account) ---- */
   var VZ_FLOWS = [
     { k: 'shield', label: 'Deposit', verb: 'depositing' },
     { k: 'send', label: 'Send', verb: 'sending' },
@@ -1932,10 +1932,10 @@
     }
     if (vzLast === k) return;
     vzLast = k;
-    try { document.title = ((vzFlow(k) || {}).label || VZ_NAMES[k] || 'Vault') + ' · Vaulz zk'; } catch (x) {}
+    try { document.title = ((vzFlow(k) || {}).label || VZ_NAMES[k] || 'Vault') + ' · BlindSpot'; } catch (x) {}
   }
   DI.vault = '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="12" cy="12" r="3.5"/><path d="M12 8.5V7m0 10v-1.5M15.5 12H17M7 12h1.5"/>';
-  /* ---- Vaulz zk: ?do=<tool> deep links (from the landing launcher / docs) ---- */
+  /* ---- BlindSpot: ?do=<tool> deep links (from the landing launcher / docs) ---- */
   var vzDo = (function () { try { var d = (new URLSearchParams(location.search).get('do') || '').toLowerCase(); if (!d && !location.hash && /^\/(app|shield)\/?$/.test(location.pathname)) d = 'shield'; if (d === 'deposit') d = 'shield'; if (d === 'vault' || d === 'wallet') d = 'home'; return d; } catch (e) { return ''; } })();
   var vzDoTries = 0;
   function runDo() {

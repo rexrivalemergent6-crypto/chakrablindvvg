@@ -87,9 +87,9 @@ function WhyDialog({ onClose }) {
     <div className="vz vz-dialog-bg" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }} data-testid="why-dialog">
       <div role="dialog" aria-modal="true" aria-labelledby="why-title" className="vz-glass relative w-[min(760px,100%)] p-8 sm:p-10" style={{ background: 'var(--vz-glass)' }}>
         <button type="button" onClick={onClose} aria-label="Close" className="absolute right-4 top-4 h-9 w-9 rounded-full border border-[var(--vz-edge)] text-[18px] text-[var(--vz-dim)] hover:text-white" data-testid="why-close">&times;</button>
-        <p className="vz-eyebrow">The point of Vaulz zk</p>
+        <p className="vz-eyebrow">The point of BlindSpot</p>
         <h2 id="why-title" className="vz-h2 mt-5 !text-[44px] sm:!text-[56px]">Privacy is room<br /><span className="vz-serif">to be yourself.</span></h2>
-        <p className="mt-5 max-w-[520px] text-[14px] leading-[1.6] text-[var(--vz-dim)]">An open blockchain shouldn&rsquo;t mean an open book. Vaulz zk brings private balances, payments and swaps into one place.</p>
+        <p className="mt-5 max-w-[520px] text-[14px] leading-[1.6] text-[var(--vz-dim)]">An open blockchain shouldn&rsquo;t mean an open book. BlindSpot brings private balances, payments and swaps into one place.</p>
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
           {P.map(([i, h, t]) => (
             <div key={h}><VzIcon name={i} size={22} className="text-[var(--vz-dim)]" /><h3 className="mt-3 text-[16px] tracking-[-.03em]">{h}</h3><p className="mt-2 text-[12px] leading-[1.6] text-[var(--vz-muted)]">{t}</p></div>
@@ -116,7 +116,7 @@ export default function LandingPage() {
   const [why, setWhy] = useState(false);
   const [unseen, setUnseen] = useState(false);
   useEffect(() => {
-    document.title = 'Vaulz zk — Everywhere. Unseen.';
+    document.title = 'BlindSpot — Everywhere. Unseen.';
     if (window.location.hash) {
       const t = document.getElementById(window.location.hash.slice(1));
       if (t) setTimeout(() => t.scrollIntoView(), 80);
@@ -142,7 +142,7 @@ export default function LandingPage() {
             <h1 className="vz-h1" data-testid="hero-title">Hit send.<br /><span className="vz-serif">Leave no trace.</span></h1>
             <p className="mt-6 text-[13px] leading-[1.7] text-[var(--vz-dim)]">Private balances. Private payments. Private swaps.<br />For a chain that sees too much.</p>
             <div className="mt-7 flex flex-wrap items-center gap-4">
-              <a href="/app?do=shield" className="vz-enter" data-testid="hero-launch">Enter Vaulz <span aria-hidden="true">&#8599;</span></a>
+              <a href="/app?do=shield" className="vz-enter" data-testid="hero-launch">Enter BlindSpot <span aria-hidden="true">&#8599;</span></a>
               <a href="/app#private-route" className="vz-link text-[12px] underline decoration-[var(--vz-edge)] underline-offset-4" data-testid="hero-swap">Swap without a wallet</a>
             </div>
           </div>
@@ -188,7 +188,7 @@ export default function LandingPage() {
 
       {/* ---------------- privacy model ---------------- */}
       <section id="zk" className="relative z-[1] mx-auto w-[91.6%] border-t border-[var(--vz-hair)] py-24" data-testid="section-zk">
-        <SectionHead eyebrow="Privacy model" a="Less trust." b="More proof.">Hiding data is not the same as proving it. Vaulz zk proves every move is valid without showing who made it.</SectionHead>
+        <SectionHead eyebrow="Privacy model" a="Less trust." b="More proof.">Hiding data is not the same as proving it. BlindSpot proves every move is valid without showing who made it.</SectionHead>
         <div className="mt-12 grid gap-4 lg:grid-cols-3">
           {METHODS.map((m) => (
             <div key={m.k} className={`vz-glass p-6 ${m.zk ? '!border-[var(--vz-edge-hi)]' : ''}`}>
@@ -255,7 +255,7 @@ export default function LandingPage() {
         <p className="vz-eyebrow">Ready when you are</p>
         <h2 className="vz-h2 mt-6">Everywhere.<br /><span className="vz-serif">Unseen.</span></h2>
         <div className="mt-9 flex flex-wrap justify-center gap-4">
-          <a href="/app?do=shield" className="vz-enter" data-testid="cta-launch">Enter Vaulz <span aria-hidden="true">&#8599;</span></a>
+          <a href="/app?do=shield" className="vz-enter" data-testid="cta-launch">Enter BlindSpot <span aria-hidden="true">&#8599;</span></a>
           <a href="/docs" className="vz-pill !h-[46px]" data-testid="cta-docs">Read the docs</a>
         </div>
       </section>
@@ -266,7 +266,7 @@ export default function LandingPage() {
           <a className="vz-link" href="/app">App</a><a className="vz-link" href="/vault">Vault</a><a className="vz-link" href="/docs">Docs</a>
           <a className="vz-link" href="#flow">How it works</a><a className="vz-link" href="#fees">Fees</a><a className="vz-link" href="#faq">FAQ</a>
         </nav>
-        <span>&copy; {new Date().getFullYear()} Vaulz zk</span>
+        <span>&copy; {new Date().getFullYear()} BlindSpot</span>
       </footer>
 
       {why && <WhyDialog onClose={() => setWhy(false)} />}

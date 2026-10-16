@@ -6,7 +6,7 @@ const MAIN = ['shield', 'send', 'swap', 'bridge', 'private-route', 'privacy-swap
 const MORE = ['track', 'receive', 'withdraw', 'history', 'addresses', 'keys', 'chain'];
 const byId = (id) => TOOLS.find((t) => t.id === id);
 
-// Vaulz zk top bar: wordmark, tool links with icons, More, Vault, Docs, Why privacy, Launch.
+// BlindSpot top bar: wordmark, tool links with icons, More, Vault, Docs, Why privacy, Launch.
 export default function NmNav({ active = '', onWhy }) {
   const [more, setMore] = useState(false);
   const [menu, setMenu] = useState(false);

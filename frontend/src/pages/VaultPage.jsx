@@ -5,7 +5,7 @@ const BACKEND = process.env.REACT_APP_BACKEND_URL || '';
 const VAULT_SRC = `${BACKEND}/api/bifrost/v1/vault/?do=vault`;
 
 export default function VaultPage() {
-  useEffect(() => { document.title = 'Vault · Vaulz zk'; }, []);
+  useEffect(() => { document.title = 'Vault · BlindSpot'; }, []);
   return (
     <div className="vz relative min-h-screen bg-[#090d10]" data-testid="vault-page">
       <div className="vz-world left" aria-hidden="true" />
@@ -26,7 +26,7 @@ export default function VaultPage() {
         <div className="mx-auto w-[91.6%] pb-10">
           <iframe
             src={VAULT_SRC}
-            title="Vaulz zk Vault"
+            title="BlindSpot Vault"
             data-testid="vault-frame"
             allow="publickey-credentials-create *; publickey-credentials-get *; clipboard-write; clipboard-read"
             className="vz-glass block h-[calc(100vh-150px)] min-h-[620px] w-full"

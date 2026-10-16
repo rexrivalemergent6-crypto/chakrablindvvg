@@ -1,19 +1,19 @@
 """
-Bifrost v1 — browser shim + Vaulz zk re-branding layer for the Veil mirror.
+Bifrost v1 — browser shim + BlindSpot re-branding layer for the Veil mirror.
 
 Veil's own client code still runs unmodified in the browser (wallet creation,
 ZK proofs, RPC, relayer, indexer). This module only:
   * injects a shim that routes every network call through /api/bifrost/v1/*
   * keeps the URL bar on pretty paths (/shield, /shield/about, /shield/docs …)
-  * swaps visible brand text / logos / colours to Vaulz zk
+  * swaps visible brand text / logos / colours to BlindSpot
 """
 import base64
 import functools
 from pathlib import Path
 
 BRAND_DIR = Path(__file__).parent / "brand"
-BRAND_NAME = "Vaulz zk"
-BRAND_SLUG = "vaulz"
+BRAND_NAME = "BlindSpot"
+BRAND_SLUG = "blindspot"
 
 
 def _b64(name: str) -> str:
@@ -27,8 +27,8 @@ def _b64(name: str) -> str:
 def lockup_svg(light: bool = False) -> str:
     # light=True -> dark ink (for light surfaces); default light ink for the dark-only UI
     png = _b64("vz-lockup-dark-ink.png" if light else "vz-lockup-light-ink.png")
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 537 256" width="537" height="256">
-<image href="data:image/png;base64,{png}" xlink:href="data:image/png;base64,{png}" x="0" y="0" width="537" height="256"/>
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 813 256" width="813" height="256">
+<image href="data:image/png;base64,{png}" xlink:href="data:image/png;base64,{png}" x="0" y="0" width="813" height="256"/>
 </svg>"""
 
 
@@ -94,14 +94,14 @@ var hr=history.replaceState,hp=history.pushState;
 if(!DBG.nopretty)try{hr.call(history,history.state,'',pretty(location.href));}catch(e){}
 function hpatch(f){return function(s,t,u){if(u!=null){var pu=pretty(String(u));try{VBASE=vbaseFrom(new URL(pu,location.href).pathname);}catch(e){}u=pu;}return f.call(this,s,t,u);};}
 if(!DBG.nopretty){history.pushState=hpatch(hp);history.replaceState=hpatch(hr);}
-/* address bar shows Vaulz zk names for in-app hash routes (the app still sees its own on load) */
+/* address bar shows BlindSpot names for in-app hash routes (the app still sees its own on load) */
 try{if(/^#nullswap\b/i.test(location.hash))hr.call(history,history.state,'',location.pathname+location.search+location.hash.replace(/^#nullswap/i,'#veilswap'));}catch(e){}
 function hashBrand(){try{var h=location.hash||'';if(/veil/i.test(h))hr.call(history,history.state,'',location.pathname+location.search+h.replace(/veil/ig,'null'));}catch(e){}}
 /* before the app's own handlers run (registered first), give the app its real hash back */
 function hashUnbrand(){try{if(/^#nullswap\b/i.test(location.hash||''))hr.call(history,history.state,'',location.pathname+location.search+location.hash.replace(/^#nullswap/i,'#veilswap'));}catch(e){}}
 window.addEventListener('popstate',hashUnbrand,true);
 window.addEventListener('hashchange',hashUnbrand,true);
-/* show the Vaulz zk name only once the Bridge view is really on screen (app has finished routing) */
+/* show the BlindSpot name only once the Bridge view is really on screen (app has finished routing) */
 function bridgeOn(){var n=document.querySelectorAll('nav.side .nav-i.on');for(var i=0;i<n.length;i++){if(/^\s*Bridge\s*$/i.test(n[i].textContent||''))return true;}return false;}
 var HBon=0;setInterval(function(){if(!/^#veilswap\b/i.test(location.hash||'')){HBon=0;return;}if(bridgeOn()){HBon++;if(HBon>=2)hashBrand();}else HBon=0;},400);
 var of=window.fetch;
@@ -167,7 +167,7 @@ var wo=window.open;window.open=function(u){if(typeof u==='string')arguments[0]=f
 document.addEventListener('click',function(e){var a=e.target&&e.target.closest&&e.target.closest('a[href]');
  if(!a)return;var h=a.getAttribute('href');if(!h||SKIP.test(h))return;var n=fx(h);if(n!==h)a.setAttribute('href',n);},true);
 
-/* ---------- Vaulz zk branding ---------- */
+/* ---------- BlindSpot branding ---------- */
 var TXT=/veilit\.xyz|Veil|ContractWolf|Jupiter|veil-core|@veil|NEAR Intents|NEAR intents|1Click|DarkSwap|Darkswap|Dark Swap|HoudiniSwap|Houdini|Mayan|Cadabra|Darkinator|Bifrost|(^|[^$A-Za-z0-9_\/.:@-])veil(?![A-Za-z0-9_-])/;
 function rt(s){
  return s.replace(/app\.veilit\.xyz/g,location.host+'/shield')
@@ -194,7 +194,7 @@ function brandEl(el){
  if(el.tagName==='IMG'){
   var s=el.getAttribute('src')||'';var b=bimg(s);
   if(!b&&el.closest&&el.closest('a.brand,.brand'))b=LK();
-  if(!b&&/^(veil|darkinator|nullcash|vaulz|vaulz zk)$/i.test(el.getAttribute('alt')||''))b=LK();
+  if(!b&&/^(veil|darkinator|nullcash|vaulz|vaulz zk|blindspot)$/i.test(el.getAttribute('alt')||''))b=LK();
   if(b&&s!==b&&s.indexOf(b)<0){sa.call(el,'src',b);el.removeAttribute('srcset');}
  }
  if(el.tagName==='A'){var hh=el.getAttribute('href')||'';if(/(x|twitter)\.com\//i.test(hh)&&el.style.display!=='none')el.style.display='none';}
@@ -214,8 +214,8 @@ function start(){
  if(started)return;started=true;
  if(DBG.nobrand){document.documentElement.classList.add('bf-ready');setInterval(function(){document.documentElement.classList.add('bf-ready');},300);return;}
  walk(document.documentElement);
- try{var fl=document.createElement('link');sa.call(fl,'rel','icon');sa.call(fl,'href',BU+'favicon.png?v=6');sa.call(fl,'id','bf-icon');document.head.appendChild(fl);}catch(e){}
- // keep only Vaulz zk icons / manifest in <head> (the app re-adds its own on hydration)
+ try{var fl=document.createElement('link');sa.call(fl,'rel','icon');sa.call(fl,'href',BU+'favicon.png?v=7');sa.call(fl,'id','bf-icon');document.head.appendChild(fl);}catch(e){}
+ // keep only BlindSpot icons / manifest in <head> (the app re-adds its own on hydration)
  var icoClean=function(){try{var ls=document.querySelectorAll('link[rel~="icon"],link[rel="apple-touch-icon"],link[rel="apple-touch-icon-precomposed"],link[rel="manifest"],link[rel="mask-icon"]');for(var i=0;i<ls.length;i++){var hh=ls[i].getAttribute('href')||'';if(hh.indexOf(BU)!==0)ls[i].parentNode&&ls[i].parentNode.removeChild(ls[i]);}}catch(e){}};
  icoClean();setInterval(icoClean,1000);
  var syncTitle=function(){var t=document.title;if(t&&TXT.test(t)){var nt=rt(t);if(nt!==t)document.title=nt;}};
@@ -246,7 +246,7 @@ setTimeout(start,2500);
 
 
 NAV_LABELS = {
-    "Home": "Home", "Shield": "Shield", "Trade": "Swap", "Vaulz zkSwap": "Bridge",
+    "Home": "Home", "Shield": "Shield", "Trade": "Swap", "BlindSpotSwap": "Bridge",
     "Send": "Send", "Receive": "Receive", "Withdraw": "Withdraw", "Earn": "Earn",
     "Invite": "Invite", "Addresses": "Addresses", "Activity": "History", "Keys": "Keys",
     "More": "More",
@@ -292,14 +292,14 @@ def head_inject(target: str, prefix: str) -> str:
     )
 
 
-_ICON_V = "6"
+_ICON_V = "7"
 
 
 def nullcash_manifest():
     b = "/api/bifrost/v1/_brand/"
     return {
-        "name": "Vaulz zk · Private money on Solana",
-        "short_name": "Vaulz zk",
+        "name": "BlindSpot · Private money on Solana",
+        "short_name": "BlindSpot",
         "description": "Private balances, transfers, trades and swaps on Solana.",
         "id": "/app",
         "start_url": "/app",
@@ -316,7 +316,7 @@ def nullcash_manifest():
 
 
 def brand_icon_for(path: str):
-    """Map any upstream favicon / app-icon / manifest path to a Vaulz zk brand asset name."""
+    """Map any upstream favicon / app-icon / manifest path to a BlindSpot brand asset name."""
     p = path.lower().split("?", 1)[0]
     base = p.rsplit("/", 1)[-1]
     if base in ("manifest.webmanifest", "manifest.json", "site.webmanifest"):

@@ -278,8 +278,8 @@ def _scrub(body: bytes) -> bytes:
     except Exception:
         return body
     t = opaque_image_urls(t)
-    t = t.replace("DarkSwap", "Vaulz zk").replace("darkswap.app", "vaulz")
-    t = t.replace('"houdiniId"', '"orderId"').replace("HoudiniSwap", "Vaulz zk").replace("houdiniswap", "vaulz")
+    t = t.replace("DarkSwap", "BlindSpot").replace("darkswap.app", "blindspot")
+    t = t.replace('"houdiniId"', '"orderId"').replace("HoudiniSwap", "BlindSpot").replace("houdiniswap", "blindspot")
     return t.encode("utf-8")
 
 
