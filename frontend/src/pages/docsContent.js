@@ -29,7 +29,7 @@ export const DOC_GROUPS = [
           { k: 'steps', items: [
             ['Open a vault', 'Hit Connect wallet and pick Create a BlindSpot vault. Choose a password for this device. You get a recovery key once; store it offline.'],
             ['Shield', 'Go to Shield, pick a token and amount, and approve one signature from your public wallet. Your tokens become sealed notes.'],
-            ['Use it', 'Send to any null2… address, trade inside the pool, or exit. No pop-ups: a relayer submits each proof for you.'],
+            ['Use it', 'Send to any blind2… address, trade inside the pool, or exit. No pop-ups: a relayer submits each proof for you.'],
             ['Leave', 'Withdraw to a brand-new address, or use Private route / Privacy swap to land on another chain.'],
           ] },
         ],

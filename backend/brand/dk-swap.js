@@ -1859,18 +1859,20 @@
 
   /* ---- BlindSpot: Umbra-style workspace (hero + Deposit/Send/Swap/Withdraw + Vault / Create account) ---- */
   var VZ_FLOWS = [
+    { k: 'home', label: 'Vault', verb: '' },
     { k: 'shield', label: 'Deposit', verb: 'depositing' },
     { k: 'send', label: 'Send', verb: 'sending' },
     { k: 'swap', label: 'Swap', verb: 'swapping' },
     { k: 'withdraw', label: 'Withdraw', verb: 'withdrawing' }
   ];
   var VZ_NAMES = { 'dk:private-route': 'Private route', 'dk:privacy-swap': 'Privacy swap', 'dk:track': 'Track', 'dk:chain': 'Chain',
-    home: 'Vault', bridge: 'Bridge', receive: 'Receive', history: 'History', addresses: 'Addresses', keys: 'Keys' };
+    bridge: 'Bridge', receive: 'Receive', history: 'History', addresses: 'Addresses', keys: 'Keys' };
   function vzFlow(k) { for (var i = 0; i < VZ_FLOWS.length; i++) if (VZ_FLOWS[i].k === k) return VZ_FLOWS[i]; return null; }
   function ensureHeaderBtns() {
     var tr = document.querySelector('header .top-right'); if (!tr) return;
     var wb = tr.querySelector('.wallet-btn');
-    if (!tr.querySelector('#vz-vault-btn')) {
+    var oldV = tr.querySelector('#vz-vault-btn'); if (oldV) oldV.remove();
+    if (false) {
       var v = document.createElement('button'); v.type = 'button'; v.id = 'vz-vault-btn'; v.setAttribute('data-testid', 'vz-vault-btn');
       v.innerHTML = dsv('vault', 16) + '<span>Vault</span>';
       v.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); openFeature('home'); setTimeout(ensureStage, 60); });
@@ -1882,8 +1884,7 @@
       m.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); openSheet(); });
       tr.appendChild(m);
     }
-    var on = currentKey() === 'home';
-    var vb = tr.querySelector('#vz-vault-btn'); if (vb && vb.classList.contains('on') !== on) vb.classList.toggle('on', on);
+
   }
   var vzLast = null;
   function ensureStage() {
@@ -1926,9 +1927,9 @@
     else if (tabs.nextSibling !== cap) tabs.parentNode.insertBefore(cap, tabs.nextSibling);
     if (cap.getAttribute('data-k') !== k) {
       cap.setAttribute('data-k', k);
-      cap.innerHTML = name ? '<span>' + esc(name) + '</span><button type="button" data-testid="vz-where-back">Back to Deposit</button>' : '';
+      cap.innerHTML = name ? '<span>' + esc(name) + '</span><button type="button" data-testid="vz-where-back">Back to Vault</button>' : '';
       cap.style.display = name ? '' : 'none';
-      var bk = cap.querySelector('button'); if (bk) bk.addEventListener('click', function () { openFeature('shield'); setTimeout(ensureStage, 60); });
+      var bk = cap.querySelector('button'); if (bk) bk.addEventListener('click', function () { openFeature('home'); setTimeout(ensureStage, 60); });
     }
     if (vzLast === k) return;
     vzLast = k;
@@ -1936,7 +1937,7 @@
   }
   DI.vault = '<rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="12" cy="12" r="3.5"/><path d="M12 8.5V7m0 10v-1.5M15.5 12H17M7 12h1.5"/>';
   /* ---- BlindSpot: ?do=<tool> deep links (from the landing launcher / docs) ---- */
-  var vzDo = (function () { try { var d = (new URLSearchParams(location.search).get('do') || '').toLowerCase(); if (!d && !location.hash && /^\/(app|shield)\/?$/.test(location.pathname)) d = 'shield'; if (d === 'deposit') d = 'shield'; if (d === 'vault' || d === 'wallet') d = 'home'; return d; } catch (e) { return ''; } })();
+  var vzDo = (function () { try { var d = (new URLSearchParams(location.search).get('do') || '').toLowerCase(); if (!d && !location.hash && /^\/(app|shield)\/?$/.test(location.pathname)) d = 'home'; if (d === 'deposit') d = 'shield'; if (d === 'vault' || d === 'wallet') d = 'home'; return d; } catch (e) { return ''; } })();
   var vzDoTries = 0;
   function runDo() {
     if (!vzDo) return;

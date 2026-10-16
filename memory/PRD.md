@@ -118,3 +118,8 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - App (/app) restyled after v2.umbraprivacy.com (dark): centred hero "The privacy layer / for your money.", Deposit(=Shield)/Send/Swap/Withdraw tabs with sliding indicator, rounded 22px transaction frame; gated state = Umbra-style form ("You're depositing", amount, Select Token, quick tokens, fee rows) + "Create an account". Header: Vault button (=Home/balance), Create account, ••• menu (all other tools). Top nav + mobile dock hidden. /app defaults to Deposit.
 - Landing (/) kept in Omni style (rebranded). Visible-text scan of 12 pages: zero third-party brand names.
 - Declined (again): hiding upstream providers at network/proxy level.
+
+## Iteration 18 — Blind key prefixes + Vault tab (Oct 2026)
+- Key/address prefixes now blindsk2… (recovery key), blindvk1… (viewing key), blind2… (receive address) via bifrost.py null_prefix_js; parsers accept blind/null/veil (case-insensitive) so old keys still import. CHUNK_VER nc3 busts cached chunks. Verified: new vault shows blindsk2… recovery key; patched chunks pass node --check.
+- Welcome intro tour removed (showTour no-op, footer link removed, menu item -> /#flow).
+- Tabs: Vault (=home balance) · Deposit · Send · Swap · Withdraw; header Vault button removed; /app opens on Vault.
