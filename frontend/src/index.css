@@ -419,3 +419,66 @@ html { background:#090d10; color-scheme:dark; }
 .bs-path li.is-dark small { color:var(--vz-ok); }
 @media (max-width:900px) { .bs-path { grid-template-columns:1fr; gap:28px; } .bs-path::before { left:8px; right:auto; top:8px; bottom:8px; width:1px; height:auto; } .bs-path li { padding:0 0 0 38px; } }
 @media (prefers-reduced-motion:reduce) { .bs-disc-lens, .bs-hero-disc .bs-disc-rings { animation:none; } .bs-panel { transition:none; } }
+
+/* ---------- BlindSpot landing motion ---------- */
+.bs .vz-world { animation:bsDrift 38s ease-in-out infinite alternate; background-size:auto,auto,cover; }
+@keyframes bsDrift { from { background-position:0 0,0 0,68% 38%,0 0; } to { background-position:0 0,0 0,76% 46%,0 0; } }
+.bs-fade { animation:bsFadeUp .9s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes bsFadeUp { from { opacity:0; transform:translateY(16px); filter:blur(4px); } to { opacity:1; transform:none; filter:none; } }
+.bs-word { display:inline-block; overflow:hidden; vertical-align:top; padding-bottom:.08em; margin-bottom:-.08em; margin-right:.24em; }
+.bs-word:last-child { margin-right:0; }
+.bs-word > span { display:inline-block; animation:bsWord 1s cubic-bezier(.2,.75,.15,1) both; }
+@keyframes bsWord { from { transform:translateY(105%) rotate(4deg); opacity:0; } to { transform:none; opacity:1; } }
+/* scroll reveal + stagger */
+.bs-reveal { opacity:0; transform:translateY(28px); transition:opacity .9s cubic-bezier(.2,.7,.2,1), transform .9s cubic-bezier(.2,.7,.2,1); }
+.bs-reveal.bs-in { opacity:1; transform:none; }
+.bs-stagger.bs-reveal { opacity:1; transform:none; }
+.bs-stagger > * { opacity:0; transform:translateY(22px) scale(.98); transition:opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1); }
+.bs-stagger.bs-in > * { opacity:1; transform:none; }
+.bs-stagger > *:nth-child(2) { transition-delay:.07s; } .bs-stagger > *:nth-child(3) { transition-delay:.14s; } .bs-stagger > *:nth-child(4) { transition-delay:.21s; }
+.bs-stagger > *:nth-child(5) { transition-delay:.28s; } .bs-stagger > *:nth-child(6) { transition-delay:.35s; } .bs-stagger > *:nth-child(7) { transition-delay:.42s; }
+.bs-stagger > *:nth-child(8) { transition-delay:.49s; } .bs-stagger > *:nth-child(n+9) { transition-delay:.56s; }
+/* disc: pointer tilt, depth on orbit chips, light sweep */
+.bs-stage { --rx:0deg; --ry:0deg; --px:0px; --py:0px; perspective:1000px; }
+.bs-tilt { transform:rotateX(var(--rx)) rotateY(var(--ry)); transform-style:preserve-3d; transition:transform .6s cubic-bezier(.2,.7,.2,1); will-change:transform; }
+.bs-orbit { transition:transform .6s cubic-bezier(.2,.7,.2,1); animation:bsFloat 7s ease-in-out infinite; }
+.bs-orbit-a { translate:calc(var(--px) * -1) calc(var(--py) * -1); }
+.bs-orbit-b { translate:var(--px) var(--py); animation-delay:-3.5s; }
+@keyframes bsFloat { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+.bs-disc-sweep { position:absolute; inset:0; border-radius:50%; pointer-events:none;
+  background:conic-gradient(from 0deg,transparent 0 78%,rgba(200,224,235,.18) 88%,transparent 96%); animation:bsTurn 6s linear infinite; mix-blend-mode:screen; }
+.bs-disc:not(.bs-hero-disc) .bs-disc-sweep { animation-duration:9s; opacity:.7; }
+.bs-hero-disc .bs-disc-core { animation:bsCore 3.2s ease-in-out infinite; }
+@keyframes bsCore { 0%,100% { box-shadow:0 0 0 6px rgba(9,13,16,.4), 0 0 0 0 rgba(200,224,235,.0); } 50% { box-shadow:0 0 0 6px rgba(9,13,16,.4), 0 0 0 14px rgba(200,224,235,.10); } }
+/* buttons: shine sweep */
+.bs-btn, .bs-btn-ghost { position:relative; overflow:hidden; }
+.bs-btn::after, .bs-btn-ghost::after { content:""; position:absolute; top:0; bottom:0; left:-60%; width:50%; transform:skewX(-20deg); pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent); opacity:0; }
+.bs-btn-ghost::after { background:linear-gradient(90deg,transparent,rgba(227,232,232,.18),transparent); }
+.bs-btn:hover::after, .bs-btn-ghost:hover::after, .bs-btn:focus-visible::after { opacity:1; animation:bsShine .8s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes bsShine { from { left:-60%; } to { left:130%; } }
+/* tool discs: ripple + icon spin on hover */
+.bs-disc-btn::before { content:""; position:absolute; inset:0; border-radius:50%; border:1px solid rgba(200,224,235,.5); opacity:0; pointer-events:none; }
+.bs-discs a:hover .bs-disc-btn::before, .bs-discs a:focus-visible .bs-disc-btn::before { animation:bsRipple 1.4s cubic-bezier(.2,.7,.2,1) infinite; }
+@keyframes bsRipple { from { opacity:.8; transform:scale(1); } to { opacity:0; transform:scale(1.55); } }
+.bs-disc-btn svg { transition:transform .5s cubic-bezier(.2,.8,.2,1); }
+.bs-discs a:hover .bs-disc-btn svg { transform:scale(1.12); }
+/* how-it-works: line draws, dots light in sequence */
+.bs-path::before { transform-origin:left center; transform:scaleX(0); transition:transform 1.6s cubic-bezier(.2,.7,.2,1) .15s; }
+.bs-path.bs-in::before { transform:scaleX(1); }
+@media (max-width:900px) { .bs-path::before { transform-origin:top center; transform:scaleY(0); } .bs-path.bs-in::before { transform:scaleY(1); } }
+.bs-path.bs-in li .bs-path-dot { animation:bsDot .6s cubic-bezier(.2,.8,.2,1) both; }
+.bs-path.bs-in li:nth-child(2) .bs-path-dot { animation-delay:.3s; } .bs-path.bs-in li:nth-child(3) .bs-path-dot { animation-delay:.6s; }
+.bs-path.bs-in li:nth-child(4) .bs-path-dot { animation-delay:.9s; } .bs-path.bs-in li:nth-child(5) .bs-path-dot { animation-delay:1.2s; }
+@keyframes bsDot { 0% { transform:scale(.4); box-shadow:0 0 0 0 rgba(200,224,235,.6); } 60% { transform:scale(1.15); box-shadow:0 0 0 10px rgba(200,224,235,0); } 100% { transform:none; } }
+/* status pills: soft pulse on the dot */
+.bs-st i { animation:bsPulse 2.4s ease-in-out infinite; }
+@keyframes bsPulse { 0%,100% { box-shadow:0 0 0 0 currentColor; opacity:1; } 50% { box-shadow:0 0 0 4px transparent; opacity:.55; } }
+/* live stat numbers glow briefly on update */
+.bs-stats dd { transition:text-shadow .6s; }
+.bs-stats dd:hover { text-shadow:0 0 24px rgba(200,224,235,.45); }
+@media (prefers-reduced-motion:reduce) {
+  .bs .vz-world, .bs-fade, .bs-word > span, .bs-orbit, .bs-disc-sweep, .bs-hero-disc .bs-disc-core, .bs-st i { animation:none !important; }
+  .bs-reveal, .bs-stagger > * { opacity:1 !important; transform:none !important; transition:none !important; }
+  .bs-tilt { transform:none !important; } .bs-path::before { transform:none !important; }
+}

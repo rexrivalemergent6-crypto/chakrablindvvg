@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import NmNav from '../components/NmNav';
 import Logo from '../components/Logo';
 import { TOOLS, VzIcon } from '../components/vzTools';
@@ -32,6 +32,47 @@ function useLiveStats() {
   return s;
 }
 const fmt = (n) => (n === null || n === undefined ? '—' : Number(n).toLocaleString());
+const REDUCED = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* numbers roll up to their value (and roll on to each live update) */
+function CountUp({ value }) {
+  const [v, setV] = useState(null);
+  const from = useRef(0);
+  useEffect(() => {
+    if (value === null || value === undefined) return undefined;
+    if (REDUCED) { setV(value); from.current = value; return undefined; }
+    const a = from.current, b = Number(value), t0 = performance.now(), dur = a === 0 ? 1400 : 700;
+    let raf;
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4);
+      setV(Math.round(a + (b - a) * e));
+      if (k < 1) raf = requestAnimationFrame(step); else from.current = b;
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [value]);
+  return <span className="tabular-nums">{fmt(v)}</span>;
+}
+
+/* fade-and-rise for anything marked .bs-reveal once it scrolls into view */
+function useReveal() {
+  useEffect(() => {
+    const els = Array.from(document.querySelectorAll('.bs-reveal'));
+    if (REDUCED || !('IntersectionObserver' in window)) { els.forEach((e) => e.classList.add('bs-in')); return undefined; }
+    const io = new IntersectionObserver((ents) => ents.forEach((en) => {
+      if (en.isIntersecting) { en.target.classList.add('bs-in'); io.unobserve(en.target); }
+    }), { rootMargin: '0px 0px -12% 0px', threshold: 0.12 });
+    els.forEach((e) => io.observe(e));
+    return () => io.disconnect();
+  }, []);
+}
+
+/* headline words rise one by one */
+function Words({ text, base = 0 }) {
+  return text.split(' ').map((w, i) => (
+    <span key={`${w}-${i}`} className="bs-word"><span style={{ animationDelay: `${base + i * 90}ms` }}>{w}</span></span>
+  ));
+}
 
 /* the BlindSpot disc: concentric rings + a split lens that slowly turns */
 function Disc({ size = 420, label, sub, tone = 'shield', className = '' }) {
@@ -39,6 +80,7 @@ function Disc({ size = 420, label, sub, tone = 'shield', className = '' }) {
     <div className={`bs-disc bs-disc-${tone} ${className}`} style={{ width: size, height: size }} aria-hidden={!label}>
       <span className="bs-disc-rings" />
       <span className="bs-disc-lens" />
+      <span className="bs-disc-sweep" />
       <span className="bs-disc-core" />
       {label && (
         <span className="bs-disc-label"><b>{label}</b>{sub && <small>{sub}</small>}</span>
@@ -100,6 +142,18 @@ export default function LandingPage() {
     }
   }, []);
   const tools = DISC_TOOLS.map((id) => TOOLS.find((t) => t.id === id)).filter(Boolean);
+  useReveal();
+  const stage = useRef(null);
+  const onMove = (e) => {
+    if (REDUCED || !stage.current) return;
+    const r = stage.current.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
+    stage.current.style.setProperty('--rx', `${(-y * 14).toFixed(2)}deg`);
+    stage.current.style.setProperty('--ry', `${(x * 18).toFixed(2)}deg`);
+    stage.current.style.setProperty('--px', `${(x * 26).toFixed(1)}px`);
+    stage.current.style.setProperty('--py', `${(y * 20).toFixed(1)}px`);
+  };
+  const onLeave = () => { if (stage.current) ['--rx', '--ry', '--px', '--py'].forEach((k) => stage.current.style.setProperty(k, '0')); };
 
   return (
     <div className="vz bs relative min-h-screen overflow-x-hidden bg-[#090d10]" data-testid="landing-page">
@@ -109,24 +163,24 @@ export default function LandingPage() {
       {/* ---------------- hero ---------------- */}
       <main id="top" className="relative z-[1] mx-auto grid min-h-[100svh] w-[91.6%] items-center gap-12 pb-16 pt-[110px] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)]">
         <div className="vz-rise">
-          <p className="bs-kick" data-testid="hero-kicker"><span className="bs-dot" />Solana-first · ZK shield · Quantum vault</p>
-          <h1 className="bs-h1 mt-7" data-testid="hero-title">Your money&rsquo;s<br /><span className="vz-serif">blind spot.</span></h1>
-          <p className="mt-7 max-w-[470px] text-[15px] leading-[1.7] text-[var(--vz-dim)]">
+          <p className="bs-kick bs-fade" style={{ animationDelay: '40ms' }} data-testid="hero-kicker"><span className="bs-dot" />Solana-first · ZK shield · Quantum vault</p>
+          <h1 className="bs-h1 mt-7" data-testid="hero-title" aria-label="Your money's blind spot."><span aria-hidden="true"><Words text="Your money’s" base={120} /><br /><span className="vz-serif"><Words text="blind spot." base={340} /></span></span></h1>
+          <p className="bs-fade mt-7 max-w-[470px] text-[15px] leading-[1.7] text-[var(--vz-dim)]" style={{ animationDelay: '620ms' }}>
             Shield what you move with zero-knowledge proofs. Vault what you keep behind quantum-safe signatures. All on Solana, all from your browser.
           </p>
-          <div className="mt-9 flex flex-wrap items-center gap-3">
+          <div className="bs-fade mt-9 flex flex-wrap items-center gap-3" style={{ animationDelay: '760ms' }}>
             <a href="/app" className="bs-btn" data-testid="hero-launch"><span className="bs-btn-lens" />Enter BlindSpot</a>
             <a href="/vault" className="bs-btn-ghost" data-testid="hero-vault">Open the quantum vault</a>
           </div>
-          <dl className="bs-stats mt-12" data-testid="hero-stats">
-            <div><dt>Sealed notes</dt><dd data-testid="hero-notes">{fmt(s.leaves)}</dd></div>
-            <div><dt>Nullifiers</dt><dd>{fmt(s.nullifiers)}</dd></div>
-            <div><dt>Shieldable tokens</dt><dd>{fmt(s.assets)}</dd></div>
+          <dl className="bs-stats bs-fade mt-12" style={{ animationDelay: '900ms' }} data-testid="hero-stats">
+            <div><dt>Sealed notes</dt><dd data-testid="hero-notes"><CountUp value={s.leaves} /></dd></div>
+            <div><dt>Nullifiers</dt><dd><CountUp value={s.nullifiers} /></dd></div>
+            <div><dt>Shieldable tokens</dt><dd><CountUp value={s.assets} /></dd></div>
             <div><dt>Pool</dt><dd className="flex items-center gap-2 !text-[15px]"><i className={`h-1.5 w-1.5 rounded-full ${s.live ? 'bg-[var(--vz-ok)]' : 'bg-[var(--vz-warn)]'}`} />{s.live ? 'Live' : 'Reconnecting'}</dd></div>
           </dl>
         </div>
-        <div className="vz-rise relative flex justify-center" style={{ animationDelay: '.15s' }}>
-          <Disc size={460} className="bs-hero-disc" />
+        <div ref={stage} onPointerMove={onMove} onPointerLeave={onLeave} className="bs-stage vz-rise relative flex justify-center" style={{ animationDelay: '.15s' }} data-testid="hero-disc">
+          <div className="bs-tilt"><Disc size={460} className="bs-hero-disc" /></div>
           <span className="bs-orbit bs-orbit-a"><b>ZK shield</b><small>Live on mainnet</small></span>
           <span className="bs-orbit bs-orbit-b"><b>Quantum vault</b><small>Hash-based signatures</small></span>
         </div>
@@ -138,7 +192,7 @@ export default function LandingPage() {
           <p className="bs-kick">Everything in one place</p>
           <a href="/docs" className="vz-link text-[11px] underline underline-offset-4" data-testid="discs-docs">Read the docs</a>
         </div>
-        <ul className="bs-discs mt-8">
+        <ul className="bs-discs bs-reveal bs-stagger mt-8">
           {tools.map((t) => (
             <li key={t.id}>
               <a href={t.href} data-testid={`tool-${t.id}`} title={t.d}>
@@ -153,8 +207,8 @@ export default function LandingPage() {
       {/* ---------------- two pillars ---------------- */}
       <section id="zk" className="relative z-[1] mx-auto w-[91.6%] border-t border-[var(--vz-hair)] py-24" data-testid="section-pillars">
         <p className="bs-kick">Two layers</p>
-        <h2 className="bs-h2 mt-6 max-w-[760px]">Shield what you move.<br /><span className="vz-serif">Vault what you keep.</span></h2>
-        <div className="mt-14 grid gap-5 lg:grid-cols-2">
+        <h2 className="bs-reveal bs-h2 mt-6 max-w-[760px]">Shield what you move.<br /><span className="vz-serif">Vault what you keep.</span></h2>
+        <div className="bs-reveal bs-stagger mt-14 grid gap-5 lg:grid-cols-2">
           <article className="bs-panel bs-pillar" data-testid="pillar-shield">
             <Disc size={150} tone="shield" />
             <div>
@@ -189,11 +243,11 @@ export default function LandingPage() {
         <div className="grid gap-12 lg:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
           <div>
             <p className="bs-kick">The quantum question</p>
-            <h2 className="bs-h2 mt-6">Ready for the day<br /><span className="vz-serif">the maths changes.</span></h2>
+            <h2 className="bs-reveal bs-h2 mt-6">Ready for the day<br /><span className="vz-serif">the maths changes.</span></h2>
             <p className="mt-6 max-w-[460px] text-[14px] leading-[1.7] text-[var(--vz-dim)]">Large quantum computers would break the elliptic-curve maths behind most of crypto. Hash functions are expected to hold. Here is exactly where each part of BlindSpot stands today.</p>
             <a href="/docs#quantum" className="vz-link mt-6 inline-block text-[12px] underline underline-offset-4" data-testid="quantum-docs">Read the research</a>
           </div>
-          <ol className="bs-panel divide-y divide-[var(--vz-hair)]">
+          <ol className="bs-panel bs-reveal bs-stagger divide-y divide-[var(--vz-hair)]">
             {QUANTUM.map(([h, t, k]) => (
               <li key={h} className="flex flex-col gap-3 p-6 sm:flex-row sm:items-start sm:justify-between">
                 <div className="max-w-[460px]"><h3 className="text-[18px] tracking-[-.035em] text-[var(--vz-strong)]">{h}</h3><p className="mt-1.5 text-[13px] leading-[1.6] text-[var(--vz-dim)]">{t}</p></div>
@@ -207,8 +261,8 @@ export default function LandingPage() {
       {/* ---------------- how it works ---------------- */}
       <section id="flow" className="relative z-[1] mx-auto w-[91.6%] border-t border-[var(--vz-hair)] py-24" data-testid="section-flow">
         <p className="bs-kick">How it works</p>
-        <h2 className="bs-h2 mt-6">In publicly.<br /><span className="vz-serif">Out unseen.</span></h2>
-        <ol className="bs-path mt-14">
+        <h2 className="bs-reveal bs-h2 mt-6">In publicly.<br /><span className="vz-serif">Out unseen.</span></h2>
+        <ol className="bs-path bs-reveal bs-stagger mt-14">
           {JOURNEY.map((j) => (
             <li key={j.t} className={j.tone === 'dark' ? 'is-dark' : ''}>
               <span className="bs-path-dot" />
@@ -225,10 +279,10 @@ export default function LandingPage() {
         <div className="grid gap-12 lg:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
           <div>
             <p className="bs-kick">Fees</p>
-            <h2 className="bs-h2 mt-6">Shown before<br /><span className="vz-serif">you confirm.</span></h2>
+            <h2 className="bs-reveal bs-h2 mt-6">Shown before<br /><span className="vz-serif">you confirm.</span></h2>
             <p className="mt-6 max-w-[440px] text-[14px] leading-[1.7] text-[var(--vz-dim)]">Private payments carry no protocol fee. Everything else is a small, fixed share, always visible up front.</p>
           </div>
-          <div className="bs-panel overflow-x-auto">
+          <div className="bs-panel bs-reveal overflow-x-auto">
             <table className="vz-table w-full min-w-[520px] text-left text-[13px]" data-testid="fees-table">
               <thead><tr className="border-b border-[var(--vz-hair)]"><th className="px-6 py-4">Action</th><th className="px-6 py-4">Protocol fee</th><th className="px-6 py-4">Network cost</th></tr></thead>
               <tbody>{PRICES.map((f) => (
@@ -242,8 +296,8 @@ export default function LandingPage() {
       {/* ---------------- faq ---------------- */}
       <section id="faq" className="relative z-[1] mx-auto w-[91.6%] border-t border-[var(--vz-hair)] py-24" data-testid="section-faq">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,.85fr)_minmax(0,1.15fr)]">
-          <div><p className="bs-kick">Questions</p><h2 className="bs-h2 mt-6">Asked,<br /><span className="vz-serif">answered.</span></h2></div>
-          <Accordion type="single" collapsible className="bs-panel px-6">
+          <div><p className="bs-kick">Questions</p><h2 className="bs-reveal bs-h2 mt-6">Asked,<br /><span className="vz-serif">answered.</span></h2></div>
+          <Accordion type="single" collapsible className="bs-panel bs-reveal bs-stagger px-6">
             {QA.map(([q, a], i) => (
               <AccordionItem key={q} value={`q${i}`} className="border-[var(--vz-hair)] last:border-0">
                 <AccordionTrigger className="py-5 text-left text-[15px] font-normal tracking-[-.02em] text-[var(--vz-fg)] hover:no-underline" data-testid={`faq-${i}`}>{q}</AccordionTrigger>
@@ -255,7 +309,7 @@ export default function LandingPage() {
       </section>
 
       {/* ---------------- closing ---------------- */}
-      <section className="relative z-[1] mx-auto flex w-[91.6%] flex-col items-center border-t border-[var(--vz-hair)] py-24 text-center" data-testid="section-cta">
+      <section className="bs-reveal relative z-[1] mx-auto flex w-[91.6%] flex-col items-center border-t border-[var(--vz-hair)] py-24 text-center" data-testid="section-cta">
         <Disc size={120} />
         <h2 className="bs-h2 mt-10">Shielded today.<br /><span className="vz-serif">Quantum-safe for tomorrow.</span></h2>
         <div className="mt-9 flex flex-wrap justify-center gap-3">
