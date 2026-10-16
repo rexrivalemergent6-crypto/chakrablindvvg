@@ -156,7 +156,9 @@ async def _ds_request(method: str, url: str, params=None, content=None, retries:
                     await asyncio.sleep(0.6 * (2 ** attempt))
                     continue
                 return httpx.Response(503, json={"error": "Upstream is busy. Please retry in a few seconds.", "busy": True})
-            if resp.status_code in RETRY_STATUS and attempt < retries:
+            # quotes upstream sometimes answers a transient 404 on the first request for a pair
+            transient_404 = resp.status_code == 404 and method == "GET" and "/quotes" in url
+            if (resp.status_code in RETRY_STATUS or transient_404) and attempt < retries:
                 await asyncio.sleep(0.4 * (2 ** attempt))
                 continue
             return resp

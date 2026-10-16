@@ -1,0 +1,43 @@
+{
+  "summary": "Full liveness and branding pass (backend + frontend). BACKEND: 13/14 new tests pass (tests/test_iter31_blindspot_live.py). _live shows relay 'on' with 0 errors. indexer stats returned 1256-1259 leaves and 325 nullifiers. The assets list is non-empty and includes SOL. /api/ds source tokens include SOL with an id; destination term=USDC returns USDC on many chains; quotes for SOL to USDC (Solana) return 8 routes. All 5 _brand assets return 200, and the manifest name contains BlindSpot. /app/ HTML is clean. The one failure: the vault HTML still contains 'Omni' in its og/twitter meta tags. FRONTEND: Landing page passes. hero-title is present; hero-notes counts up (283 to 1,259); all 8 tool discs have correct hrefs; pillars, quantum, flow, fees and fees-table sections exist; the FAQ accordion opens; why-dialog opens and closes; nav-x-follow goes to x.com/tryblind. At 390px the mobile menu shows all discs and there is no horizontal scroll. /app passes: full-screen splash, Vault tab by default, all 5 vz-flow tabs switch views and update aria-selected, and nc-pitch-connect opens the 'Create account.' modal. Wallet order is BlindSpot vault, then Phantom; vz-more-wallets reveals Solflare and Backpack. vz-x-follow opens an x.com/tryblind popup. vz-menu-btn opens #nc-sheet with all 11 tiles. Private route loads tokens and gave a live SOL to USDC (Solana) quote (0.5 SOL = 51.85 USDC, 3 routes, fees and limits shown). Privacy swap shows the Confidential Intents banner, Track renders, and Chain shows the .ch-term LIVE feed. Deep links ?do=send, swap, withdraw and shield open the matching tab; bridge and receive also work. Vault creation works with password BlindTest#2026x: the recovery key starts with blindsk2, the Receive address with blind2, and the view-only key with blindvk1. History (#activity), Keys and Addresses views render. No console errors and no /api 4xx/5xx in the app. /vault shows the 'Vault.' heading and the iframe loads the quantum vault UI. /docs has all Protocol research links, and #quantum / #quantum-vault scroll correctly. Branding scan of visible text, titles and alt/aria/title/placeholder on /, /docs, /vault outer page, /app and all 14 /app views found no banned names. The vault iframe does contain 'omni' (details below).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/bifrost/v1/vault/?do=vault", "issue": "The HTML still has upstream brand meta tags: og:title and twitter:title 'Omni — Everywhere. Unseen.', og:site_name 'Omni', og:image:alt 'omni. Everywhere. Unseen...', twitter:site '@omnizec', and og.jpg is the upstream image. These show up in link previews. The theme-color is light (#e5e6e5)."},
+      {"endpoint": "GET /api/ds/quotes", "issue": "The upstream (darkswap.app/api/swap/quotes) sometimes returns 404 {\"error\":\"Not found\"} on the first request for a given amount or pair. In one sample 4 of 6 calls failed, called both through our proxy and directly. Retrying usually returns 200. The proxy's RETRY_STATUS does not include 404, so the user could briefly see a 'Not found' quote error. In the UI run the first quote returned 200."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/vault iframe (quantum vault mirror)", "issues": [
+        "BRANDING LEAK: after expanding 'What this protects, and what it does not', the visible text reads '...so omni saves each signed withdrawal and sends only that one until it lands.'",
+        "These strings are also in the vault DOM and appear in other vault states or settings: button 'omni' and aria 'Omni home', 'RPC: omni', 'this page reads Solana through omni’s server', 'Still through omni’s server', 'THE POINT OF OMNI', 'Omni brings private payments...', 'omni wallet', and the X link 'Omni on X, @omnizec'. _vault_rewrite in bifrost.py (~line 487) only replaces 'omni vault', 'omni included' and '© OMNI'.",
+        "The iframe content is a light cream theme (#f4f6ee), but the brief says dark only. This may be intentional; please confirm."
+      ]},
+      {"screen": "/app Bridge", "issues": ["?do=bridge sends the user to /app#nullswap. The upstream 'null' naming shows in the URL bar. Consider aliasing it to #bridge."]},
+      {"screen": "/app signed in", "issues": ["The header pill shows 'BlindSpot Wallet · Cu9b…mGxw' while the balance card shows 'BlindSpot Wallet C4WZ…6W7d'. Two different addresses with the same label is confusing; label one of them, e.g. 'Deposit address'."]},
+      {"screen": "Landing nav", "issues": ["Seen once: in a screenshot taken right after a programmatic scroll to the FAQ, the fixed header (background rgba(0,0,0,0)) showed fees-section text through the nav links. After the scroll settled, the nav had a dark band. Low priority."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_iter31_blindspot_live.py", "/app/test_reports/pytest/pytest_iter31.xml"],
+  "action_items": [
+    "Vault mirror branding: in _vault_rewrite (JS branch), replace the remaining visible lowercase and uppercase 'omni' strings (\"so omni saves\", \"omni’s server\", \"RPC: omni\", \"THE POINT OF OMNI\", \"Omni brings\", \"omni wallet\", 'Omni home', 'Omni on X, @omnizec'). Only change visible strings, not identifiers.",
+    "Vault HTML: rewrite or remove the og:* and twitter:* meta tags (title, site_name, image:alt, twitter:site @omnizec, og.jpg) to BlindSpot values.",
+    "Optional: add retry-on-404 (2-3 tries, short backoff) for the /api/ds/quotes path in server.py _ds_request to absorb the upstream's intermittent 404 on first quote.",
+    "Optional: alias #nullswap to #bridge; clarify the two different 'BlindSpot Wallet' addresses.",
+    "Stale regression tests: test_iter33_app_umbra.py::test_manifest_vaulz, test_no_nullcash[nc-theme.css] (that file is now inlined, so /_brand/nc-theme.css returns 404 by design) and test_iter31_vault.py title/'Vaulz zk' assertions still expect the old Vaulz brand. Update them to BlindSpot or delete them."
+  ],
+  "critical_code_review_comments": [
+    "bifrost.py _vault_rewrite does exact-case replacements on a few phrases. The upstream uses 'omni', 'Omni' and 'OMNI' in many visible strings, so a case-aware word-boundary replace limited to visible text, or a strings map like brand/_strings.json, would hold up better.",
+    "Writing files under /app/backend/tests triggers a uvicorn --reload, which resets the in-memory _LIVE relay counters (ok goes back to 0 right after a test file is saved). This only happens in dev, but tests should not assert ok>0."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter31_blindspot_live.py"],
+  "success_rate": {"backend": "93% (13/14; only the vault meta-tag brand check fails)", "frontend": "97% (all flows work; only the vault iframe 'omni' branding leak)"},
+  "test_credentials": "None needed. /app/memory/test_credentials.md does not exist (no auth in app). Vault password used: BlindTest#2026x",
+  "seed_data_creation": "Several local in-browser BlindSpot vaults were created in throwaway Playwright contexts. Nothing was stored server-side, no funds moved, no orders placed.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Use tests/test_iter31_blindspot_live.py for liveness and brand regression. History hash is #activity and Bridge is #nullswap. The password modal after 'Create a BlindSpot vault' is not inside .card.onb; use input[type=password]:visible, then button 'Create', then check 'My recovery key is saved somewhere safe', then 'Open BlindSpot'. Token picker: dk-pick-destination, dk-token-search, dk-token-USDC (filter has_text 'Solana'), then dk-amount. Vault iframe: page.frames where url contains '/vault/'."
+}

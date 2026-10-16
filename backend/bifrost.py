@@ -467,15 +467,41 @@ def _vault_rewrite(text: str, origin: str, ctype: str) -> str:
                  '<meta name="apple-mobile-web-app-title" content="BlindSpot Vault"/>'
                  '<style id="nc-vault-skin">'
                  'header.site-header,footer.site-footer,nav.tool-tabs,.unseen-world,.presence-control,.back-link,.workspace-heading{display:none!important}'
-                 'html,body{background:#f4f6ee!important}'
+                 'html,body{background:#090d10!important;color-scheme:dark}'
+                 'a[href*="x.com/"],a[href*="twitter.com/"]{display:none!important}'
                  '#root{min-height:auto!important}'
-                 'main.stage,main.stage.has-tool{display:block!important;min-height:100vh!important;height:auto!important;padding:34px 16px 48px!important;background:#f4f6ee!important}'
+                 'main.stage,main.stage.has-tool{display:block!important;min-height:100vh!important;height:auto!important;padding:34px 16px 48px!important;background:#090d10!important}'
                  'main .stage-copy{position:static!important;inset:auto!important;transform:none!important;max-width:660px!important;margin:0 auto!important;width:100%!important}'
                  'main .workspace-heading{margin:0 auto 16px!important}'
                  'main .tool-surface{margin:0 auto!important;max-width:660px!important}'
                  '</style>')
+        # link-preview / meta branding
+        text = re.sub(r'(<meta\b[^>]*(?:property|name)=["\'](?:og:title|twitter:title)["\'][^>]*content=["\'])[^"\']*', r'\1BlindSpot Vault · quantum-safe SOL', text)
+        text = re.sub(r'(<meta\b[^>]*(?:property|name)=["\'](?:og:description|twitter:description|description)["\'][^>]*content=["\'])[^"\']*', r'\1Hold SOL behind hash-based signatures. Opened with your passkey or 24 words.', text)
+        text = re.sub(r'(<meta\b[^>]*property=["\']og:site_name["\'][^>]*content=["\'])[^"\']*', r'\1BlindSpot', text)
+        text = re.sub(r'(<meta\b[^>]*property=["\']og:image:alt["\'][^>]*content=["\'])[^"\']*', r'\1BlindSpot Vault', text)
+        text = re.sub(r'<meta\b[^>]*name=["\']twitter:site["\'][^>]*>', '<meta name="twitter:site" content="@tryblind"/>', text)
+        text = re.sub(r'(<meta\b[^>]*(?:property|name)=["\'](?:og:image|twitter:image)["\'][^>]*content=["\'])[^"\']*', rf'\1{PREFIX}/_brand/favicon-512.png?v=7', text)
+        text = re.sub(r'(<meta\b[^>]*name=["\']theme-color["\'][^>]*content=["\'])[^"\']*', r'\1#090d10', text)
+        text = re.sub(r'<html\b', '<html data-theme="dark"', text, count=1) if 'data-theme=' not in text[:400] else re.sub(r'data-theme=["\'][^"\']*["\']', 'data-theme="dark"', text, count=1)
+        skin = ('<script id="nc-vault-brand">(function(){'
+                'var R=[[/\\bOMNI\\b/g,"BLINDSPOT"],[/\\bOmni\\b/g,"BlindSpot"],[/\\bomni\\b/g,"BlindSpot"],[/@omnizec/gi,"@tryblind"],[/omnizec\\.com/gi,"BlindSpot"]];'
+                'function fx(s){if(!s||!/omni/i.test(s))return s;for(var i=0;i<R.length;i++)s=s.replace(R[i][0],R[i][1]);return s}'
+                'var AT=["title","aria-label","alt","placeholder"];'
+                'function walk(n){if(!n)return;if(n.nodeType===3){var v=n.nodeValue,w=fx(v);if(w!==v)n.nodeValue=w;return}'
+                'if(n.nodeType!==1||n.tagName==="SCRIPT"||n.tagName==="STYLE")return;'
+                'for(var a=0;a<AT.length;a++){var x=n.getAttribute&&n.getAttribute(AT[a]);if(x&&/omni/i.test(x))n.setAttribute(AT[a],fx(x))}'
+                'if(n.tagName==="A"&&/(x|twitter)\\.com\\//i.test(n.getAttribute("href")||""))n.style.display="none";'
+                'for(var c=n.firstChild;c;c=c.nextSibling)walk(c)}'
+                'function dark(){var h=document.documentElement;if(h.getAttribute("data-theme")!=="dark")h.setAttribute("data-theme","dark")}'
+                'try{for(var k in localStorage){if(/theme/i.test(k))localStorage.setItem(k,"dark")}}catch(e){}'
+                'dark();function go(){walk(document.body);if(document.title&&/omni/i.test(document.title))document.title=fx(document.title)}'
+                'document.addEventListener("DOMContentLoaded",function(){go();new MutationObserver(function(ms){for(var i=0;i<ms.length;i++){var m=ms[i];'
+                'if(m.type==="characterData")walk(m.target);else if(m.type==="attributes"){if(m.target===document.documentElement)dark();else walk(m.target)}else for(var j=0;j<m.addedNodes.length;j++)walk(m.addedNodes[j])}})'
+                '.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["data-theme","title","aria-label","alt","placeholder"]})});'
+                '})();</script>')
         if "<head>" in text:
-            text = text.replace("<head>", "<head>" + icons, 1)
+            text = text.replace("<head>", "<head>" + icons + skin, 1)
     elif "css" in ctype:
         text = re.sub(r'url\((["\']?)/(?!/|api/bifrost/)', rf"url(\1{p}/", text)
     elif "javascript" in ctype:
