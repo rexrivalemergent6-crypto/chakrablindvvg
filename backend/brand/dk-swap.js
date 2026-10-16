@@ -1878,6 +1878,12 @@
       v.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); openFeature('home'); setTimeout(ensureStage, 60); });
       tr.insertBefore(v, wb || null);
     }
+    if (!tr.querySelector('#vz-x-btn')) {
+      var xb = document.createElement('button'); xb.type = 'button'; xb.id = 'vz-x-btn'; xb.setAttribute('data-testid', 'vz-x-follow'); xb.setAttribute('aria-label', 'Follow BlindSpot on X');
+      xb.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg><span>Follow</span>';
+      xb.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); window.open('https://x.com/tryblind', '_blank', 'noopener,noreferrer'); });
+      tr.insertBefore(xb, wb || null);
+    }
     if (!tr.querySelector('#vz-menu-btn')) {
       var m = document.createElement('button'); m.type = 'button'; m.id = 'vz-menu-btn'; m.setAttribute('data-testid', 'vz-menu-btn'); m.setAttribute('aria-label', 'More tools');
       m.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>';

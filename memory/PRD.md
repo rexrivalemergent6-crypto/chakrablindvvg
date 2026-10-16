@@ -123,3 +123,4 @@ Clone DarkSwap /swap with sleek frontend and both live swap methods (Private rou
 - Key/address prefixes now blindsk2… (recovery key), blindvk1… (viewing key), blind2… (receive address) via bifrost.py null_prefix_js; parsers accept blind/null/veil (case-insensitive) so old keys still import. CHUNK_VER nc3 busts cached chunks. Verified: new vault shows blindsk2… recovery key; patched chunks pass node --check.
 - Welcome intro tour removed (showTour no-op, footer link removed, menu item -> /#flow).
 - Tabs: Vault (=home balance) · Deposit · Send · Swap · Withdraw; header Vault button removed; /app opens on Vault.
+- X Follow button (https://x.com/tryblind): square 8px-radius "Follow" button in app header (#vz-x-btn, button+window.open so the x.com hide rules don't apply) and React NmNav (nav-x-follow) on landing/docs/vault. Icon-only under 520px/640px.

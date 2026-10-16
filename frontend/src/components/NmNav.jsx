@@ -51,6 +51,11 @@ export default function NmNav({ active = '', onWhy }) {
           {onWhy && (
             <span className="hidden md:block"><button type="button" onClick={onWhy} className="vz-navlink" data-testid="nav-why">Why privacy <span aria-hidden="true">&#8599;</span></button></span>
           )}
+          <a href="https://x.com/tryblind" target="_blank" rel="noopener noreferrer" aria-label="Follow BlindSpot on X" data-testid="nav-x-follow"
+            className="vz-pill !rounded-[8px] !px-3.5 whitespace-nowrap">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
+            <span className="hidden sm:inline">Follow</span>
+          </a>
           <a href="/app" className="vz-pill whitespace-nowrap" data-testid="nav-launch">Launch app</a>
           <span className="xl:hidden"><button type="button" className="vz-pill w-[38px] !px-0" onClick={() => setMenu(true)} aria-label="Open menu" data-testid="nav-menu-open">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M4 8h16M4 16h16" /></svg>

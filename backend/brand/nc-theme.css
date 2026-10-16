@@ -461,3 +461,7 @@ main.main .card{padding:22px!important}
 .dk-row,.dk-in,.dk-r,.dk-fees,.dk-meta div,.dk-cf .v,.dk-recent,.dk-ci{border-radius:16px!important}
 .dk-cta{border-radius:16px!important}
 #nc-foot{justify-content:center!important;text-align:center}
+#vz-x-btn{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:38px;padding:0 14px;border-radius:8px;
+ background:var(--vz-frost);border:1px solid var(--vz-edge);color:var(--vz-fg);font:500 12px var(--f-sans);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);transition:background .2s,border-color .2s,color .2s}
+#vz-x-btn:hover{background:var(--vz-fg);color:var(--vz-bg);border-color:var(--vz-fg)}
+@media (max-width:520px){#vz-x-btn span{display:none}#vz-x-btn{width:38px;padding:0}}
